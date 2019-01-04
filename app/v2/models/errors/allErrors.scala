@@ -26,7 +26,6 @@ object InvalidStartDateError extends MtdError("FORMAT_START_DATE", "Invalid acco
 object InvalidEndDateError extends MtdError("FORMAT_END_DATE", "Invalid account period end date")
 object InvalidRangeError extends MtdError("RANGE_INVALID", "The start date must be the same day or before the from date")
 
-
 //Standard Errors
 object DownstreamError extends MtdError("INTERNAL_SERVER_ERROR", "An internal server error occurred")
 object NotFoundError extends MtdError("MATCHING_RESOURCE_NOT_FOUND", "Matching resource not found")
