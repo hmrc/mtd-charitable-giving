@@ -29,8 +29,8 @@ import v2.models.outcomes.AmendCharitableGivingOutcome
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CharitableGivingConnector @Inject()(http: HttpClient,
-                                          appConfig: AppConfig){
+class DesConnector @Inject()(http: HttpClient,
+                             appConfig: AppConfig){
 
   val logger = Logger(this.getClass)
 
@@ -42,8 +42,9 @@ class CharitableGivingConnector @Inject()(http: HttpClient,
            (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AmendCharitableGivingOutcome] = {
 
     import v2.connectors.httpparsers.AmendCharitableGivingHttpParser.amendHttpReads
-
-    http.POST[AmendCharitableGiving, AmendCharitableGivingOutcome]
-    ("/url", amendCharitableGivingRequest.model)(amendHttpReads, desHeaderCarrier, ec, implicitly)
+    import v2.models.inbound.AmendCharitableGiving.writes
+    val url = s"${appConfig.desBaseUrl}/income-store/nino/${amendCharitableGivingRequest.nino.nino}/charitable-giving/" +
+      s"${amendCharitableGivingRequest.desTaxYear.toDesTaxYear}"
+    http.POST[AmendCharitableGiving, AmendCharitableGivingOutcome](url, amendCharitableGivingRequest.model)(writes, amendHttpReads, desHeaderCarrier, implicitly)
   }
 }

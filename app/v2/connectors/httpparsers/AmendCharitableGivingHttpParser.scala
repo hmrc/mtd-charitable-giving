@@ -16,20 +16,20 @@
 
 package v2.connectors.httpparsers
 
-import play.api.http.Status.NO_CONTENT
+import play.api.http.Status.OK
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import v2.models.outcomes.AmendCharitableGivingOutcome
 
 object AmendCharitableGivingHttpParser extends HttpParser {
 
-  private val jsonReads: Reads[String] = (__ \ "id").read[String]
+  private val jsonReads: Reads[String] = (__ \ "transactionReference").read[String]
 
   implicit val amendHttpReads: HttpReads[AmendCharitableGivingOutcome] = new HttpReads[AmendCharitableGivingOutcome] {
     override def read(method: String, url: String, response: HttpResponse): AmendCharitableGivingOutcome = {
       response.status match {
-        case NO_CONTENT => response.validateJson[String](jsonReads) match {
-          case Some(id) => Right(id)
+        case OK => response.validateJson[String](jsonReads) match {
+          case Some(ref) => Right(ref)
         }
       }
     }
