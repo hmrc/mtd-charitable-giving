@@ -1,1 +1,1 @@
-GET        /sample/:nino        v2.controllers.SampleController.doSomething(nino:String)
+GET        /:nino/:taxYear        v2.controllers.CharitableGivingController.retrieve(nino:String, taxYear:String)

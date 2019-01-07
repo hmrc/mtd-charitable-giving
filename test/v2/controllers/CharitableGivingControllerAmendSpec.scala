@@ -22,18 +22,19 @@ import v2.models.errors.{NinoFormatError, UnauthorisedError}
 
 import scala.concurrent.Future
 
-class SampleControllerSpec extends ControllerBaseSpec {
+class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
 
   trait Test extends MockEnrolmentsAuthService with MockMtdIdLookupService {
     val hc = HeaderCarrier()
 
-    lazy val target = new SampleController(
+    lazy val target = new CharitableGivingController(
       authService = mockEnrolmentsAuthService,
       lookupService = mockMtdIdLookupService
     )
   }
 
   val nino = "test-nino"
+  val taxYear = "2018-19"
 
   "getTaxCalculation" should {
     "return a 200" in new Test {
@@ -43,7 +44,7 @@ class SampleControllerSpec extends ControllerBaseSpec {
 
       MockedEnrolmentsAuthService.authoriseUser()
 
-      private val result = target.doSomething(nino)(fakeGetRequest)
+      private val result = target.amend(nino, taxYear)(fakeGetRequest)
       status(result) shouldBe OK
       contentAsString(result) shouldBe "test-mtd-id"
     }
@@ -54,7 +55,7 @@ class SampleControllerSpec extends ControllerBaseSpec {
         MockedMtdIdLookupService.lookup(nino)
           .returns(Future.successful(Left(NinoFormatError)))
 
-        private val result = target.doSomething(nino)(fakeGetRequest)
+        private val result = target.amend(nino, taxYear)(fakeGetRequest)
         status(result) shouldBe BAD_REQUEST
       }
     }
@@ -65,7 +66,7 @@ class SampleControllerSpec extends ControllerBaseSpec {
         MockedMtdIdLookupService.lookup(nino)
           .returns(Future.successful(Left(UnauthorisedError)))
 
-        private val result = target.doSomething(nino)(fakeGetRequest)
+        private val result = target.amend(nino, taxYear)(fakeGetRequest)
         status(result) shouldBe FORBIDDEN
       }
     }
