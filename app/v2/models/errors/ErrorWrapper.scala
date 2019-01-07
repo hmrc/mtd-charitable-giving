@@ -21,6 +21,11 @@ import play.api.libs.json.{JsValue, Json, Writes}
 case class ErrorWrapper(error: MtdError, errors: Option[Seq[MtdError]])
 
 object ErrorWrapper {
+  //TODO
+/**
+  * TODO - Add back in during unhappy path
+  *
+
   implicit val writes: Writes[ErrorWrapper] = new Writes[ErrorWrapper] {
     override def writes(errorResponse: ErrorWrapper): JsValue = {
 
@@ -36,4 +41,6 @@ object ErrorWrapper {
 
     }
   }
+  **
+  **/
 }

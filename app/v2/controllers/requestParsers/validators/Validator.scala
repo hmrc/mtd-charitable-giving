@@ -14,20 +14,26 @@
  * limitations under the License.
  */
 
-package v2.models.inbound
+package v2.controllers.requestParsers.validators
 
-import play.api.libs.json.{Reads, Writes}
-import uk.gov.hmrc.domain.{SimpleName, SimpleObjectReads, SimpleObjectWrites}
+import v2.models.errors.MtdError
+import v2.models.requestData.InputData
 
-case class DesTaxYear(taxYear: String) extends SimpleName {
+trait Validator[A <: InputData] {
 
-  override def toString: String = taxYear
-  def toDesTaxYear: String = taxYear.take(2) + taxYear.drop(5)
-  val name = "taxYear"
-}
 
-object DesTaxYear {
-  implicit val taxYearWrite: Writes[DesTaxYear] = new SimpleObjectWrites[DesTaxYear](_.toDesTaxYear)
-  implicit val taxYearRead: Reads[DesTaxYear] = new SimpleObjectReads[DesTaxYear]("taxYear", DesTaxYear.apply)
+  type ValidationLevel[T] = T => List[MtdError]
 
+  def validate(data: A): List[MtdError]
+
+  def run(validationSet: List[A => List[List[MtdError]]], data: A): List[MtdError] = {
+
+    validationSet match {
+      case Nil => List()
+      case thisLevel :: remainingLevels => thisLevel(data).flatten match {
+        case x if x.isEmpty => run(remainingLevels, data)
+        case x if x.nonEmpty => x
+      }
+    }
+  }
 }

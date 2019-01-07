@@ -14,25 +14,6 @@
  * limitations under the License.
  */
 
-package v2.models
+package v2.models.requestData
 
-import play.api.libs.json.JsString
-import support.UnitSpec
-import v2.models.inbound.DesTaxYear
-import v2.models.utils.JsonErrorValidators
-
-class DesTaxYearSpec extends UnitSpec with JsonErrorValidators {
-
-  "reads" should {
-    "create the correct model" in {
-      DesTaxYear.taxYearRead.reads(JsString.apply("2017-18")).get shouldBe DesTaxYear("2017-18")
-    }
-  }
-
-  "writes" should {
-    "write the tax year in the correct format" in {
-      DesTaxYear.taxYearWrite.writes(DesTaxYear("2017-18")) shouldBe JsString.apply("2018")
-    }
-  }
-
-}
+trait InputData
