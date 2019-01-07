@@ -17,11 +17,12 @@
 package v2.models
 
 import v2.models.auth.UserDetails
-import v2.models.errors.MtdError
+import v2.models.errors.{DesError, MtdError}
 
 package object outcomes {
 
   type AuthOutcome = Either[MtdError, UserDetails]
   type MtdIdLookupOutcome = Either[MtdError, String]
 
+  type AmendCharitableGivingOutcome = Either[DesError, String]
 }
