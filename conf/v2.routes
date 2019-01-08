@@ -1,1 +1,3 @@
-GET        /sample/:nino        v2.controllers.SampleController.doSomething(nino:String)
+GET        /:nino/charitable-giving/:taxYear        v2.controllers.CharitableGivingController.retrieve(nino:String, taxYear:String)
+
+PUT        /:nino/charitable-giving/:taxYear        v2.controllers.CharitableGivingController.amend(nino:String, taxYear:String)
