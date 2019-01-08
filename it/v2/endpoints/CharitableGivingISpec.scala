@@ -22,17 +22,18 @@ import play.api.libs.ws.{WSRequest, WSResponse}
 import support.IntegrationBaseSpec
 import v2.stubs.{AuditStub, AuthStub, MtdIdLookupStub}
 
-class SampleISpec extends IntegrationBaseSpec {
+class CharitableGivingISpec extends IntegrationBaseSpec {
 
   private trait Test {
 
     val nino: String
+    val taxYear: String
 
     def setupStubs(): StubMapping
 
-    def request(): WSRequest = {
+    def request(): WSRequest = {  // This should be DES tests, as charitable giving will integrate with DES
       setupStubs()
-      buildRequest(s"/2.0/sample/$nino")
+      buildRequest(s"/2.0/$nino/charitable-giving/$taxYear")
     }
   }
 
@@ -42,6 +43,7 @@ class SampleISpec extends IntegrationBaseSpec {
 
       "any valid request is made" in new Test {
         override val nino: String = "AA123456A"
+        override val taxYear: String = "2018-19"
 
         override def setupStubs(): StubMapping = {
           AuditStub.audit()
