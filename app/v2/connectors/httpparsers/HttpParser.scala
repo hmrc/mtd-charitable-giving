@@ -44,4 +44,6 @@ trait HttpParser {
     }
   }
 
+  def retrieveCorrelationId(response: HttpResponse): String = response.header("CorrelationId").getOrElse("")
+
 }
