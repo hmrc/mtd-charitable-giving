@@ -23,15 +23,10 @@ import v2.services.{EnrolmentsAuthService, MtdIdLookupService}
 import scala.concurrent.Future
 
 @Singleton
-class CharitableGivingController @Inject()(val authService: EnrolmentsAuthService,
+class SampleController @Inject()(val authService: EnrolmentsAuthService,
                                  val lookupService: MtdIdLookupService) extends AuthorisedController {
 
-  def retrieve(nino: String, taxYear: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
+  def doSomething(nino: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
     Future.successful(Ok(request.userDetails.mtdId))
   }
-
-  def amend(nino: String, taxYear: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
-  	Future.successful(Ok(request.userDetails.mtdId))
-  }
-
 }
