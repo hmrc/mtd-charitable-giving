@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-package v2.models.inbound
+package v2.controllers.requestParsers.validators.validations
 
+import play.api.libs.json._
 import play.api.mvc.AnyContentAsJson
+import v2.models.errors.{BadRequestError, MtdError}
 
-case class AmendCharitableGivingRequestData(nino: String, taxYear: String, body: AnyContentAsJson) extends InputData
+object JsonFormatValidation {
+
+  def validate[A](data: AnyContentAsJson)(implicit reads: Reads[A]): List[MtdError] = {
+
+    data.json.validate[A] match {
+      case JsSuccess(_, _) => NoValidationErrors
+      case _ => List(BadRequestError)
+    }
+
+  }
+
+}

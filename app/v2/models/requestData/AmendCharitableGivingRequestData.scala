@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
-package v2.models.inbound
+package v2.models.requestData
 
-trait InputData
+import play.api.mvc.AnyContentAsJson
+
+case class AmendCharitableGivingRequestData(nino: String, taxYear: String, body: AnyContentAsJson) extends InputData

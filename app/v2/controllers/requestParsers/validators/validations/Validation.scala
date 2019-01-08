@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-package v2.models
+package v2.controllers.requestParsers.validators.validations
 
-import uk.gov.hmrc.domain.Nino
-import v2.models.inbound.{AmendCharitableGiving, DesTaxYear}
-
-case class AmendCharitableGivingRequest(nino: Nino, desTaxYear: DesTaxYear, model: AmendCharitableGiving)
+trait Validation

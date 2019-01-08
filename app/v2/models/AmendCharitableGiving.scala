@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package v2.models.inbound
+package v2.models
 
-import play.api.libs.json.{JsPath, Json, Reads, Writes}
 import play.api.libs.functional.syntax._
+import play.api.libs.json.{JsPath, Json, Reads, Writes}
 
 case class AmendCharitableGiving(giftAidPayments: GiftAidPayments, gifts: Gifts)
 
