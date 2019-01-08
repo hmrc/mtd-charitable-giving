@@ -22,15 +22,15 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import v2.config.AppConfig
-import v2.models.AmendCharitableGivingRequest
-import v2.models.inbound.AmendCharitableGiving
+import v2.models.AmendCharitableGiving
 import v2.models.outcomes.AmendCharitableGivingOutcome
+import v2.models.requestData.AmendCharitableGivingRequest
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DesConnector @Inject()(http: HttpClient,
-                             appConfig: AppConfig){
+                             appConfig: AppConfig) {
 
   val logger = Logger(this.getClass)
 
@@ -42,9 +42,12 @@ class DesConnector @Inject()(http: HttpClient,
            (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AmendCharitableGivingOutcome] = {
 
     import v2.connectors.httpparsers.AmendCharitableGivingHttpParser.amendHttpReads
-    import v2.models.inbound.AmendCharitableGiving.writes
-    val url = s"${appConfig.desBaseUrl}/income-tax/nino/${amendCharitableGivingRequest.nino.nino}/income-source/charity/annual/" +
-      s"${amendCharitableGivingRequest.desTaxYear.toDesTaxYear}"
-    http.POST[AmendCharitableGiving, AmendCharitableGivingOutcome](url, amendCharitableGivingRequest.model)(writes, amendHttpReads, desHeaderCarrier, implicitly)
+
+    val nino = amendCharitableGivingRequest.nino.nino
+    val taxYear = amendCharitableGivingRequest.desTaxYear.toDesTaxYear
+
+    val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/income-source/charity/annual/$taxYear"
+
+    http.POST[AmendCharitableGiving, AmendCharitableGivingOutcome](url, amendCharitableGivingRequest.model)
   }
 }

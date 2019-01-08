@@ -18,9 +18,9 @@ package v2.connectors
 
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.{MockAppConfig, MockHttpClient}
-import v2.models.AmendCharitableGivingRequest
-import v2.models.inbound.{AmendCharitableGiving, DesTaxYear, GiftAidPayments, Gifts}
+import v2.models.{AmendCharitableGiving, GiftAidPayments, Gifts}
 import v2.models.outcomes.{AmendCharitableGivingOutcome, DesResponse}
+import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear}
 
 import scala.concurrent.Future
 

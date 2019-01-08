@@ -29,7 +29,7 @@ object AmendCharitableGivingHttpParser extends HttpParser {
     override def read(method: String, url: String, response: HttpResponse): AmendCharitableGivingOutcome = {
       response.status match {
         case OK => response.validateJson[String](jsonReads) match {
-          case Some(ref) => Right(DesResponse(retrieveCorrelationHeader(response), ref))
+          case Some(ref) => Right(DesResponse(retrieveCorrelationId(response), ref))
         }
       }
     }
