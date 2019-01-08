@@ -43,7 +43,7 @@ class DesConnector @Inject()(http: HttpClient,
 
     import v2.connectors.httpparsers.AmendCharitableGivingHttpParser.amendHttpReads
     import v2.models.inbound.AmendCharitableGiving.writes
-    val url = s"${appConfig.desBaseUrl}/income-store/nino/${amendCharitableGivingRequest.nino.nino}/charitable-giving/" +
+    val url = s"${appConfig.desBaseUrl}/income-tax/nino/${amendCharitableGivingRequest.nino.nino}/income-source/charity/annual/" +
       s"${amendCharitableGivingRequest.desTaxYear.toDesTaxYear}"
     http.POST[AmendCharitableGiving, AmendCharitableGivingOutcome](url, amendCharitableGivingRequest.model)(writes, amendHttpReads, desHeaderCarrier, implicitly)
   }

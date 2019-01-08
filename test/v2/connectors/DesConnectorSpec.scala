@@ -47,7 +47,7 @@ class DesConnectorSpec extends ConnectorSpec{
         val taxYear = "2017-18"
 
         MockedHttpClient.post[AmendCharitableGiving, AmendCharitableGivingOutcome](
-          s"$baseUrl" + s"/income-store/nino/$nino/charitable-giving/${DesTaxYear(taxYear).toDesTaxYear}",
+          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}",
           AmendCharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))
           .returns(Future.successful(Right(expectedRef)))
 
