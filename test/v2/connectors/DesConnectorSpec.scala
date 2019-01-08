@@ -20,7 +20,7 @@ import uk.gov.hmrc.domain.Nino
 import v2.mocks.{MockAppConfig, MockHttpClient}
 import v2.models.AmendCharitableGivingRequest
 import v2.models.inbound.{AmendCharitableGiving, DesTaxYear, GiftAidPayments, Gifts}
-import v2.models.outcomes.AmendCharitableGivingOutcome
+import v2.models.outcomes.{AmendCharitableGivingOutcome, DesResponse}
 
 import scala.concurrent.Future
 
@@ -46,15 +46,17 @@ class DesConnectorSpec extends ConnectorSpec{
         val nino = "AA123456A"
         val taxYear = "2017-18"
 
+        val expectedDesResponse = DesResponse("X-123", expectedRef)
+
         MockedHttpClient.post[AmendCharitableGiving, AmendCharitableGivingOutcome](
           s"$baseUrl" + s"/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}",
           AmendCharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))
-          .returns(Future.successful(Right(expectedRef)))
+          .returns(Future.successful(Right(expectedDesResponse)))
 
         val result = await(connector.amend(AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
             AmendCharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))))
 
-        result shouldBe Right(expectedRef)
+        result shouldBe Right(expectedDesResponse)
       }
     }
   }

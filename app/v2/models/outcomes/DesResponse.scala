@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-package v2.models
+package v2.models.outcomes
 
-import v2.models.auth.UserDetails
-import v2.models.errors.{DesError, MtdError}
-
-package object outcomes {
-
-  type AuthOutcome = Either[MtdError, UserDetails]
-  type MtdIdLookupOutcome = Either[MtdError, String]
-
-  type AmendCharitableGivingOutcome = Either[DesError, DesResponse[String, String]]
-}
+case class DesResponse[String, T](correlationId: String, responseData: T)

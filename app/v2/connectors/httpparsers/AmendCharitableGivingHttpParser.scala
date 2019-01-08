@@ -19,7 +19,7 @@ package v2.connectors.httpparsers
 import play.api.http.Status.OK
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import v2.models.outcomes.AmendCharitableGivingOutcome
+import v2.models.outcomes.{AmendCharitableGivingOutcome, DesResponse}
 
 object AmendCharitableGivingHttpParser extends HttpParser {
 
@@ -29,7 +29,7 @@ object AmendCharitableGivingHttpParser extends HttpParser {
     override def read(method: String, url: String, response: HttpResponse): AmendCharitableGivingOutcome = {
       response.status match {
         case OK => response.validateJson[String](jsonReads) match {
-          case Some(ref) => Right(ref)
+          case Some(ref) => Right(DesResponse(retrieveCorrelationHeader(response), ref))
         }
       }
     }

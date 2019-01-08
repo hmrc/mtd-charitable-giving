@@ -20,6 +20,7 @@ import play.api.libs.json.Json
 import play.api.test.Helpers.OK
 import support.UnitSpec
 import uk.gov.hmrc.http.HttpResponse
+import v2.models.outcomes.DesResponse
 
 
 class AmendCharitableGivingHttpParserSpec extends UnitSpec{
@@ -29,13 +30,14 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec{
 
   val transactionReference = "000000000001"
   val desExpectedJson = Json.obj("transactionReference" -> transactionReference)
+  val desResponse = DesResponse("X-123", transactionReference)
 
   "read" should {
     "return the transactionReference" when {
       "des returns a valid success response" in {
-        val desResponse = HttpResponse(OK, Some(desExpectedJson))
-        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(method, url, desResponse)
-        result shouldBe Right(transactionReference)
+        val responseFromDes = HttpResponse(OK, Some(desExpectedJson), Map("CorrelationId" -> Seq("X-123")))
+        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(method, url, responseFromDes)
+        result shouldBe Right(desResponse)
       }
     }
   }
