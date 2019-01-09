@@ -18,9 +18,9 @@ package v2.connectors
 
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.{MockAppConfig, MockHttpClient}
-import v2.models.{AmendCharitableGiving, GiftAidPayments, Gifts}
-import v2.models.outcomes.{AmendCharitableGivingOutcome, DesResponse}
+import v2.models.outcomes.{AmendCharitableGivingConnectorOutcome, DesResponse}
 import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear}
+import v2.models.{AmendCharitableGiving, GiftAidPayments, Gifts}
 
 import scala.concurrent.Future
 
@@ -48,7 +48,7 @@ class DesConnectorSpec extends ConnectorSpec{
 
         val expectedDesResponse = DesResponse("X-123", expectedRef)
 
-        MockedHttpClient.post[AmendCharitableGiving, AmendCharitableGivingOutcome](
+        MockedHttpClient.post[AmendCharitableGiving, AmendCharitableGivingConnectorOutcome](
           s"$baseUrl" + s"/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}",
           AmendCharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))
           .returns(Future.successful(Right(expectedDesResponse)))

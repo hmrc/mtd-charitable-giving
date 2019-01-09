@@ -19,14 +19,14 @@ package v2.connectors.httpparsers
 import play.api.http.Status.OK
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import v2.models.outcomes.{AmendCharitableGivingOutcome, DesResponse}
+import v2.models.outcomes.{AmendCharitableGivingConnectorOutcome, DesResponse}
 
 object AmendCharitableGivingHttpParser extends HttpParser {
 
   private val jsonReads: Reads[String] = (__ \ "transactionReference").read[String]
 
-  implicit val amendHttpReads: HttpReads[AmendCharitableGivingOutcome] = new HttpReads[AmendCharitableGivingOutcome] {
-    override def read(method: String, url: String, response: HttpResponse): AmendCharitableGivingOutcome = {
+  implicit val amendHttpReads: HttpReads[AmendCharitableGivingConnectorOutcome] = new HttpReads[AmendCharitableGivingConnectorOutcome] {
+    override def read(method: String, url: String, response: HttpResponse): AmendCharitableGivingConnectorOutcome = {
       response.status match {
         case OK => response.validateJson[String](jsonReads) match {
           case Some(ref) => Right(DesResponse(retrieveCorrelationId(response), ref))
