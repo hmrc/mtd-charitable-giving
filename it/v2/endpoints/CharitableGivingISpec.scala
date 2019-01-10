@@ -18,9 +18,11 @@ package v2.endpoints
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
+import play.api.libs.json.Json
 import play.api.libs.ws.{WSRequest, WSResponse}
 import support.IntegrationBaseSpec
-import v2.stubs.{AuditStub, AuthStub, MtdIdLookupStub}
+import v2.models.requestData.DesTaxYear
+import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
 
 class CharitableGivingISpec extends IntegrationBaseSpec {
 
@@ -37,9 +39,28 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
     }
   }
 
-  "Calling the sample endpoint" should {
+  val charitableGivingWithNonUKCharityDonations: String =
+    """
+      |{
+      |  "giftAidPayments": {
+      |    "specifiedYear": 10000.00,
+      |    "oneOffSpecifiedYear": 1000.00,
+      |    "specifiedYearTreatedAsPreviousYear": 300.00,
+      |    "followingYearTreatedAsSpecifiedYear": 400.00,
+      |    "nonUKCharities": 2000.00,
+      |    "nonUKCharityNames": ["International Charity A","International Charity B"]
+      |  },
+      |  "gifts": {
+      |    "landAndBuildings": 700.00,
+      |    "sharesOrSecurities": 600.00,
+      |    "investmentsNonUKCharities": 300.00,
+      |    "investmentsNonUKCharityNames": ["International Charity C","International Charity D"]
+      |  }
+      |}""".stripMargin
 
-    "return a 200 status code" when {
+  "Calling the amend charitable giving endpoint" should {
+
+    "return a 204 status code" when {
 
       "any valid request is made" in new Test {
         override val nino: String = "AA123456A"
@@ -49,10 +70,11 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
           AuditStub.audit()
           AuthStub.authorised()
           MtdIdLookupStub.ninoFound(nino)
+          DesStub.amendSuccess(nino, DesTaxYear(taxYear).toDesTaxYear)
         }
 
-        val response: WSResponse = await(request().get())
-        response.status shouldBe Status.OK
+        val response: WSResponse = await(request().put(Json.parse(charitableGivingWithNonUKCharityDonations)))
+        response.status shouldBe Status.NO_CONTENT
       }
     }
   }

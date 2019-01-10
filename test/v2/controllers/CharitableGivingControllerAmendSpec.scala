@@ -43,7 +43,6 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
       amendCharitableGivingRequestDataParser = mockAmendCharitableGivingRequestDataParser
     )
 
-
     MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
     MockedEnrolmentsAuthService.authoriseUser()
   }
@@ -74,7 +73,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
     AmendCharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))
 
   "amend" should {
-    "return a successful response" when {
+    "return a successful response with header X-CorrelationId" when {
       "the request received is valid" in new Test() {
 
         MockAmendCharitableGivingRequestDataParser.parseRequest(
