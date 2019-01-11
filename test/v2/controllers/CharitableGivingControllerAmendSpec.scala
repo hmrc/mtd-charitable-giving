@@ -20,6 +20,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsJson, Result}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
+import v2.fixtures.Fixtures.AmendCharitableGivingFixture._
 import v2.mocks.requestParsers.MockAmendCharitableGivingRequestDataParser
 import v2.mocks.services.{MockCharitableGivingService, MockEnrolmentsAuthService, MockMtdIdLookupService}
 import v2.models.{AmendCharitableGiving, GiftAidPayments, Gifts}
@@ -47,25 +48,6 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
     MockedEnrolmentsAuthService.authoriseUser()
   }
 
-  val charitableGivingWithNonUKCharityDonations: String =
-    """
-      |{
-      |  "giftAidPayments": {
-      |    "specifiedYear": 10000.00,
-      |    "oneOffSpecifiedYear": 1000.00,
-      |    "specifiedYearTreatedAsPreviousYear": 300.00,
-      |    "followingYearTreatedAsSpecifiedYear": 400.00,
-      |    "nonUKCharities": 2000.00,
-      |    "nonUKCharityNames": ["International Charity A","International Charity B"]
-      |  },
-      |  "gifts": {
-      |    "landAndBuildings": 700.00,
-      |    "sharesOrSecurities": 600.00,
-      |    "investmentsNonUKCharities": 300.00,
-      |    "investmentsNonUKCharityNames": ["International Charity C","International Charity D"]
-      |  }
-      |}""".stripMargin
-
   val nino = "AA123456A"
   val taxYear = "2017-18"
   val correlationId = "X-123"
@@ -77,13 +59,13 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
       "the request received is valid" in new Test() {
 
         MockAmendCharitableGivingRequestDataParser.parseRequest(
-          AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(Json.parse(charitableGivingWithNonUKCharityDonations))))
+          AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(inputJson)))
           .returns(Right(amendCharitableGivingRequest))
 
         MockCharitableGivingService.amend(amendCharitableGivingRequest)
           .returns(Future.successful(Right(correlationId)))
 
-        val result: Future[Result] = target.amend(nino, taxYear)(fakePostRequest(Json.parse(charitableGivingWithNonUKCharityDonations)))
+        val result: Future[Result] = target.amend(nino, taxYear)(fakePostRequest(inputJson))
         status(result) shouldBe NO_CONTENT
         header("X-CorrelationId", result) shouldBe Some(correlationId)
       }
