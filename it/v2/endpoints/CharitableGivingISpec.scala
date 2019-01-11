@@ -18,9 +18,9 @@ package v2.endpoints
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
-import play.api.libs.json.Json
 import play.api.libs.ws.{WSRequest, WSResponse}
 import support.IntegrationBaseSpec
+import v2.fixtures.Fixtures.AmendCharitableGivingFixture
 import v2.models.requestData.DesTaxYear
 import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
 
@@ -39,25 +39,6 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
     }
   }
 
-  val charitableGivingWithNonUKCharityDonations: String =
-    """
-      |{
-      |  "giftAidPayments": {
-      |    "specifiedYear": 10000.00,
-      |    "oneOffSpecifiedYear": 1000.00,
-      |    "specifiedYearTreatedAsPreviousYear": 300.00,
-      |    "followingYearTreatedAsSpecifiedYear": 400.00,
-      |    "nonUKCharities": 2000.00,
-      |    "nonUKCharityNames": ["International Charity A","International Charity B"]
-      |  },
-      |  "gifts": {
-      |    "landAndBuildings": 700.00,
-      |    "sharesOrSecurities": 600.00,
-      |    "investmentsNonUKCharities": 300.00,
-      |    "investmentsNonUKCharityNames": ["International Charity C","International Charity D"]
-      |  }
-      |}""".stripMargin
-
   "Calling the amend charitable giving endpoint" should {
 
     "return a 204 status code" when {
@@ -73,7 +54,7 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
           DesStub.amendSuccess(nino, DesTaxYear(taxYear).toDesTaxYear)
         }
 
-        val response: WSResponse = await(request().put(Json.parse(charitableGivingWithNonUKCharityDonations)))
+        val response: WSResponse = await(request().put(AmendCharitableGivingFixture.inputJson))
         response.status shouldBe Status.NO_CONTENT
       }
     }

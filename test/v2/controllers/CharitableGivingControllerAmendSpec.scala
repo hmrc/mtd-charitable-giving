@@ -16,15 +16,14 @@
 
 package v2.controllers
 
-import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsJson, Result}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
-import v2.fixtures.Fixtures.AmendCharitableGivingFixture._
+import v2.fixtures.Fixtures.AmendCharitableGivingFixture
 import v2.mocks.requestParsers.MockAmendCharitableGivingRequestDataParser
 import v2.mocks.services.{MockCharitableGivingService, MockEnrolmentsAuthService, MockMtdIdLookupService}
-import v2.models.{AmendCharitableGiving, GiftAidPayments, Gifts}
 import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRequestData, DesTaxYear}
+import v2.models.{AmendCharitableGiving, GiftAidPayments, Gifts}
 
 import scala.concurrent.Future
 
@@ -33,7 +32,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
   trait Test extends MockEnrolmentsAuthService
     with MockMtdIdLookupService
     with MockCharitableGivingService
-    with MockAmendCharitableGivingRequestDataParser {
+    with MockAmendCharitableGivingRequestDataParser{
 
     val hc = HeaderCarrier()
 
@@ -59,13 +58,13 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
       "the request received is valid" in new Test() {
 
         MockAmendCharitableGivingRequestDataParser.parseRequest(
-          AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(inputJson)))
+          AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson)))
           .returns(Right(amendCharitableGivingRequest))
 
         MockCharitableGivingService.amend(amendCharitableGivingRequest)
           .returns(Future.successful(Right(correlationId)))
 
-        val result: Future[Result] = target.amend(nino, taxYear)(fakePostRequest(inputJson))
+        val result: Future[Result] = target.amend(nino, taxYear)(fakePostRequest(AmendCharitableGivingFixture.inputJson))
         status(result) shouldBe NO_CONTENT
         header("X-CorrelationId", result) shouldBe Some(correlationId)
       }
