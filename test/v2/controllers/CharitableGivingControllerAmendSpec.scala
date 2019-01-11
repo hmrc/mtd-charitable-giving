@@ -16,58 +16,57 @@
 
 package v2.controllers
 
+import play.api.mvc.{AnyContentAsJson, Result}
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
-import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService}
-import v2.models.errors.{NinoFormatError, UnauthorisedError}
+import v2.fixtures.Fixtures.AmendCharitableGivingFixture
+import v2.mocks.requestParsers.MockAmendCharitableGivingRequestDataParser
+import v2.mocks.services.{MockCharitableGivingService, MockEnrolmentsAuthService, MockMtdIdLookupService}
+import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRequestData, DesTaxYear}
+import v2.models.{AmendCharitableGiving, GiftAidPayments, Gifts}
 
 import scala.concurrent.Future
 
 class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
 
-  trait Test extends MockEnrolmentsAuthService with MockMtdIdLookupService {
+  trait Test extends MockEnrolmentsAuthService
+    with MockMtdIdLookupService
+    with MockCharitableGivingService
+    with MockAmendCharitableGivingRequestDataParser{
+
     val hc = HeaderCarrier()
 
-    lazy val target = new CharitableGivingController(
+    val target =  new CharitableGivingController(
       authService = mockEnrolmentsAuthService,
-      lookupService = mockMtdIdLookupService
+      lookupService = mockMtdIdLookupService,
+      charitableGivingService = mockCharitableGivingService,
+      amendCharitableGivingRequestDataParser = mockAmendCharitableGivingRequestDataParser
     )
+
+    MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
+    MockedEnrolmentsAuthService.authoriseUser()
   }
 
-  val nino = "test-nino"
-  val taxYear = "2018-19"
+  val nino = "AA123456A"
+  val taxYear = "2017-18"
+  val correlationId = "X-123"
+  val amendCharitableGivingRequest: AmendCharitableGivingRequest = AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
+    AmendCharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))
 
-  "getTaxCalculation" should {
-    "return a 200" in new Test {
+  "amend" should {
+    "return a successful response with header X-CorrelationId" when {
+      "the request received is valid" in new Test() {
 
-      MockedMtdIdLookupService.lookup(nino)
-        .returns(Future.successful(Right("test-mtd-id")))
+        MockAmendCharitableGivingRequestDataParser.parseRequest(
+          AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson)))
+          .returns(Right(amendCharitableGivingRequest))
 
-      MockedEnrolmentsAuthService.authoriseUser()
+        MockCharitableGivingService.amend(amendCharitableGivingRequest)
+          .returns(Future.successful(Right(correlationId)))
 
-      private val result = target.amend(nino, taxYear)(fakeGetRequest)
-      status(result) shouldBe OK
-      contentAsString(result) shouldBe "test-mtd-id"
-    }
-
-    "return a 400" when {
-      "a invalid NI number is passed" in new Test {
-
-        MockedMtdIdLookupService.lookup(nino)
-          .returns(Future.successful(Left(NinoFormatError)))
-
-        private val result = target.amend(nino, taxYear)(fakeGetRequest)
-        status(result) shouldBe BAD_REQUEST
-      }
-    }
-
-    "return a 500" when {
-      "the details passed or not authorised" in new Test {
-
-        MockedMtdIdLookupService.lookup(nino)
-          .returns(Future.successful(Left(UnauthorisedError)))
-
-        private val result = target.amend(nino, taxYear)(fakeGetRequest)
-        status(result) shouldBe FORBIDDEN
+        val result: Future[Result] = target.amend(nino, taxYear)(fakePostRequest(AmendCharitableGivingFixture.inputJson))
+        status(result) shouldBe NO_CONTENT
+        header("X-CorrelationId", result) shouldBe Some(correlationId)
       }
     }
   }

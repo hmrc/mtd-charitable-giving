@@ -17,21 +17,34 @@
 package v2.controllers
 
 import javax.inject.{Inject, Singleton}
-import play.api.mvc.{Action, AnyContent}
-import v2.services.{EnrolmentsAuthService, MtdIdLookupService}
+import play.api.libs.json.JsValue
+import play.api.mvc.{Action, AnyContent, AnyContentAsJson}
+import v2.controllers.requestParsers.AmendCharitableGivingRequestDataParser
+import v2.models.requestData.AmendCharitableGivingRequestData
+import v2.services.{CharitableGivingService, EnrolmentsAuthService, MtdIdLookupService}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
 class CharitableGivingController @Inject()(val authService: EnrolmentsAuthService,
-                                 val lookupService: MtdIdLookupService) extends AuthorisedController {
+                                           val lookupService: MtdIdLookupService,
+                                           charitableGivingService: CharitableGivingService,
+                                           amendCharitableGivingRequestDataParser: AmendCharitableGivingRequestDataParser
+                                          ) extends AuthorisedController {
 
   def retrieve(nino: String, taxYear: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
     Future.successful(Ok(request.userDetails.mtdId))
   }
 
-  def amend(nino: String, taxYear: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
-  	Future.successful(Ok(request.userDetails.mtdId))
-  }
+  def amend(nino: String, taxYear: String): Action[JsValue] = authorisedAction(nino).async(parse.json) { implicit request =>
 
+    amendCharitableGivingRequestDataParser.parseRequest(
+      AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(request.body))) match {
+
+      case Right(amendCharitableGivingRequest) => charitableGivingService.amend(amendCharitableGivingRequest).map {
+        case Right(correlationId) => NoContent.withHeaders("X-CorrelationId" -> correlationId)
+      }
+    }
+  }
 }

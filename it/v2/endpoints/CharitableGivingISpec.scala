@@ -20,7 +20,9 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
 import play.api.libs.ws.{WSRequest, WSResponse}
 import support.IntegrationBaseSpec
-import v2.stubs.{AuditStub, AuthStub, MtdIdLookupStub}
+import v2.fixtures.Fixtures.AmendCharitableGivingFixture
+import v2.models.requestData.DesTaxYear
+import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
 
 class CharitableGivingISpec extends IntegrationBaseSpec {
 
@@ -37,9 +39,9 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
     }
   }
 
-  "Calling the sample endpoint" should {
+  "Calling the amend charitable giving endpoint" should {
 
-    "return a 200 status code" when {
+    "return a 204 status code" when {
 
       "any valid request is made" in new Test {
         override val nino: String = "AA123456A"
@@ -49,10 +51,11 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
           AuditStub.audit()
           AuthStub.authorised()
           MtdIdLookupStub.ninoFound(nino)
+          DesStub.amendSuccess(nino, DesTaxYear(taxYear).toDesTaxYear)
         }
 
-        val response: WSResponse = await(request().get())
-        response.status shouldBe Status.OK
+        val response: WSResponse = await(request().put(AmendCharitableGivingFixture.inputJson))
+        response.status shouldBe Status.NO_CONTENT
       }
     }
   }
