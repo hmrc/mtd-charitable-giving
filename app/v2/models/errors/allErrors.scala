@@ -25,7 +25,7 @@ object GiftAidSpecifiedYearFormatError extends MtdError("FORMAT_GIFT_AID_SPECIFI
 object GiftAidOneOffSpecifiedYearFormatError extends MtdError("FORMAT_GIFT_AID_ONE_OFF_SPECIFIED_YEAR", "The one-off specified year amount is invalid")
 object GiftAidSpecifiedYearPreviousFormatError extends
   MtdError("FORMAT_GIFT_AID_SPECIFIED_YEAR_PREVIOUS_YEAR", "The specified year treated as previous year amount is invalid")
-object GiftAidFollowingyearSpecifiedFormatError extends
+object GiftAidFollowingYearSpecifiedFormatError extends
   MtdError("FORMAT_GIFT_AID_FOLLOWING_YEAR_SPECIFIED_YEAR", "The following year treated as specified year amount is invalid")
 object GiftAidNonUKCharityAmountFormatError extends MtdError("FORMAT_GIFT_AID_NONUK_CHARITY_AMOUNT", "The gift aid non-UK Charities amount is invalid")
 object GiftAidNonUKNamesFormatError extends MtdError("FORMAT_GIFT_AID_NONUK_NAMES", "The non-UK charity names are invalid")

@@ -20,9 +20,24 @@ import play.api.Logger
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Reads}
 import uk.gov.hmrc.http.HttpResponse
 
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 trait HttpParser {
+
+
+  implicit class HttpResponseOps(resp: HttpResponse) {
+    def jsonOpt: Option[JsValue] = {
+      Try(resp.json) match {
+        case Success(json: JsValue) => Some(json)
+        case Success(_) =>
+          Logger.warn("No JSON was returned")
+          None
+        case Failure(error) =>
+          Logger.warn(s"Unable to retrieve JSON: ${error.getMessage}")
+          None
+      }
+    }
+  }
 
   implicit class KnownJsonResponse(response: HttpResponse) {
     def validateJson[T](implicit reads: Reads[T]): Option[T] = {

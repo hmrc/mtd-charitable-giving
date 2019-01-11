@@ -16,20 +16,20 @@
 
 package v2.connectors.httpparsers
 
-import play.api.libs.json.Json
-import play.api.test.Helpers.OK
+import play.api.libs.json.{JsValue, Json}
+import play.api.test.Helpers._
 import support.UnitSpec
 import uk.gov.hmrc.http.HttpResponse
 import v2.models.outcomes.DesResponse
 
 
-class AmendCharitableGivingHttpParserSpec extends UnitSpec{
+class AmendCharitableGivingHttpParserSpec extends UnitSpec {
 
   val method = "GET"
   val url = "test-url"
 
   val transactionReference = "000000000001"
-  val desExpectedJson = Json.obj("transactionReference" -> transactionReference)
+  val desExpectedJson: JsValue = Json.obj("transactionReference" -> transactionReference)
   val desResponse = DesResponse("X-123", transactionReference)
 
   "read" should {
@@ -41,5 +41,4 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec{
       }
     }
   }
-
 }
