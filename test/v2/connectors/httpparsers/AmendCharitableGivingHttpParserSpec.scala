@@ -20,6 +20,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
 import support.UnitSpec
 import uk.gov.hmrc.http.HttpResponse
+import v2.models.errors._
 import v2.models.outcomes.DesResponse
 
 
@@ -39,6 +40,38 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
         val result = AmendCharitableGivingHttpParser.amendHttpReads.read(method, url, responseFromDes)
         result shouldBe Right(desResponse)
       }
+    }
+
+    "return an INTERNAL_SERVER_ERROR" when {
+      "the json returned can not be validated" in {
+        val responseFromDes = HttpResponse(OK, Some(Json.obj("foo"->"bar")), Map("CorrelationId" -> Seq("X-123")))
+        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(method, url, responseFromDes)
+        result shouldBe Left(DownstreamError)
+      }
+    }
+
+    def testDesErrorMap(desResponseStatus: Int, desCode: String, expectedMtdError: MtdError): Unit = {
+      s"des returns an $desCode error" in {
+        val json = Json.obj("code" -> desCode, "reason" -> "does not matter")
+        val response = HttpResponse(desResponseStatus, Some(json))
+        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(method, url, response)
+
+        result shouldBe Left(expectedMtdError)
+      }
+    }
+
+    "return the correct MTD error" when {
+      testDesErrorMap(BAD_REQUEST, "INVALID_NINO", NinoFormatError)
+      testDesErrorMap(BAD_REQUEST, "INVALID_TAXYEAR", TaxYearFormatError)
+      testDesErrorMap(BAD_REQUEST, "INVALID_PAYLOAD", BadRequestError)
+      testDesErrorMap(FORBIDDEN, "MISSING_GIFT_AID_AMOUNT", NonUKAmountNotSpecifiedRuleError)
+      testDesErrorMap(FORBIDDEN, "MISSING_CHARITIES_NAME_GIFT_AID", NonUKNamesNotSpecifiedRuleError)
+      testDesErrorMap(FORBIDDEN, "MISSING_CHARITIES_NAME_INVESTMENT", NonUKInvestmentsNamesNotSpecifiedRuleError)
+      testDesErrorMap(FORBIDDEN, "MISSING_INVESTMENT_AMOUNT", NonUKInvestmentAmountNotSpecifiedRuleError)
+
+      testDesErrorMap(BAD_REQUEST, "INVALID_TYPE", DownstreamError)
+      testDesErrorMap(FORBIDDEN, "NOT_FOUND_INCOME_SOURCE", DownstreamError)
+      testDesErrorMap(INTERNAL_SERVER_ERROR, "SERVER_ERROR", DownstreamError)
     }
   }
 }

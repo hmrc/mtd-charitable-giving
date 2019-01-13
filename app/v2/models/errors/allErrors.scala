@@ -37,7 +37,7 @@ object GiftsNonUKInvestmentsNamesFormatError extends MtdError("FORMAT_GIFTS_NONU
 //Rule Errors
 object NonUKNamesNotSpecifiedRuleError extends
   MtdError("RULE_GIFT_AID_NONUK_AMOUNT_WITHOUT_NAMES", "Non-UK charity gift aid amount supplied without the non-UK gift aid charity names")
-object NonUKAmountNotSpecifiedRuleError extends
+    object NonUKAmountNotSpecifiedRuleError extends
   MtdError("RULE_GIFT_AID_NONUK_NAMES_WITHOUT_AMOUNT", "Non-UK charity gift aid charity names supplied without an amount or the amount was zero")
 object NonUKInvestmentsNamesNotSpecifiedRuleError extends
   MtdError("RULE_GIFTS_NONUK_INVESTMENTS_AMOUNT_WITHOUT_NAMES",
