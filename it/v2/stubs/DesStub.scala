@@ -31,7 +31,7 @@ object DesStub extends WireMockMethods {
     """.stripMargin
 
   def amendSuccess(nino: String, taxYear: String): StubMapping = {
-    when(method = POST, uri = amendCharitableGivingUrl(nino, taxYear))
+    when(method = PUT, uri = amendCharitableGivingUrl(nino, taxYear))
       .thenReturn(status = OK, body)
   }
 
