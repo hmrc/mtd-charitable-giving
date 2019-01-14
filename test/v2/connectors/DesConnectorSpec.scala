@@ -48,7 +48,7 @@ class DesConnectorSpec extends ConnectorSpec{
 
         val expectedDesResponse = DesResponse("X-123", expectedRef)
 
-        MockedHttpClient.post[AmendCharitableGiving, AmendCharitableGivingConnectorOutcome](
+        MockedHttpClient.put[AmendCharitableGiving, AmendCharitableGivingConnectorOutcome](
           s"$baseUrl" + s"/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}",
           AmendCharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))
           .returns(Future.successful(Right(expectedDesResponse)))
