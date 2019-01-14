@@ -19,6 +19,35 @@ package v2.models.errors
 // Nino Errors
 object NinoFormatError extends MtdError("FORMAT_NINO", "The NINO format is invalid")
 
+//Format Rules
+object TaxYearFormatError extends MtdError("FORMAT_TAX_YEAR", "The provided tax year is invalid")
+object GiftAidSpecifiedYearFormatError extends MtdError("FORMAT_GIFT_AID_SPECIFIED_YEAR", "The specified year payment amount is invalid")
+object GiftAidOneOffSpecifiedYearFormatError extends MtdError("FORMAT_GIFT_AID_ONE_OFF_SPECIFIED_YEAR", "The one-off specified year amount is invalid")
+object GiftAidSpecifiedYearPreviousFormatError extends
+  MtdError("FORMAT_GIFT_AID_SPECIFIED_YEAR_PREVIOUS_YEAR", "The specified year treated as previous year amount is invalid")
+object GiftAidFollowingYearSpecifiedFormatError extends
+  MtdError("FORMAT_GIFT_AID_FOLLOWING_YEAR_SPECIFIED_YEAR", "The following year treated as specified year amount is invalid")
+object GiftAidNonUKCharityAmountFormatError extends MtdError("FORMAT_GIFT_AID_NONUK_CHARITY_AMOUNT", "The gift aid non-UK Charities amount is invalid")
+object GiftAidNonUKNamesFormatError extends MtdError("FORMAT_GIFT_AID_NONUK_NAMES", "The non-UK charity names are invalid")
+object GiftsSharesSecuritiesFormatError extends MtdError("FORMAT_GIFTS_SHARES_SECURITIES", "The shares or securities amount is invalid")
+object GiftsLandsBuildingsFormatError extends MtdError("FORMAT_GIFTS_LAND_BUILDINGS", "The land and buildings amount is invalid")
+object GiftsInvestmentsAmountFormatError extends MtdError("FORMAT_GIFTS_INVESTMENTS_AMOUNT", "The investments amount is invalid")
+object GiftsNonUKInvestmentsNamesFormatError extends MtdError("FORMAT_GIFTS_NONUK_INVESTMENTS_NAMES", "The non-UK investments charity names list is invalid")
+
+//Rule Errors
+object NonUKNamesNotSpecifiedRuleError extends
+  MtdError("RULE_GIFT_AID_NONUK_AMOUNT_WITHOUT_NAMES", "Non-UK charity gift aid amount supplied without the non-UK gift aid charity names")
+object NonUKAmountNotSpecifiedRuleError extends
+  MtdError("RULE_GIFT_AID_NONUK_NAMES_WITHOUT_AMOUNT", "Non-UK charity gift aid charity names supplied without an amount or the amount was zero")
+object NonUKInvestmentsNamesNotSpecifiedRuleError extends
+  MtdError("RULE_GIFTS_NONUK_INVESTMENTS_AMOUNT_WITHOUT_NAMES",
+    "Positive non-UK gift of investment amount supplied without non-UK gift of investment charity names")
+object NonUKInvestmentAmountNotSpecifiedRuleError extends
+  MtdError("RULE_GIFTS_NONUK_INVESTMENTS_NAMES_WITHOUT_AMOUNT", "Non-UK gift of investment charity names supplied without an amount or the amount was zero")
+object TaxYearNotSpecifiedRuleError extends
+  MtdError("RULE_TAX_YEAR_NOT_SUPPORTED", "Tax year not supported, because it precedes the earliest allowable tax year")
+
+
 // Date Errors
 object MissingStartDateError extends MtdError("MISSING_START_DATE", "Missing account period start date")
 object MissingEndDateError extends MtdError("MISSING_END_DATE", "Missing account period end date")

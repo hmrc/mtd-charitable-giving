@@ -27,10 +27,12 @@ object AmendCharitableGivingHttpParser extends HttpParser {
 
   implicit val amendHttpReads: HttpReads[AmendCharitableGivingConnectorOutcome] = new HttpReads[AmendCharitableGivingConnectorOutcome] {
     override def read(method: String, url: String, response: HttpResponse): AmendCharitableGivingConnectorOutcome = {
+
       response.status match {
         case OK => response.validateJson[String](jsonReads) match {
           case Some(ref) => Right(DesResponse(retrieveCorrelationId(response), ref))
         }
+
       }
     }
   }
