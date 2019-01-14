@@ -26,7 +26,7 @@ import v2.models.outcomes.DesResponse
 
 class AmendCharitableGivingHttpParserSpec extends UnitSpec {
 
-  val method = "GET"
+  val method = "PUT"
   val url = "test-url"
 
   val transactionReference = "000000000001"
@@ -34,44 +34,150 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
   val desResponse = DesResponse("X-123", transactionReference)
 
   "read" should {
-    "return the transactionReference" when {
-      "des returns a valid success response" in {
-        val responseFromDes = HttpResponse(OK, Some(desExpectedJson), Map("CorrelationId" -> Seq("X-123")))
-        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(method, url, responseFromDes)
+    "return a DesResponse" when {
+      "the http response contains a 200" in {
+        val correlationId = "X-123"
+        val httpResponse = HttpResponse(OK, Some(desExpectedJson), Map("CorrelationId" -> Seq(correlationId)))
+
+        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(PUT, "/test", httpResponse)
         result shouldBe Right(desResponse)
       }
     }
 
-    "return an INTERNAL_SERVER_ERROR" when {
-      "the json returned can not be validated" in {
-        val responseFromDes = HttpResponse(OK, Some(Json.obj("foo"->"bar")), Map("CorrelationId" -> Seq("X-123")))
-        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(method, url, responseFromDes)
-        result shouldBe Left(DownstreamError)
+    "return a single error" when {
+      "the http response contains a 400 with an error response body" in {
+        val errorResponseJson = Json.parse(
+          """
+            |{
+            |  "code": "TEST_CODE",
+            |  "reason": "some reason"
+            |}
+          """.stripMargin)
+        val expected = SingleError(MtdError("TEST_CODE", "some reason"))
+
+        val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson))
+        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(PUT, "/test", httpResponse)
+        result shouldBe Left(expected)
+      }
+
+      "the http response contains a 403 with an error response body" in {
+        val errorResponseJson = Json.parse(
+          """
+            |{
+            |  "code": "TEST_CODE",
+            |  "reason": "some reason"
+            |}
+          """.stripMargin)
+        val expected = SingleError(MtdError("TEST_CODE", "some reason"))
+
+        val httpResponse = HttpResponse(FORBIDDEN, Some(errorResponseJson))
+        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(PUT, "/test", httpResponse)
+        result shouldBe Left(expected)
       }
     }
 
-    def testDesErrorMap(desResponseStatus: Int, desCode: String, expectedMtdError: MtdError): Unit = {
-      s"des returns an $desCode error" in {
-        val json = Json.obj("code" -> desCode, "reason" -> "does not matter")
-        val response = HttpResponse(desResponseStatus, Some(json))
-        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(method, url, response)
+    "return a generic error" when {
 
-        result shouldBe Left(expectedMtdError)
+      "the successful json response from DES can't be read" in {
+        val correlationId = "X-123"
+        val httpResponse = HttpResponse(OK, Some(Json.obj("foo" -> "bar")), Map("CorrelationId" -> Seq(correlationId)))
+        val expected = GenericError(DownstreamError)
+
+
+        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(PUT, "/test", httpResponse)
+        result shouldBe Left(expected)
+      }
+
+      "the error response from DES can't be read" in {
+        val errorResponseJson = Json.parse(
+          """
+            |{
+            |  "foo": "TEST_CODE",
+            |  "bar": "some reason"
+            |}
+          """.
+            stripMargin)
+        val expected = GenericError(DownstreamError)
+
+        val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson))
+        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(PUT, "/test", httpResponse)
+        result shouldBe Left(expected)
+      }
+
+      "the http response contains a 500 with an error response body" in {
+        val errorResponseJson = Json.parse(
+          """
+            |{
+            |  "code": "TEST_CODE",
+            |  "reason": "some reason"
+            |}
+          """.
+            stripMargin)
+        val expected = GenericError(DownstreamError)
+
+        val httpResponse = HttpResponse(INTERNAL_SERVER_ERROR, Some(errorResponseJson))
+        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(PUT, "/test", httpResponse)
+        result shouldBe Left(expected)
+      }
+
+      "the http response contains a 503 with an error response body" in {
+        val errorResponseJson = Json.parse(
+          """
+            |{
+            |  "code": "TEST_CODE",
+            |  "reason": "some reason"
+            |}
+          """.
+            stripMargin)
+        val expected = GenericError(DownstreamError)
+
+        val httpResponse = HttpResponse(SERVICE_UNAVAILABLE, Some(errorResponseJson))
+        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(PUT, "/test", httpResponse)
+        result shouldBe Left(expected)
       }
     }
 
-    "return the correct MTD error" when {
-      testDesErrorMap(BAD_REQUEST, "INVALID_NINO", NinoFormatError)
-      testDesErrorMap(BAD_REQUEST, "INVALID_TAXYEAR", TaxYearFormatError)
-      testDesErrorMap(BAD_REQUEST, "INVALID_PAYLOAD", BadRequestError)
-      testDesErrorMap(FORBIDDEN, "MISSING_GIFT_AID_AMOUNT", NonUKAmountNotSpecifiedRuleError)
-      testDesErrorMap(FORBIDDEN, "MISSING_CHARITIES_NAME_GIFT_AID", NonUKNamesNotSpecifiedRuleError)
-      testDesErrorMap(FORBIDDEN, "MISSING_CHARITIES_NAME_INVESTMENT", NonUKInvestmentsNamesNotSpecifiedRuleError)
-      testDesErrorMap(FORBIDDEN, "MISSING_INVESTMENT_AMOUNT", NonUKInvestmentAmountNotSpecifiedRuleError)
+    "return multiple errors" when {
+      "the http response contains a 400 with an error response body with multiple errors" in {
+        val errorResponseJson = Json.parse(
+          """
+            | [
+            |    {
+            |      "code": "TEST_CODE_1",
+            |      "reason": "some reason"
+            |    },
+            |    {
+            |      "code": "TEST_CODE_2",
+            |      "reason": "some reason"
+            |    }
+            |  ]
+          """.stripMargin)
+        val expected = MultipleErrors(Seq(MtdError("TEST_CODE_1", "some reason"), MtdError("TEST_CODE_2", "some reason")))
 
-      testDesErrorMap(BAD_REQUEST, "INVALID_TYPE", DownstreamError)
-      testDesErrorMap(FORBIDDEN, "NOT_FOUND_INCOME_SOURCE", DownstreamError)
-      testDesErrorMap(INTERNAL_SERVER_ERROR, "SERVER_ERROR", DownstreamError)
+        val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson))
+        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(POST, "/test", httpResponse)
+        result shouldBe Left(expected)
+      }
+      "the http response contains a 403 with an error response body with multiple errors" in {
+        val errorResponseJson = Json.parse(
+          """
+            | [
+            |    {
+            |      "code": "TEST_CODE_1",
+            |      "reason": "some reason"
+            |    },
+            |    {
+            |      "code": "TEST_CODE_2",
+            |      "reason": "some reason"
+            |    }
+            |  ]
+          """.stripMargin)
+        val expected = MultipleErrors(Seq(MtdError("TEST_CODE_1", "some reason"), MtdError("TEST_CODE_2", "some reason")))
+
+        val httpResponse = HttpResponse(FORBIDDEN, Some(errorResponseJson))
+        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(POST, "/test", httpResponse)
+        result shouldBe Left(expected)
+      }
     }
   }
 }

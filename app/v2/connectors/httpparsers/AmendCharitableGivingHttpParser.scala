@@ -16,7 +16,8 @@
 
 package v2.connectors.httpparsers
 
-import play.api.http.Status.{BAD_REQUEST, OK, FORBIDDEN, INTERNAL_SERVER_ERROR}
+import play.api.Logger
+import play.api.http.Status.{BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, OK, SERVICE_UNAVAILABLE}
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import v2.models.errors._
@@ -24,31 +25,29 @@ import v2.models.outcomes.{AmendCharitableGivingConnectorOutcome, DesResponse}
 
 object AmendCharitableGivingHttpParser extends HttpParser {
 
+  val logger = Logger(AmendCharitableGivingHttpParser.getClass)
+
+
   private val jsonReads: Reads[String] = (__ \ "transactionReference").read[String]
 
   implicit val amendHttpReads: HttpReads[AmendCharitableGivingConnectorOutcome] = new HttpReads[AmendCharitableGivingConnectorOutcome] {
     override def read(method: String, url: String, response: HttpResponse): AmendCharitableGivingConnectorOutcome = {
 
-
-      // scalastyle:off
-      (response.status, response.jsonOpt) match {
-        case (OK, _) => parseResponse(response)
-        case (BAD_REQUEST, ErrorCode(DesErrorCode.INVALID_NINO)) => Left(NinoFormatError)
-        case (BAD_REQUEST, ErrorCode(DesErrorCode.INVALID_TAXYEAR)) => Left(TaxYearFormatError)
-        case (BAD_REQUEST, ErrorCode(DesErrorCode.INVALID_PAYLOAD)) => Left(BadRequestError)
-        case (BAD_REQUEST, ErrorCode(DesErrorCode.INVALID_TYPE)) => Left(DownstreamError)
-        case (FORBIDDEN, ErrorCode(DesErrorCode.MISSING_GIFT_AID_AMOUNT)) => Left(NonUKAmountNotSpecifiedRuleError)
-        case (FORBIDDEN, ErrorCode(DesErrorCode.MISSING_CHARITIES_NAME_GIFT_AID)) => Left(NonUKNamesNotSpecifiedRuleError)
-        case (FORBIDDEN, ErrorCode(DesErrorCode.MISSING_CHARITIES_NAME_INVESTMENT)) => Left(NonUKInvestmentsNamesNotSpecifiedRuleError)
-        case (FORBIDDEN, ErrorCode(DesErrorCode.MISSING_INVESTMENT_AMOUNT)) => Left(NonUKInvestmentAmountNotSpecifiedRuleError)
-        case (FORBIDDEN, ErrorCode(DesErrorCode.NOT_FOUND_INCOME_SOURCE)) => Left(DownstreamError)
-        case (INTERNAL_SERVER_ERROR, _) => Left(DownstreamError)
+      if(response.status != OK) {
+        logger.info("[AmendCharitableGivingHttpParser][read] - " +
+          s"Error response received from DES with status: ${response.status} and body\n" +
+          s"${response.body} when calling $url")
       }
-      // scalastyle:on
+
+      response.status match {
+        case OK => parseResponse(response)
+        case BAD_REQUEST | FORBIDDEN => Left(parseErrors(response))
+        case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(GenericError(DownstreamError))
+      }
     }
     private def parseResponse(response: HttpResponse) = response.validateJson[String](jsonReads) match {
       case Some(ref) => Right(DesResponse(retrieveCorrelationId(response), ref))
-      case None => Left(DownstreamError)
+      case None => Left(GenericError(DownstreamError))
     }
   }
 }
