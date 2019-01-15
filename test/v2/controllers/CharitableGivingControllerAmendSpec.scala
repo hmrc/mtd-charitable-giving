@@ -101,7 +101,8 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
         InvalidRangeError
       )
 
-      badRequestErrors.foreach(errorTester(_, BAD_REQUEST))
+      badRequestErrors.foreach(errorsFromParserTester(_, BAD_REQUEST))
+      badRequestErrors.foreach(errorsFromServiceTester(_, BAD_REQUEST))
 
     }
 
@@ -111,7 +112,8 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
         DownstreamError
       )
 
-      internalServerErrorErrors.foreach(errorTester(_, INTERNAL_SERVER_ERROR))
+      internalServerErrorErrors.foreach(errorsFromParserTester(_, INTERNAL_SERVER_ERROR))
+      internalServerErrorErrors.foreach(errorsFromServiceTester(_, INTERNAL_SERVER_ERROR))
 
     }
 
@@ -130,18 +132,36 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
         contentAsJson(response) shouldBe Json.toJson(multipleErrorResponse)
       }
     }
-
-
   }
 
-  def errorTester(error: MtdError, expectedStatus: Int): Unit = {
-    s"a ${error.code} error occurs" in new Test {
+  def errorsFromParserTester(error: MtdError, expectedStatus: Int): Unit = {
+    s"a ${error.code} error is returned from the parser" in new Test {
 
       val amendCharitableGivingRequestData = AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson))
 
       MockAmendCharitableGivingRequestDataParser.parseRequest(
         AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson)))
         .returns(Left(ErrorWrapper(error, None)))
+
+      val response: Future[Result] = target.amend(nino, taxYear)(fakePostRequest[JsValue](AmendCharitableGivingFixture.inputJson))
+
+      status(response) shouldBe expectedStatus
+      contentAsJson(response) shouldBe Json.toJson(error)
+
+    }
+  }
+
+  def errorsFromServiceTester(error: MtdError, expectedStatus: Int): Unit = {
+    s"a ${error.code} error is returned from the service" in new Test {
+
+      val amendCharitableGivingRequestData = AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson))
+
+      MockAmendCharitableGivingRequestDataParser.parseRequest(
+        AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson)))
+        .returns(Right(amendCharitableGivingRequest))
+
+      MockCharitableGivingService.amend(amendCharitableGivingRequest)
+        .returns(Future.successful(Left(ErrorWrapper(error, None))))
 
       val response: Future[Result] = target.amend(nino, taxYear)(fakePostRequest[JsValue](AmendCharitableGivingFixture.inputJson))
 
