@@ -29,19 +29,29 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
     List(
       NinoValidation.validate(data.nino),
       TaxYearValidation.validate(data.taxYear)
+        //Converted input data validation
+        JsonFormatValidation.validate[AmendCharitableGiving](data.body)
     )
   }
 
   private def levelTwoValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
     List(
-      //Converted input data validation
-      JsonFormatValidation.validate[AmendCharitableGiving](data.body)
+
     )
   }
 
   private def levelThreeValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
     List(
       AmendCharitableGivingEmptyFieldsValidator.validate(data.body)
+        val myparsed = json.pars
+      AmountValidator(giftAidPayments.specifiedYear, SPECIFIED_YEAR_ERROR)
+      AmountValidator(giftAidPayments.specifiedYear, SPECIFIED_YEAR_ERROR)
+      AmountValidator(giftAidPayments.specifiedYear, SPECIFIED_YEAR_ERROR)
+      AmountValidator(giftAidPayments.specifiedYear, SPECIFIED_YEAR_ERROR)
+      AmountValidator(giftAidPayments.specifiedYear, SPECIFIED_YEAR_ERROR)
+      AmountValidator(giftAidPayments.specifiedYear, SPECIFIED_YEAR_ERROR)
+      AmountValidator(giftAidPayments.specifiedYear, SPECIFIED_YEAR_ERROR)
+      AmountValidator(giftAidPayments.specifiedYear, SPECIFIED_YEAR_ERROR)
     )
   }
 
