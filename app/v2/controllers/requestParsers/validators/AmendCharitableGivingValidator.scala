@@ -16,18 +16,19 @@
 
 package v2.controllers.requestParsers.validators
 
-import v2.controllers.requestParsers.validators.validations.JsonFormatValidation
+import v2.controllers.requestParsers.validators.validations._
 import v2.models.AmendCharitableGiving
 import v2.models.errors._
 import v2.models.requestData.AmendCharitableGivingRequestData
 
 class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequestData] {
 
-  private val validationSet = List(levelOneValidations, levelTwoValidations, levelThreeValidations)
+  private val validationSet = List(levelOneValidations, levelTwoValidations, levelThreeValidations, levelFourValidations)
 
   private def levelOneValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
     List(
-      //Raw input format validation
+      NinoValidation.validate(data.nino),
+      TaxYearValidation.validate(data.taxYear)
     )
   }
 
@@ -40,7 +41,13 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
 
   private def levelThreeValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
     List(
-      //Business rule validation
+      AmendCharitableGivingEmptyFieldsValidator.validate(data.body)
+    )
+  }
+
+  private def levelFourValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
+    List(
+      AmendCharitableGivingDataValidator.validate(data.body)
     )
   }
 

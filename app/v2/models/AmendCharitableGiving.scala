@@ -21,7 +21,6 @@ import play.api.libs.json.{JsPath, Json, Reads, Writes}
 
 case class AmendCharitableGiving(giftAidPayments: GiftAidPayments, gifts: Gifts)
 
-
 object AmendCharitableGiving {
   implicit val reads: Reads[AmendCharitableGiving] = Json.reads[AmendCharitableGiving]
 
@@ -34,7 +33,15 @@ case class GiftAidPayments(specifiedYear: Option[BigDecimal],
                            followingYearTreatedAsSpecifiedYear: Option[BigDecimal],
                            nonUKCharities: Option[BigDecimal],
                            nonUKCharityNames: Option[Seq[String]]
-                          )
+                          ){
+  def isValid(): Boolean = specifiedYear.nonEmpty ||
+    oneOffSpecifiedYear.nonEmpty ||
+    specifiedYearTreatedAsPreviousYear.nonEmpty ||
+    followingYearTreatedAsSpecifiedYear.nonEmpty ||
+    nonUKCharities.nonEmpty ||
+    nonUKCharityNames.nonEmpty
+
+}
 
 object GiftAidPayments {
   implicit val reads: Reads[GiftAidPayments] = Json.reads[GiftAidPayments]
@@ -52,7 +59,13 @@ object GiftAidPayments {
 case class Gifts(landAndBuildings: Option[BigDecimal],
                  sharesOrSecurities: Option[BigDecimal],
                  investmentsNonUKCharities: Option[BigDecimal],
-                 investmentsNonUKCharityNames: Option[Seq[String]])
+                 investmentsNonUKCharityNames: Option[Seq[String]]){
+
+  def isValid(): Boolean = landAndBuildings.nonEmpty ||
+    sharesOrSecurities.nonEmpty ||
+    investmentsNonUKCharities.nonEmpty ||
+    investmentsNonUKCharityNames.nonEmpty
+}
 
 object Gifts {
   implicit val reads: Reads[Gifts] = Json.reads[Gifts]
