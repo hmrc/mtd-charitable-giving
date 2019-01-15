@@ -16,12 +16,14 @@
 
 package v2.controllers
 
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AnyContentAsJson, Result}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures.AmendCharitableGivingFixture
 import v2.mocks.requestParsers.MockAmendCharitableGivingRequestDataParser
 import v2.mocks.services.{MockCharitableGivingService, MockEnrolmentsAuthService, MockMtdIdLookupService}
+import v2.models.errors._
 import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRequestData, DesTaxYear}
 import v2.models.{AmendCharitableGiving, GiftAidPayments, Gifts}
 
@@ -32,11 +34,11 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
   trait Test extends MockEnrolmentsAuthService
     with MockMtdIdLookupService
     with MockCharitableGivingService
-    with MockAmendCharitableGivingRequestDataParser{
+    with MockAmendCharitableGivingRequestDataParser {
 
     val hc = HeaderCarrier()
 
-    val target =  new CharitableGivingController(
+    val target = new CharitableGivingController(
       authService = mockEnrolmentsAuthService,
       lookupService = mockMtdIdLookupService,
       charitableGivingService = mockCharitableGivingService,
@@ -69,5 +71,34 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
         header("X-CorrelationId", result) shouldBe Some(correlationId)
       }
     }
+
+
+    "return a 400 Bad Request with a single error" when {
+
+      List(
+        NinoFormatError,
+        TaxYearFormatError,
+        BadRequestError
+      ).foreach(errorTester)
+
+    }
   }
+
+  def errorTester(error: MtdError) : Unit = {
+    s"a ${error.code} error occurs" in new Test {
+
+      val amendCharitableGivingRequestData = AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson))
+
+      MockAmendCharitableGivingRequestDataParser.parseRequest(
+        AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson)))
+        .returns(Left(ErrorWrapper(error, None)))
+
+      val response: Future[Result] = target.amend(nino, taxYear)(fakePostRequest[JsValue](AmendCharitableGivingFixture.inputJson))
+
+      status(response) shouldBe 400
+      contentAsJson(response) shouldBe Json.toJson(error)
+
+    }
+  }
+
 }

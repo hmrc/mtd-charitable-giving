@@ -17,9 +17,10 @@
 package v2.controllers
 
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, AnyContentAsJson}
 import v2.controllers.requestParsers.AmendCharitableGivingRequestDataParser
+import v2.models.errors.{BadRequestError, ErrorWrapper, NinoFormatError, TaxYearFormatError}
 import v2.models.requestData.AmendCharitableGivingRequestData
 import v2.services.{CharitableGivingService, EnrolmentsAuthService, MtdIdLookupService}
 
@@ -39,12 +40,23 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
 
   def amend(nino: String, taxYear: String): Action[JsValue] = authorisedAction(nino).async(parse.json) { implicit request =>
 
-    amendCharitableGivingRequestDataParser.parseRequest(
-      AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(request.body))) match {
+    amendCharitableGivingRequestDataParser.parseRequest(AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(request.body))) match {
 
       case Right(amendCharitableGivingRequest) => charitableGivingService.amend(amendCharitableGivingRequest).map {
         case Right(correlationId) => NoContent.withHeaders("X-CorrelationId" -> correlationId)
       }
+      case Left(errorWrapper) => Future.successful {
+        processError(errorWrapper)
+      }
     }
   }
+
+  private def processError(errorWrapper: ErrorWrapper) = {
+    errorWrapper.error match {
+      case NinoFormatError
+           | TaxYearFormatError
+           | BadRequestError => BadRequest(Json.toJson(errorWrapper))
+    }
+  }
+
 }
