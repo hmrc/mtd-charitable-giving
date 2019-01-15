@@ -75,16 +75,66 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
 
     "return a 400 Bad Request with a single error" when {
 
-      List(
+      val badRequestErrors = List(
+        BadRequestError,
         NinoFormatError,
         TaxYearFormatError,
-        BadRequestError
-      ).foreach(errorTester)
+        GiftAidSpecifiedYearFormatError,
+        GiftAidOneOffSpecifiedYearFormatError,
+        GiftAidSpecifiedYearPreviousFormatError,
+        GiftAidFollowingYearSpecifiedFormatError,
+        GiftAidNonUKCharityAmountFormatError,
+        GiftAidNonUKNamesFormatError,
+        GiftsSharesSecuritiesFormatError,
+        GiftsLandsBuildingsFormatError,
+        GiftsInvestmentsAmountFormatError,
+        GiftsNonUKInvestmentsNamesFormatError,
+        NonUKNamesNotSpecifiedRuleError,
+        NonUKAmountNotSpecifiedRuleError,
+        NonUKInvestmentsNamesNotSpecifiedRuleError,
+        NonUKInvestmentAmountNotSpecifiedRuleError,
+        TaxYearNotSpecifiedRuleError,
+        MissingStartDateError,
+        MissingEndDateError,
+        InvalidStartDateError,
+        InvalidEndDateError,
+        InvalidRangeError
+      )
+
+      badRequestErrors.foreach(errorTester(_, BAD_REQUEST))
 
     }
+
+    "return a 500 Internal Server Error with a single error" when {
+
+      val internalServerErrorErrors = List(
+        DownstreamError
+      )
+
+      internalServerErrorErrors.foreach(errorTester(_, INTERNAL_SERVER_ERROR))
+
+    }
+
+    "return a valid error response" when {
+      "multiple errors exist" in new Test() {
+        val amendCharitableGivingRequestData = AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson))
+        val multipleErrorResponse = ErrorWrapper(BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
+
+        MockAmendCharitableGivingRequestDataParser.parseRequest(
+          AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson)))
+          .returns(Left(multipleErrorResponse))
+
+        val response: Future[Result] = target.amend(nino, taxYear)(fakePostRequest[JsValue](AmendCharitableGivingFixture.inputJson))
+
+        status(response) shouldBe BAD_REQUEST
+        contentAsJson(response) shouldBe Json.toJson(multipleErrorResponse)
+      }
+    }
+
+
   }
 
-  def errorTester(error: MtdError) : Unit = {
+  def errorTester(error: MtdError, expectedStatus: Int): Unit = {
     s"a ${error.code} error occurs" in new Test {
 
       val amendCharitableGivingRequestData = AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson))
@@ -95,7 +145,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
 
       val response: Future[Result] = target.amend(nino, taxYear)(fakePostRequest[JsValue](AmendCharitableGivingFixture.inputJson))
 
-      status(response) shouldBe 400
+      status(response) shouldBe expectedStatus
       contentAsJson(response) shouldBe Json.toJson(error)
 
     }

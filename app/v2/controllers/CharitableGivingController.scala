@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, AnyContentAsJson}
 import v2.controllers.requestParsers.AmendCharitableGivingRequestDataParser
-import v2.models.errors.{BadRequestError, ErrorWrapper, NinoFormatError, TaxYearFormatError}
+import v2.models.errors._
 import v2.models.requestData.AmendCharitableGivingRequestData
 import v2.services.{CharitableGivingService, EnrolmentsAuthService, MtdIdLookupService}
 
@@ -53,9 +53,31 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
 
   private def processError(errorWrapper: ErrorWrapper) = {
     errorWrapper.error match {
-      case NinoFormatError
+      case BadRequestError
+           | NinoFormatError
            | TaxYearFormatError
-           | BadRequestError => BadRequest(Json.toJson(errorWrapper))
+           | GiftAidSpecifiedYearFormatError
+           | GiftAidOneOffSpecifiedYearFormatError
+           | GiftAidSpecifiedYearPreviousFormatError
+           | GiftAidFollowingYearSpecifiedFormatError
+           | GiftAidNonUKCharityAmountFormatError
+           | GiftAidNonUKNamesFormatError
+           | GiftsSharesSecuritiesFormatError
+           | GiftsLandsBuildingsFormatError
+           | GiftsInvestmentsAmountFormatError
+           | GiftsNonUKInvestmentsNamesFormatError
+           | NonUKNamesNotSpecifiedRuleError
+           | NonUKAmountNotSpecifiedRuleError
+           | NonUKInvestmentsNamesNotSpecifiedRuleError
+           | NonUKInvestmentAmountNotSpecifiedRuleError
+           | TaxYearNotSpecifiedRuleError
+           | MissingStartDateError
+           | MissingEndDateError
+           | InvalidStartDateError
+           | InvalidEndDateError
+           | InvalidRangeError => BadRequest(Json.toJson(errorWrapper))
+      case DownstreamError => InternalServerError(Json.toJson(errorWrapper))
+
     }
   }
 
