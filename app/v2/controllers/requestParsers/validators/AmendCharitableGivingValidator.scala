@@ -16,8 +16,7 @@
 
 package v2.controllers.requestParsers.validators
 
-import v2.controllers.requestParsers.validators.validations.AmendCharitableGivingDataValidator.amountValidation
-import v2.controllers.requestParsers.validators.validations.{AmountValidator, _}
+import v2.controllers.requestParsers.validators.validations.{AmountValidator_OLD, _}
 import v2.models.AmendCharitableGiving
 import v2.models.errors._
 import v2.models.requestData.AmendCharitableGivingRequestData
@@ -53,19 +52,17 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
     val gifts = amendCharitableGiving.gifts
     List(
       //Amount validations to the gift payments
-      AmountValidator(giftAidPayments.specifiedYear, GiftAidSpecifiedYearFormatError),
-      AmountValidator(giftAidPayments.oneOffSpecifiedYear, GiftAidOneOffSpecifiedYearFormatError),
-      AmountValidator(giftAidPayments.specifiedYearTreatedAsPreviousYear, GiftAidSpecifiedYearPreviousFormatError),
-      AmountValidator(giftAidPayments.followingYearTreatedAsSpecifiedYear, GiftAidFollowingYearSpecifiedFormatError),
-      AmountValidator(giftAidPayments.nonUKCharities, GiftAidNonUKCharityAmountFormatError),
+      AmountValidator_OLD.validate(giftAidPayments.specifiedYear, GiftAidSpecifiedYearFormatError),
+      AmountValidator_OLD.validate(giftAidPayments.oneOffSpecifiedYear, GiftAidOneOffSpecifiedYearFormatError),
+      AmountValidator_OLD.validate(giftAidPayments.specifiedYearTreatedAsPreviousYear, GiftAidSpecifiedYearPreviousFormatError),
+      AmountValidator_OLD.validate(giftAidPayments.followingYearTreatedAsSpecifiedYear, GiftAidFollowingYearSpecifiedFormatError),
+      AmountValidator_OLD.validate(giftAidPayments.nonUKCharities, GiftAidNonUKCharityAmountFormatError),
 
       // Amount validations to gifts
-        AmountValidator(gifts.sharesOrSecurities, GiftsSharesSecuritiesFormatError),
-      AmountValidator(gifts.landAndBuildings, GiftsLandsBuildingsFormatError),
+        AmountValidator_OLD.validate(gifts.sharesOrSecurities, GiftsSharesSecuritiesFormatError),
+      AmountValidator_OLD.validate(gifts.landAndBuildings, GiftsLandsBuildingsFormatError),
 
-      AmountValidator(gifts.investmentsNonUKCharities, GiftsLandsBuildingsFormatError),
-
-
+      AmountValidator_OLD.validate(gifts.investmentsNonUKCharities, GiftsLandsBuildingsFormatError)
 
     )
   }

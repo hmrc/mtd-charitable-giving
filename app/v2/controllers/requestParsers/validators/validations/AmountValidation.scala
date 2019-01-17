@@ -18,14 +18,10 @@ package v2.controllers.requestParsers.validators.validations
 
 import v2.models.errors.MtdError
 
-object AmountValidator {
+object AmountValidation {
 
-  def validate(amount: Option[BigDecimal], error: MtdError): List[MtdError] = {
-    if(amount.exists(value => value >= 0 || value < 99999999999.99)) {
-      List(error)
-    }
-    else {
-      NoValidationErrors
-    }
+  def validate(amount: Option[BigDecimal]): List[MtdError] = {
+    List()
   }
+
 }

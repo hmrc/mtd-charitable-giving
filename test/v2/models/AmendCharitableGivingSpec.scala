@@ -28,7 +28,7 @@ class AmendCharitableGivingSpec extends UnitSpec with JsonErrorValidators {
 
     "return an AmendCharitablGiving model" when {
       "correct json is supplied" in {
-        val model = reads.reads(inputJson).get
+        val model = AmendCharitableGiving.reads.reads(inputJson).get
         model shouldBe amendCharitableGivingModel
       }
     }
