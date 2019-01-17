@@ -93,12 +93,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
         NonUKAmountNotSpecifiedRuleError,
         NonUKInvestmentsNamesNotSpecifiedRuleError,
         NonUKInvestmentAmountNotSpecifiedRuleError,
-        TaxYearNotSpecifiedRuleError,
-        MissingStartDateError,
-        MissingEndDateError,
-        InvalidStartDateError,
-        InvalidEndDateError,
-        InvalidRangeError
+        TaxYearNotSpecifiedRuleError
       )
 
       val badRequestErrorsFromService = List(
