@@ -24,42 +24,6 @@ object AmendCharitableGivingDataValidator {
   val nameFormat = "^[^|]{1,75}$".r
 
 
-  def validate(data: AnyContentAsJson): List[MtdError] = {
-
-    val resultList = List.empty[MtdError]
-    val amendCharitableGiving = data.json.as[AmendCharitableGiving]
-
-    giftAidPaymentsValidation(amendCharitableGiving.giftAidPayments, resultList)
-    giftsValidation(amendCharitableGiving.gifts, resultList)
-
-    resultList
-  }
-
-  private def giftAidPaymentsValidation(giftAidPayments: GiftAidPayments, resultList: List[MtdError]): List[MtdError] = {
-    if (!amountValidation(giftAidPayments.specifiedYear)) resultList.::(GiftAidSpecifiedYearFormatError)
-    if (!amountValidation(giftAidPayments.oneOffSpecifiedYear)) resultList.::(GiftAidOneOffSpecifiedYearFormatError)
-    if (!amountValidation(giftAidPayments.specifiedYearTreatedAsPreviousYear)) resultList.::(GiftAidSpecifiedYearPreviousFormatError)
-    if (!amountValidation(giftAidPayments.followingYearTreatedAsSpecifiedYear)) resultList.::(GiftAidFollowingYearSpecifiedFormatError)
-    if (!amountValidation(giftAidPayments.nonUKCharities)) resultList.::(GiftAidNonUKCharityAmountFormatError)
-
-    validateGiftAidNonUKCharityNames(giftAidPayments.nonUKCharities, giftAidPayments.nonUKCharityNames, resultList)
-  }
-
-  private def giftsValidation(gifts: Gifts, resultList: List[MtdError]): List[MtdError] = {
-    if (!amountValidation(gifts.sharesOrSecurities)) resultList.::(GiftsSharesSecuritiesFormatError)
-    if (!amountValidation(gifts.landAndBuildings)) resultList.::(GiftsLandsBuildingsFormatError)
-
-    if (!amountValidation(gifts.investmentsNonUKCharities)) resultList.::(GiftsLandsBuildingsFormatError)
-    if (gifts.investmentsNonUKCharityNames.isEmpty) resultList.::(NonUKNamesNotSpecifiedRuleError)
-
-
-    validateGiftsNonUKCharityNames(gifts.investmentsNonUKCharities, gifts.investmentsNonUKCharityNames, resultList)
-  }
-
-  private def amountValidation(value: Option[BigDecimal]): Boolean = {
-    value.exists(x => x >= 0 || x < 99999999999.99)
-  }
-
   private def validateGiftAidNonUKCharityNames(nonUKCharities: Option[BigDecimal], nonUKCharityNames: Option[Seq[String]],
                                         resultList: List[MtdError]): List[MtdError] = {
     resultList.::((nonUKCharities.exists(x => x > 0), nonUKCharityNames.isEmpty) match {

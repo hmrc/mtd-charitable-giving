@@ -16,7 +16,8 @@
 
 package v2.controllers.requestParsers.validators
 
-import v2.controllers.requestParsers.validators.validations._
+import v2.controllers.requestParsers.validators.validations.AmendCharitableGivingDataValidator.amountValidation
+import v2.controllers.requestParsers.validators.validations.{AmountValidator, _}
 import v2.models.AmendCharitableGiving
 import v2.models.errors._
 import v2.models.requestData.AmendCharitableGivingRequestData
@@ -29,35 +30,43 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
     List(
       NinoValidation.validate(data.nino),
       TaxYearValidation.validate(data.taxYear)
-        //Converted input data validation
-        JsonFormatValidation.validate[AmendCharitableGiving](data.body)
     )
   }
 
   private def levelTwoValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
     List(
-
+      //Converted input data validation
+      JsonFormatValidation.validate[AmendCharitableGiving](data.body)
     )
   }
 
   private def levelThreeValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
     List(
-      AmendCharitableGivingEmptyFieldsValidator.validate(data.body)
-        val myparsed = json.pars
-      AmountValidator(giftAidPayments.specifiedYear, SPECIFIED_YEAR_ERROR)
-      AmountValidator(giftAidPayments.specifiedYear, SPECIFIED_YEAR_ERROR)
-      AmountValidator(giftAidPayments.specifiedYear, SPECIFIED_YEAR_ERROR)
-      AmountValidator(giftAidPayments.specifiedYear, SPECIFIED_YEAR_ERROR)
-      AmountValidator(giftAidPayments.specifiedYear, SPECIFIED_YEAR_ERROR)
-      AmountValidator(giftAidPayments.specifiedYear, SPECIFIED_YEAR_ERROR)
-      AmountValidator(giftAidPayments.specifiedYear, SPECIFIED_YEAR_ERROR)
-      AmountValidator(giftAidPayments.specifiedYear, SPECIFIED_YEAR_ERROR)
+        AmendCharitableGivingEmptyFieldsValidator.validate(data.body)
     )
   }
 
   private def levelFourValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
+
+    val amendCharitableGiving = data.body.json.as[AmendCharitableGiving]
+    val giftAidPayments = amendCharitableGiving.giftAidPayments
+    val gifts = amendCharitableGiving.gifts
     List(
-      AmendCharitableGivingDataValidator.validate(data.body)
+      //Amount validations to the gift payments
+      AmountValidator(giftAidPayments.specifiedYear, GiftAidSpecifiedYearFormatError),
+      AmountValidator(giftAidPayments.oneOffSpecifiedYear, GiftAidOneOffSpecifiedYearFormatError),
+      AmountValidator(giftAidPayments.specifiedYearTreatedAsPreviousYear, GiftAidSpecifiedYearPreviousFormatError),
+      AmountValidator(giftAidPayments.followingYearTreatedAsSpecifiedYear, GiftAidFollowingYearSpecifiedFormatError),
+      AmountValidator(giftAidPayments.nonUKCharities, GiftAidNonUKCharityAmountFormatError),
+
+      // Amount validations to gifts
+        AmountValidator(gifts.sharesOrSecurities, GiftsSharesSecuritiesFormatError),
+      AmountValidator(gifts.landAndBuildings, GiftsLandsBuildingsFormatError),
+
+      AmountValidator(gifts.investmentsNonUKCharities, GiftsLandsBuildingsFormatError),
+
+
+
     )
   }
 
