@@ -43,7 +43,7 @@ class CharitableGivingServiceSpec extends ServiceSpec {
 
   "calling amend" should {
     "return a valid correlationId" when {
-      "a valid data is passed"  in new Test {
+      "a valid data is passed" in new Test {
 
         val expected = correlationId
 
@@ -108,7 +108,7 @@ class CharitableGivingServiceSpec extends ServiceSpec {
     )
 
 
-    for(error <- errorMap.keys) {
+    for (error <- errorMap.keys) {
 
       s"the DesConnector returns a single $error error" in new Test {
 
@@ -121,6 +121,7 @@ class CharitableGivingServiceSpec extends ServiceSpec {
         private val result = await(target.amend(input))
         result shouldBe Left(expected)
       }
+
     }
 
   }

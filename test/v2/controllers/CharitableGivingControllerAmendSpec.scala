@@ -16,12 +16,14 @@
 
 package v2.controllers
 
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AnyContentAsJson, Result}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures.AmendCharitableGivingFixture
 import v2.mocks.requestParsers.MockAmendCharitableGivingRequestDataParser
 import v2.mocks.services.{MockCharitableGivingService, MockEnrolmentsAuthService, MockMtdIdLookupService}
+import v2.models.errors._
 import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRequestData, DesTaxYear}
 import v2.models.{AmendCharitableGiving, GiftAidPayments, Gifts}
 
@@ -32,11 +34,11 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
   trait Test extends MockEnrolmentsAuthService
     with MockMtdIdLookupService
     with MockCharitableGivingService
-    with MockAmendCharitableGivingRequestDataParser{
+    with MockAmendCharitableGivingRequestDataParser {
 
     val hc = HeaderCarrier()
 
-    val target =  new CharitableGivingController(
+    val target = new CharitableGivingController(
       authService = mockEnrolmentsAuthService,
       lookupService = mockMtdIdLookupService,
       charitableGivingService = mockCharitableGivingService,
@@ -69,5 +71,109 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
         header("X-CorrelationId", result) shouldBe Some(correlationId)
       }
     }
+
+
+    "return a 400 Bad Request with a single error" when {
+
+      val badRequestErrorsFromParser = List(
+        BadRequestError,
+        NinoFormatError,
+        TaxYearFormatError,
+        GiftAidSpecifiedYearFormatError,
+        GiftAidOneOffSpecifiedYearFormatError,
+        GiftAidSpecifiedYearPreviousFormatError,
+        GiftAidFollowingYearSpecifiedFormatError,
+        GiftAidNonUKCharityAmountFormatError,
+        GiftAidNonUKNamesFormatError,
+        GiftsSharesSecuritiesFormatError,
+        GiftsLandsBuildingsFormatError,
+        GiftsInvestmentsAmountFormatError,
+        GiftsNonUKInvestmentsNamesFormatError,
+        NonUKNamesNotSpecifiedRuleError,
+        NonUKAmountNotSpecifiedRuleError,
+        NonUKInvestmentsNamesNotSpecifiedRuleError,
+        NonUKInvestmentAmountNotSpecifiedRuleError,
+        TaxYearNotSpecifiedRuleError
+      )
+
+      val badRequestErrorsFromService = List(
+        NinoFormatError,
+        TaxYearFormatError,
+        BadRequestError,
+        NonUKNamesNotSpecifiedRuleError,
+        NonUKAmountNotSpecifiedRuleError,
+        NonUKInvestmentsNamesNotSpecifiedRuleError,
+        NonUKInvestmentAmountNotSpecifiedRuleError
+      )
+
+      badRequestErrorsFromParser.foreach(errorsFromParserTester(_, BAD_REQUEST))
+      badRequestErrorsFromService.foreach(errorsFromServiceTester(_, BAD_REQUEST))
+
+    }
+
+    "return a 500 Internal Server Error with a single error" when {
+
+      val internalServerErrorErrors = List(
+        DownstreamError
+      )
+
+      internalServerErrorErrors.foreach(errorsFromParserTester(_, INTERNAL_SERVER_ERROR))
+      internalServerErrorErrors.foreach(errorsFromServiceTester(_, INTERNAL_SERVER_ERROR))
+
+    }
+
+    "return a valid error response" when {
+      "multiple errors exist" in new Test() {
+        val amendCharitableGivingRequestData = AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson))
+        val multipleErrorResponse = ErrorWrapper(BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
+
+        MockAmendCharitableGivingRequestDataParser.parseRequest(
+          AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson)))
+          .returns(Left(multipleErrorResponse))
+
+        val response: Future[Result] = target.amend(nino, taxYear)(fakePostRequest[JsValue](AmendCharitableGivingFixture.inputJson))
+
+        status(response) shouldBe BAD_REQUEST
+        contentAsJson(response) shouldBe Json.toJson(multipleErrorResponse)
+      }
+    }
   }
+
+  def errorsFromParserTester(error: MtdError, expectedStatus: Int): Unit = {
+    s"a ${error.code} error is returned from the parser" in new Test {
+
+      val amendCharitableGivingRequestData = AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson))
+
+      MockAmendCharitableGivingRequestDataParser.parseRequest(
+        AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson)))
+        .returns(Left(ErrorWrapper(error, None)))
+
+      val response: Future[Result] = target.amend(nino, taxYear)(fakePostRequest[JsValue](AmendCharitableGivingFixture.inputJson))
+
+      status(response) shouldBe expectedStatus
+      contentAsJson(response) shouldBe Json.toJson(error)
+
+    }
+  }
+
+  def errorsFromServiceTester(error: MtdError, expectedStatus: Int): Unit = {
+    s"a ${error.code} error is returned from the service" in new Test {
+
+      val amendCharitableGivingRequestData = AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson))
+
+      MockAmendCharitableGivingRequestDataParser.parseRequest(
+        AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(AmendCharitableGivingFixture.inputJson)))
+        .returns(Right(amendCharitableGivingRequest))
+
+      MockCharitableGivingService.amend(amendCharitableGivingRequest)
+        .returns(Future.successful(Left(ErrorWrapper(error, None))))
+
+      val response: Future[Result] = target.amend(nino, taxYear)(fakePostRequest[JsValue](AmendCharitableGivingFixture.inputJson))
+
+      status(response) shouldBe expectedStatus
+      contentAsJson(response) shouldBe Json.toJson(error)
+
+    }
+  }
+
 }
