@@ -17,33 +17,72 @@
 package v2.controllers.requestParsers.validators.validations
 
 import support.UnitSpec
-import v2.models.errors.TaxYearFormatError
+import v2.models.errors.{GiftAidNonUKCharityAmountFormatError, GiftsSharesSecuritiesFormatError, MtdError, TaxYearFormatError}
 import v2.models.utils.JsonErrorValidators
 
 class AmountValidationSpec extends UnitSpec with JsonErrorValidators {
+
+  val dummyError = MtdError("DUMMY_ERROR", "For testing only")
 
   "validate" should {
     "return no errors" when {
       "when a valid amount is supplied" in {
 
-        val validAmount = Some(BigDecimal(99.99))
-        val validationResult = AmountValidation.validate(validAmount)
+        val validAmount = Some(BigDecimal(98.76))
+        val validationResult = AmountValidation.validate(validAmount, dummyError)
         validationResult.isEmpty shouldBe true
 
       }
+
+      "when a zero amount is supplied" in {
+
+        val validAmount = Some(BigDecimal(0))
+        val validationResult = AmountValidation.validate(validAmount, dummyError)
+        validationResult.isEmpty shouldBe true
+
+      }
+
+      "when the maximum allowed amount is supplied" in {
+
+        val validAmount = Some(BigDecimal(99999999999.99))
+        val validationResult = AmountValidation.validate(validAmount, dummyError)
+        validationResult.isEmpty shouldBe true
+
+      }
+
+
     }
 
-//    "return an error" when {
-//      "when an invalid tax year is supplied" in {
-//
-//        val invalidTaxYear = "2019"
-//        val validationResult = TaxYearValidation.validate(invalidTaxYear)
-//        validationResult.isEmpty shouldBe false
-//        validationResult.length shouldBe 1
-//        validationResult.head shouldBe TaxYearFormatError
-//
-//      }
-//    }
+    val exampleErrorsToReturn = List(
+      GiftAidNonUKCharityAmountFormatError,
+      GiftsSharesSecuritiesFormatError
+    )
+
+    exampleErrorsToReturn.foreach { error =>
+
+      s"return a ${error.code} error" when {
+        "the amount supplied exceeds the maximum allowed " in {
+
+          val tooLargeAmount = Some(BigDecimal(999999999999.99))
+          val validationResult = AmountValidation.validate(tooLargeAmount, error)
+          validationResult.isEmpty shouldBe false
+          validationResult.length shouldBe 1
+          validationResult.head shouldBe error
+
+        }
+
+        "the amount is less than zero" in {
+          val lessThanZero = Some(BigDecimal(-12.00))
+          val validationResult = AmountValidation.validate(lessThanZero, error)
+          validationResult.isEmpty shouldBe false
+          validationResult.length shouldBe 1
+          validationResult.head shouldBe error
+        }
+
+      }
+
+    }
+
 
   }
 }

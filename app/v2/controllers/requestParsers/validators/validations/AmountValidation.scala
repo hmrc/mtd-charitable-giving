@@ -20,8 +20,14 @@ import v2.models.errors.MtdError
 
 object AmountValidation {
 
-  def validate(amount: Option[BigDecimal]): List[MtdError] = {
-    List()
+  def validate(amount: Option[BigDecimal], error: MtdError): List[MtdError] = {
+
+    if (amount.exists(x => x <= 99999999999.99 && x >= 0)) {
+      NoValidationErrors
+    } else {
+      List(error)
+    }
+
   }
 
 }
