@@ -75,7 +75,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
 
     "return a 400 Bad Request with a single error" when {
 
-      val badRequestErrors = List(
+      val badRequestErrorsFromParser = List(
         BadRequestError,
         NinoFormatError,
         TaxYearFormatError,
@@ -101,8 +101,18 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
         InvalidRangeError
       )
 
-      badRequestErrors.foreach(errorsFromParserTester(_, BAD_REQUEST))
-      badRequestErrors.foreach(errorsFromServiceTester(_, BAD_REQUEST))
+      val badRequestErrorsFromService = List(
+        NinoFormatError,
+        TaxYearFormatError,
+        BadRequestError,
+        NonUKNamesNotSpecifiedRuleError,
+        NonUKAmountNotSpecifiedRuleError,
+        NonUKInvestmentsNamesNotSpecifiedRuleError,
+        NonUKInvestmentAmountNotSpecifiedRuleError
+      )
+
+      badRequestErrorsFromParser.foreach(errorsFromParserTester(_, BAD_REQUEST))
+      badRequestErrorsFromService.foreach(errorsFromServiceTester(_, BAD_REQUEST))
 
     }
 
