@@ -71,12 +71,7 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
            | NonUKAmountNotSpecifiedRuleError
            | NonUKInvestmentsNamesNotSpecifiedRuleError
            | NonUKInvestmentAmountNotSpecifiedRuleError
-           | TaxYearNotSpecifiedRuleError
-           | MissingStartDateError
-           | MissingEndDateError
-           | InvalidStartDateError
-           | InvalidEndDateError
-           | InvalidRangeError => BadRequest(Json.toJson(errorWrapper))
+           | TaxYearNotSpecifiedRuleError => BadRequest(Json.toJson(errorWrapper))
       case DownstreamError => InternalServerError(Json.toJson(errorWrapper))
 
     }
