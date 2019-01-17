@@ -16,7 +16,7 @@
 
 package v2.controllers.requestParsers.validators
 
-import v2.controllers.requestParsers.validators.validations.{AmountValidator_OLD, _}
+import v2.controllers.requestParsers.validators.validations.{AmountValidation, _}
 import v2.models.AmendCharitableGiving
 import v2.models.errors._
 import v2.models.requestData.AmendCharitableGivingRequestData
@@ -41,7 +41,7 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
 
   private def levelThreeValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
     List(
-        AmendCharitableGivingEmptyFieldsValidator.validate(data.body)
+      //        AmendCharitableGivingEmptyFieldsValidator.validate(data.body)
     )
   }
 
@@ -50,33 +50,24 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
     val amendCharitableGiving = data.body.json.as[AmendCharitableGiving]
     val giftAidPayments = amendCharitableGiving.giftAidPayments
     val gifts = amendCharitableGiving.gifts
+
     List(
-      //Amount validations to the gift payments
-      AmountValidator_OLD.validate(giftAidPayments.specifiedYear, GiftAidSpecifiedYearFormatError),
-      AmountValidator_OLD.validate(giftAidPayments.oneOffSpecifiedYear, GiftAidOneOffSpecifiedYearFormatError),
-      AmountValidator_OLD.validate(giftAidPayments.specifiedYearTreatedAsPreviousYear, GiftAidSpecifiedYearPreviousFormatError),
-      AmountValidator_OLD.validate(giftAidPayments.followingYearTreatedAsSpecifiedYear, GiftAidFollowingYearSpecifiedFormatError),
-      AmountValidator_OLD.validate(giftAidPayments.nonUKCharities, GiftAidNonUKCharityAmountFormatError),
+      AmountValidation.validate(giftAidPayments.specifiedYear, GiftAidSpecifiedYearFormatError),
+      AmountValidation.validate(giftAidPayments.oneOffSpecifiedYear, GiftAidOneOffSpecifiedYearFormatError),
+      AmountValidation.validate(giftAidPayments.specifiedYearTreatedAsPreviousYear, GiftAidSpecifiedYearPreviousFormatError),
+      AmountValidation.validate(giftAidPayments.followingYearTreatedAsSpecifiedYear, GiftAidFollowingYearSpecifiedFormatError),
+      AmountValidation.validate(giftAidPayments.nonUKCharities, GiftAidNonUKCharityAmountFormatError),
+      AmountValidation.validate(gifts.sharesOrSecurities, GiftsSharesSecuritiesFormatError),
+      AmountValidation.validate(gifts.landAndBuildings, GiftsLandsBuildingsFormatError),
+      AmountValidation.validate(gifts.investmentsNonUKCharities, GiftsInvestmentsAmountFormatError)
 
-      // Amount validations to gifts
-        AmountValidator_OLD.validate(gifts.sharesOrSecurities, GiftsSharesSecuritiesFormatError),
-      AmountValidator_OLD.validate(gifts.landAndBuildings, GiftsLandsBuildingsFormatError),
-
-      AmountValidator_OLD.validate(gifts.investmentsNonUKCharities, GiftsLandsBuildingsFormatError)
 
     )
+
   }
 
+
   override def validate(data: AmendCharitableGivingRequestData): List[MtdError] = {
-    run(validationSet, data) match {
-      case Nil => List()
-        //TODO
-      /**
-        * Add back in during unhappy path
-        *
-      case err :: Nil => Left(List(err))
-      case errs => Left(errs)
-        **/
-    }
+    run(validationSet, data)
   }
 }

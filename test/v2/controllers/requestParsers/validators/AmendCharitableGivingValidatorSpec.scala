@@ -16,11 +16,14 @@
 
 package v2.controllers.requestParsers.validators
 
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
 import uk.gov.hmrc.domain.Nino
+import v2.models.errors._
+import v2.fixtures.Fixtures.AmendCharitableGivingFixture.amendCharitableGivingModel
 import v2.fixtures.Fixtures._
-import v2.models.errors.MtdError
+import v2.models.{AmendCharitableGiving, GiftAidPayments, Gifts}
 import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRequestData, DesTaxYear}
 
 class AmendCharitableGivingValidatorSpec extends UnitSpec {
@@ -29,29 +32,178 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
   val validTaxYear = "2017-18"
   val validJsonBody = AnyContentAsJson(AmendCharitableGivingFixture.inputJson)
 
+
   private trait Test {
     val validator = new AmendCharitableGivingValidator()
+  }
+
+  def createJson(amendCharitableGiving: AmendCharitableGiving) : JsValue = {
+    Json.obj(
+      "giftAidPayments" ->  Json.writes[GiftAidPayments].writes(amendCharitableGiving.giftAidPayments),
+      "gifts" -> Json.writes[Gifts].writes(amendCharitableGiving.gifts)
+    )
   }
 
   "running a validation" should {
 
     "return no errors" when {
       "when the uri is valid and the JSON payload is Valid" in new Test {
-//        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, validJsonBody)
-//
-//        val result: Seq[MtdError] = validator.validate(inputData)
-//
-//        result shouldBe List()
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, validJsonBody)
+
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result shouldBe List()
+
       }
     }
 
     "return a single error" when {
+
+      "specifiedYear of giftAidPayments is not a valid value" in new Test {
+
+        val mutatedData = amendCharitableGivingModel.copy(
+          giftAidPayments = amendCharitableGivingModel.giftAidPayments.copy(
+            specifiedYear = Some(BigDecimal(-11))
+          )
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe GiftAidSpecifiedYearFormatError
+
+      }
+
+      "oneOffSpecifiedYear of giftAidPayments is not a valid value" in new Test {
+
+        val mutatedData = amendCharitableGivingModel.copy(
+          giftAidPayments = amendCharitableGivingModel.giftAidPayments.copy(
+            oneOffSpecifiedYear = Some(BigDecimal(-1))
+          )
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe GiftAidOneOffSpecifiedYearFormatError
+
+      }
+
+      "specifiedYearTreatedAsPreviousYear of giftAidPayments is not a valid value" in new Test {
+
+        val mutatedData = amendCharitableGivingModel.copy(
+          giftAidPayments = amendCharitableGivingModel.giftAidPayments.copy(
+            specifiedYearTreatedAsPreviousYear = Some(BigDecimal(-1))
+          )
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe GiftAidSpecifiedYearPreviousFormatError
+
+      }
+
+
+      "followingYearTreatedAsSpecifiedYear of giftAidPayments is not a valid value" in new Test {
+
+        val mutatedData = amendCharitableGivingModel.copy(
+          giftAidPayments = amendCharitableGivingModel.giftAidPayments.copy(
+            followingYearTreatedAsSpecifiedYear = Some(BigDecimal(-1))
+          )
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe GiftAidFollowingYearSpecifiedFormatError
+
+      }
+
+      "nonUKCharities of giftAidPayments is not a valid value" in new Test {
+
+        val mutatedData = amendCharitableGivingModel.copy(
+          giftAidPayments = amendCharitableGivingModel.giftAidPayments.copy(
+            nonUKCharities = Some(BigDecimal(-1))
+          )
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe GiftAidNonUKCharityAmountFormatError
+
+      }
+
+      "nonUKCharities of gifts is not a valid value" in new Test {
+
+        val mutatedData = amendCharitableGivingModel.copy(
+          gifts = amendCharitableGivingModel.gifts.copy(
+            sharesOrSecurities = Some(BigDecimal(-1))
+          )
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe GiftsSharesSecuritiesFormatError
+
+      }
+
+      "landAndBuildings of gifts is not a valid value" in new Test {
+
+        val mutatedData = amendCharitableGivingModel.copy(
+          gifts = amendCharitableGivingModel.gifts.copy(
+            landAndBuildings = Some(BigDecimal(-1))
+          )
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe GiftsLandsBuildingsFormatError
+
+      }
+
+      "investmentsNonUKCharities of gifts is not a valid value" in new Test {
+
+        val mutatedData = amendCharitableGivingModel.copy(
+          gifts = amendCharitableGivingModel.gifts.copy(
+            investmentsNonUKCharities = Some(BigDecimal(-1))
+          )
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe GiftsInvestmentsAmountFormatError
+
+      }
 
     }
 
     "return multiple errors" when {
 
     }
+
   }
 
 }
+
+//      AmountValidator_OLD.validate(gifts.investmentsNonUKCharities, GiftsLandsBuildingsFormatError)
