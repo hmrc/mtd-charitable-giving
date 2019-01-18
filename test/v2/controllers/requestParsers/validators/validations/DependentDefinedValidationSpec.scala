@@ -20,7 +20,7 @@ import support.UnitSpec
 import v2.models.errors.MtdError
 import v2.models.utils.JsonErrorValidators
 
-class BothFieldsDefinedValidationSpec extends UnitSpec with JsonErrorValidators {
+class DependentDefinedValidationSpec extends UnitSpec with JsonErrorValidators {
 
   val dummyError = MtdError("DUMMY_ERROR", "For testing only")
 
@@ -30,7 +30,7 @@ class BothFieldsDefinedValidationSpec extends UnitSpec with JsonErrorValidators 
 
         val firstValue = Some("FIRST")
         val secondValue = Some("SECOND")
-        val validationResult = BothFieldsDefinedValidation.validate(firstValue, secondValue, dummyError)
+        val validationResult = DependentDefinedValidation.validate(firstValue, secondValue, dummyError)
         validationResult.isEmpty shouldBe true
 
       }
@@ -38,34 +38,35 @@ class BothFieldsDefinedValidationSpec extends UnitSpec with JsonErrorValidators 
       "when both field are not supplied" in {
         val firstValue = None
         val secondValue = None
-        val validationResult = BothFieldsDefinedValidation.validate(firstValue, secondValue, dummyError)
+        val validationResult = DependentDefinedValidation.validate(firstValue, secondValue, dummyError)
+        validationResult.isEmpty shouldBe true
+      }
+
+      "the first field is missing and the second field is supplied" in {
+        // One way dependency check
+        
+        val firstValue = None
+        val secondValue = Some("SECOND")
+        val validationResult = DependentDefinedValidation.validate(firstValue, secondValue, dummyError)
+
         validationResult.isEmpty shouldBe true
       }
 
       "when both fields are defined and are of different types" in {
         val firstValue = Some("STRING ARGUMENT")
         val secondValue = Some(List("LIST", "OF", "STRINGS"))
-        val validationResult = BothFieldsDefinedValidation.validate(firstValue, secondValue, dummyError)
+        val validationResult = DependentDefinedValidation.validate(firstValue, secondValue, dummyError)
         validationResult.isEmpty shouldBe true
       }
 
     }
 
     "return the supplied error" when {
-      "the first field is missing and the second field is supplied" in {
-        val firstValue = None
-        val secondValue = Some("SECOND")
-        val validationResult = BothFieldsDefinedValidation.validate(firstValue, secondValue, dummyError)
-
-        validationResult.isEmpty shouldBe false
-        validationResult.size shouldBe 1
-        validationResult.head shouldBe dummyError
-      }
 
       "the second field is missing and the first field is supplied" in {
         val firstValue = Some("FIRST")
         val secondValue = None
-        val validationResult = BothFieldsDefinedValidation.validate(firstValue, secondValue, dummyError)
+        val validationResult = DependentDefinedValidation.validate(firstValue, secondValue, dummyError)
 
         validationResult.isEmpty shouldBe false
         validationResult.size shouldBe 1

@@ -20,6 +20,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
 import uk.gov.hmrc.domain.Nino
+import v2.controllers.requestParsers.validators.validations.DependentDefinedValidation
 import v2.models.errors._
 import v2.fixtures.Fixtures.AmendCharitableGivingFixture.amendCharitableGivingModel
 import v2.fixtures.Fixtures._
@@ -144,7 +145,7 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
 
       }
 
-      "nonUKCharities of gifts is not a valid value" in new Test {
+      "sharesOrSecurities of gifts is not a valid value" in new Test {
 
         val mutatedData = amendCharitableGivingModel.copy(
           gifts = amendCharitableGivingModel.gifts.copy(
@@ -208,7 +209,8 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
         val result: Seq[MtdError] = validator.validate(inputData)
 
         result.size shouldBe 1
-        result.head shouldBe NonUKAmountNotSpecifiedRuleError
+        result.head shouldBe NonUKNamesNotSpecifiedRuleError
+
       }
 
       "giftAidPayments.nonUKCharityNames is supplied but giftAidPayments.nonUKCharities is not supplied " in new Test {
@@ -237,6 +239,22 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
         result.head shouldBe TaxYearNotSpecifiedRuleError
       }
 
+//      "positive nonUKCharities value of of giftAidPayments is supplied without nonUKCharityNames" in new Test {
+//
+//        val mutatedData = amendCharitableGivingModel.copy(
+//          giftAidPayments = amendCharitableGivingModel.giftAidPayments.copy(
+//            nonUKCharities = Some(BigDecimal(112.00))
+//          )
+//        )
+//
+//        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+//
+//        val result: Seq[MtdError] = validator.validate(inputData)
+//
+//        result.size shouldBe 1
+//        result.head shouldBe GiftsSharesSecuritiesFormatError
+//      }
+
     }
 
     "return multiple errors" when {
@@ -246,5 +264,3 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
   }
 
 }
-
-// TODO CHECK THIS ONE: AmountValidator_OLD.validate(gifts.investmentsNonUKCharities, GiftsLandsBuildingsFormatError)

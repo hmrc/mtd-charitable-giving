@@ -60,12 +60,17 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
       AmountValidation.validate(gifts.sharesOrSecurities, GiftsSharesSecuritiesFormatError),
       AmountValidation.validate(gifts.landAndBuildings, GiftsLandsBuildingsFormatError),
       AmountValidation.validate(gifts.investmentsNonUKCharities, GiftsInvestmentsAmountFormatError),
-      BothFieldsDefinedValidation.validate(giftAidPayments.nonUKCharities, giftAidPayments.nonUKCharityNames, NonUKAmountNotSpecifiedRuleError)
+      DependentDefinedValidation.validate(giftAidPayments.nonUKCharities, giftAidPayments.nonUKCharityNames, NonUKNamesNotSpecifiedRuleError),
+      DependentDefinedValidation.validate(giftAidPayments.nonUKCharityNames, giftAidPayments.nonUKCharities, NonUKAmountNotSpecifiedRuleError)
+
     )
 
   }
 
   override def validate(data: AmendCharitableGivingRequestData): List[MtdError] = {
+    // TODO DISTINCT
+    // TODO E7 / E8 / E13 / E20 / E14 / E21 / E11 / E15 / E25 / E12 / E16 / E23
+    // TODO Length validation on the charity names array
     run(validationSet, data)
   }
 
