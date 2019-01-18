@@ -23,6 +23,6 @@ object TaxYearValidation {
   val taxYearFormat = "20[1-9][0-9]\\-[1-9][0-9]"
 
   def validate(taxYear: String): List[MtdError] =
-    if(taxYear.matches(taxYearFormat)) NoValidationErrors else List(TaxYearFormatError)
+    if (taxYear.matches(taxYearFormat)) NoValidationErrors else List(TaxYearFormatError)
 
 }

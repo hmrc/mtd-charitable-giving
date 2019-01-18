@@ -227,6 +227,16 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
         result.head shouldBe NonUKAmountNotSpecifiedRuleError
       }
 
+      "the supplied tax year is before 2017" in new Test {
+        val invalidTaxYear = "2015-16"
+        val inputData = AmendCharitableGivingRequestData(validNino, invalidTaxYear, AnyContentAsJson(createJson(amendCharitableGivingModel)))
+
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe TaxYearNotSpecifiedRuleError
+      }
+
     }
 
     "return multiple errors" when {
