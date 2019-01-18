@@ -16,7 +16,7 @@
 
 package v2.controllers.requestParsers.validators
 
-import v2.controllers.requestParsers.validators.validations.{AmountValidation, _}
+import v2.controllers.requestParsers.validators.validations._
 import v2.models.AmendCharitableGiving
 import v2.models.errors._
 import v2.models.requestData.AmendCharitableGivingRequestData
@@ -34,14 +34,14 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
 
   private def levelTwoValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
     List(
-      //Converted input data validation
+      // Converted input data validation
       JsonFormatValidation.validate[AmendCharitableGiving](data.body)
     )
   }
 
   private def levelThreeValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
     List(
-      //        AmendCharitableGivingEmptyFieldsValidator.validate(data.body)
+      // AmendCharitableGivingEmptyFieldsValidator.validate(data.body)
     )
   }
 
@@ -60,14 +60,13 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
       AmountValidation.validate(gifts.sharesOrSecurities, GiftsSharesSecuritiesFormatError),
       AmountValidation.validate(gifts.landAndBuildings, GiftsLandsBuildingsFormatError),
       AmountValidation.validate(gifts.investmentsNonUKCharities, GiftsInvestmentsAmountFormatError)
-
-
+      // TODO Cross Field Validations
     )
 
   }
 
-
   override def validate(data: AmendCharitableGivingRequestData): List[MtdError] = {
     run(validationSet, data)
   }
+
 }
