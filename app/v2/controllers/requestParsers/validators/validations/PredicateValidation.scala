@@ -16,14 +16,14 @@
 
 package v2.controllers.requestParsers.validators.validations
 
-import v2.models.errors.{MtdError, TaxYearFormatError}
+import v2.models.errors.MtdError
 
-object TaxYearValidation {
+object PredicateValidation {
 
-  val taxYearFormat = "20[1-9][0-9]\\-[1-9][0-9]"
+  def validate(predicateResult: Boolean, errorToReturn: MtdError): List[MtdError] = {
 
-  def validate(taxYear: String): List[MtdError] =
-    if (taxYear.matches(taxYearFormat)) NoValidationErrors else List(TaxYearFormatError)
+    if (predicateResult) List(errorToReturn) else NoValidationErrors
 
+  }
 
 }

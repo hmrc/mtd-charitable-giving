@@ -23,7 +23,7 @@ import v2.models.requestData.AmendCharitableGivingRequestData
 
 class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequestData] {
 
-  private val validationSet = List(levelOneValidations, levelTwoValidations, levelThreeValidations, levelFourValidations)
+  private val validationSet = List(levelOneValidations, levelTwoValidations, levelThreeValidations, levelFourValidations, levelFiveValidations)
 
   private def levelOneValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
     List(
@@ -51,6 +51,8 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
     val giftAidPayments = amendCharitableGiving.giftAidPayments
     val gifts = amendCharitableGiving.gifts
 
+    lazy val nonUKNamesNotSpecifiedRuleErrorCheck = giftAidPayments.nonUKCharities.exists(_ > 0 && giftAidPayments.nonUKCharityNames.isEmpty)
+
     List(
       AmountValidation.validate(giftAidPayments.specifiedYear, GiftAidSpecifiedYearFormatError),
       AmountValidation.validate(giftAidPayments.oneOffSpecifiedYear, GiftAidOneOffSpecifiedYearFormatError),
@@ -60,11 +62,46 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
       AmountValidation.validate(gifts.sharesOrSecurities, GiftsSharesSecuritiesFormatError),
       AmountValidation.validate(gifts.landAndBuildings, GiftsLandsBuildingsFormatError),
       AmountValidation.validate(gifts.investmentsNonUKCharities, GiftsInvestmentsAmountFormatError),
-      DependentDefinedValidation.validate(giftAidPayments.nonUKCharities, giftAidPayments.nonUKCharityNames, NonUKNamesNotSpecifiedRuleError),
-      DependentDefinedValidation.validate(giftAidPayments.nonUKCharityNames, giftAidPayments.nonUKCharities, NonUKAmountNotSpecifiedRuleError)
-
+      //      DependentDefinedValidation.validate(giftAidPayments.nonUKCharities, giftAidPayments.nonUKCharityNames, NonUKNamesNotSpecifiedRuleError),
+      //      DependentDefinedValidation.validate(giftAidPayments.nonUKCharityNames, giftAidPayments.nonUKCharities, NonUKAmountNotSpecifiedRuleError),
+      PredicateValidation.validate(nonUKNamesNotSpecifiedRuleErrorCheck, NonUKNamesNotSpecifiedRuleError)
     )
 
+  }
+
+  private def levelFiveValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
+    //    lazy val exists = Some(BigDecimal(12.00)).nonEmpty
+    //    lazy val positive = Predicates.positiveAmount(Some(BigDecimal(12.00)))
+    //    lazy val exists = false
+    //
+    //
+    //
+    //    //    lazy val positive = Predicates.positiveAmount(None)
+    //
+    //    val bd = Some(BigDecimal(12.00))
+    //    val other = None
+    //
+    //    lazy val amountExistsAndGreaterThanZeroAndNoNames = bd.map(_ > 0 && other.isEmpty)
+
+    List(
+      //      CompoundValidation.validate(bd.exists(_ > 0 && other.isEmpty))
+    )
+
+
+    // TODO DELETE - TEMP SUDO CODE
+    //    val amendCharitableGiving = data.body.json.as[AmendCharitableGiving]
+    //    val giftAidPayments = amendCharitableGiving.giftAidPayments
+    //    val gifts = amendCharitableGiving.gifts
+    //
+    //    CompoundValidation.validate(
+    //      AndValidation(
+    //        Predicates.isDefined(giftAidPayments.nonUKCharities)
+    //          Predicates.positiveAmount(giftAidPayments.nonUKCharities),
+    //      Predicates.isEmpty(giftAidPayments.nonUKCharityNames)
+    //    ),
+    //    NonUKAmountNotSpecifiedRuleError
+    //    )
+    //    List()
   }
 
   override def validate(data: AmendCharitableGivingRequestData): List[MtdError] = {
