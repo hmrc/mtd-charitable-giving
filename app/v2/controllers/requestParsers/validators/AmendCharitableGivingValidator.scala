@@ -16,6 +16,7 @@
 
 package v2.controllers.requestParsers.validators
 
+//import v2.controllers.requestParsers.validators.validations._
 import v2.controllers.requestParsers.validators.validations._
 import v2.models.AmendCharitableGiving
 import v2.models.errors._
@@ -59,8 +60,8 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
       AmountValidation.validate(giftAidPayments.nonUKCharities, GiftAidNonUKCharityAmountFormatError),
       AmountValidation.validate(gifts.sharesOrSecurities, GiftsSharesSecuritiesFormatError),
       AmountValidation.validate(gifts.landAndBuildings, GiftsLandsBuildingsFormatError),
-      AmountValidation.validate(gifts.investmentsNonUKCharities, GiftsInvestmentsAmountFormatError)
-      // TODO Cross Field Validations
+      AmountValidation.validate(gifts.investmentsNonUKCharities, GiftsInvestmentsAmountFormatError),
+      BothFieldsDefinedValidation.validate(giftAidPayments.nonUKCharities, giftAidPayments.nonUKCharityNames, NonUKAmountNotSpecifiedRuleError)
     )
 
   }

@@ -17,7 +17,7 @@
 package v2.controllers.requestParsers.validators.validations
 
 import support.UnitSpec
-import v2.models.errors.{GiftAidNonUKCharityAmountFormatError, GiftsSharesSecuritiesFormatError, MtdError, TaxYearFormatError}
+import v2.models.errors.{GiftAidNonUKCharityAmountFormatError, GiftsSharesSecuritiesFormatError, MtdError}
 import v2.models.utils.JsonErrorValidators
 
 class AmountValidationSpec extends UnitSpec with JsonErrorValidators {
@@ -46,6 +46,13 @@ class AmountValidationSpec extends UnitSpec with JsonErrorValidators {
 
         val validAmount = Some(BigDecimal(99999999999.99))
         val validationResult = AmountValidation.validate(validAmount, dummyError)
+        validationResult.isEmpty shouldBe true
+
+      }
+
+      "when a None is supplied" in {
+
+        val validationResult = AmountValidation.validate(None, dummyError)
         validationResult.isEmpty shouldBe true
 
       }

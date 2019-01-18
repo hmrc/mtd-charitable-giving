@@ -22,7 +22,7 @@ object AmountValidation {
 
   def validate(amount: Option[BigDecimal], error: MtdError): List[MtdError] = {
 
-    if (amount.exists(x => x <= 99999999999.99 && x >= 0)) {
+    if (amount.exists(x => x <= 99999999999.99 && x >= 0) || amount.isEmpty) {
       NoValidationErrors
     } else {
       List(error)
