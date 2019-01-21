@@ -20,7 +20,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
 import play.api.libs.ws.{WSRequest, WSResponse}
 import support.IntegrationBaseSpec
-import v2.fixtures.Fixtures.AmendCharitableGivingFixture
+import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.models.requestData.DesTaxYear
 import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
 
@@ -54,7 +54,7 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
           DesStub.amendSuccess(nino, DesTaxYear(taxYear).toDesTaxYear)
         }
 
-        val response: WSResponse = await(request().put(AmendCharitableGivingFixture.inputJson))
+        val response: WSResponse = await(request().put(CharitableGivingFixture.mtdFormatJson))
         response.status shouldBe Status.NO_CONTENT
       }
     }

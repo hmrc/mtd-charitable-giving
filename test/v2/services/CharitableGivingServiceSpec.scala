@@ -18,9 +18,10 @@ package v2.services
 
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.connectors.MockDesConnector
+import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear}
-import v2.models.{AmendCharitableGiving, GiftAidPayments, Gifts}
+import v2.models.{CharitableGiving, GiftAidPayments, Gifts}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -31,25 +32,96 @@ class CharitableGivingServiceSpec extends ServiceSpec {
     lazy val target = new CharitableGivingService(connector)
   }
 
+
+  val correlationId = "X-123"
+  val expectedRef = "000000000001013"
+  val nino = "AA123456A"
+  val taxYear = "2017-18"
+  val expectedDesResponse = DesResponse("X-123", expectedRef)
+  val input = AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
+    CharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))
+
   "calling amend" should {
     "return a valid correlationId" when {
-    "a valid data is passed"  in new Test {
+      "a valid data is passed" in new Test {
 
-        val correlationId = "X-123"
-        val expected = Right(correlationId)
-        val expectedRef = "000000000001013"
-        val nino = "AA123456A"
-        val taxYear = "2017-18"
-        val expectedDesResponse = DesResponse("X-123", expectedRef)
-        val input = AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
-          AmendCharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))
+        val expected = correlationId
 
         MockedDesConnector.amend(input).returns(Future.successful(Right(expectedDesResponse)))
 
         private val result = await(target.amend(input))
 
-        result shouldBe expected
+        result shouldBe Right(expected)
       }
+    }
+
+    "return multiple errors" when {
+      "the DesConnector returns multiple errors" in new Test {
+
+        val response = MultipleErrors(Seq(MtdError("INVALID_NINO", "doesn't matter"), MtdError("INVALID_TAXYEAR", "doesn't matter")))
+
+        val expected = ErrorWrapper(BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
+
+        MockedDesConnector.amend(input).returns(Future.successful(Left(response)))
+
+        private val result = await(target.amend(input))
+        result shouldBe Left(expected)
+      }
+
+    }
+    "return a single error" when {
+      "the DesConnector returns multiple errors and one maps to a DownstreamError" in new Test {
+        val response = MultipleErrors(Seq(MtdError("INVALID_NINO", "doesn't matter"), MtdError("INVALID_TYPE", "doesn't matter")))
+
+        val expected = ErrorWrapper(DownstreamError, None)
+
+        MockedDesConnector.amend(input).returns(Future.successful(Left(response)))
+
+        private val result = await(target.amend(input))
+        result shouldBe Left(expected)
+      }
+    }
+
+    "the DesConnector returns a GenericError" in new Test {
+      val response = GenericError(DownstreamError)
+
+      val expected = ErrorWrapper(DownstreamError, None)
+
+      MockedDesConnector.amend(input).returns(Future.successful(Left(response)))
+
+      private val result = await(target.amend(input))
+      result shouldBe Left(expected)
+    }
+
+    val errorMap: Map[String, MtdError] = Map(
+      "INVALID_NINO" -> NinoFormatError,
+      "INVALID_TYPE" -> DownstreamError,
+      "INVALID_TAXYEAR" -> TaxYearFormatError,
+      "INVALID_PAYLOAD" -> BadRequestError,
+      "NOT_FOUND_INCOME_SOURCE" -> DownstreamError,
+      "MISSING_CHARITIES_NAME_GIFT_AID" -> NonUKNamesNotSpecifiedRuleError,
+      "MISSING_GIFT_AID_AMOUNT" -> NonUKAmountNotSpecifiedRuleError,
+      "MISSING_CHARITIES_NAME_INVESTMENT" -> NonUKInvestmentsNamesNotSpecifiedRuleError,
+      "MISSING_INVESTMENT_AMOUNT" -> NonUKInvestmentAmountNotSpecifiedRuleError,
+      "SERVER_ERROR" -> DownstreamError,
+      "SERVICE_UNAVAILABLE" -> DownstreamError
+    )
+
+
+    for (error <- errorMap.keys) {
+
+      s"the DesConnector returns a single $error error" in new Test {
+
+        val response = SingleError(MtdError(error, "doesn't matter"))
+
+        val expected = ErrorWrapper(errorMap(error), None)
+
+        MockedDesConnector.amend(input).returns(Future.successful(Left(response)))
+
+        private val result = await(target.amend(input))
+        result shouldBe Left(expected)
+      }
+
     }
 
   }

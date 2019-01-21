@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import v2.config.AppConfig
-import v2.models.AmendCharitableGiving
+import v2.models.CharitableGiving
 import v2.models.outcomes.AmendCharitableGivingConnectorOutcome
 import v2.models.requestData.AmendCharitableGivingRequest
 
@@ -42,14 +42,14 @@ class DesConnector @Inject()(http: HttpClient,
            (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AmendCharitableGivingConnectorOutcome] = {
 
     import v2.connectors.httpparsers.AmendCharitableGivingHttpParser.amendHttpReads
-    import v2.models.AmendCharitableGiving.writes
+    import v2.models.CharitableGiving.writes
 
     val nino = amendCharitableGivingRequest.nino.nino
     val taxYear = amendCharitableGivingRequest.desTaxYear.toDesTaxYear
 
     val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/income-source/charity/annual/$taxYear"
 
-    http.PUT[AmendCharitableGiving, AmendCharitableGivingConnectorOutcome](url, amendCharitableGivingRequest.model)(writes, amendHttpReads,
+    http.POST[CharitableGiving, AmendCharitableGivingConnectorOutcome](url, amendCharitableGivingRequest.model)(writes, amendHttpReads,
       desHeaderCarrier, implicitly)
   }
 }

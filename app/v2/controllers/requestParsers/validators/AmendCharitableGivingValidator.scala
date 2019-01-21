@@ -17,7 +17,7 @@
 package v2.controllers.requestParsers.validators
 
 import v2.controllers.requestParsers.validators.validations._
-import v2.models.AmendCharitableGiving
+import v2.models.CharitableGiving
 import v2.models.errors._
 import v2.models.requestData.AmendCharitableGivingRequestData
 
@@ -34,14 +34,14 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
 
   private def levelTwoValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
     List(
-      JsonFormatValidation.validate[AmendCharitableGiving](data.body),
+      JsonFormatValidation.validate[CharitableGiving](data.body),
       MtdTaxYearValidation.validate(data.taxYear, TaxYearNotSpecifiedRuleError)
     )
   }
 
   private def levelThreeValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
 
-    val amendCharitableGiving = data.body.json.as[AmendCharitableGiving]
+    val amendCharitableGiving = data.body.json.as[CharitableGiving]
     val giftAidPayments = amendCharitableGiving.giftAidPayments
     val gifts = amendCharitableGiving.gifts
 
@@ -71,7 +71,6 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
 
 
   override def validate(data: AmendCharitableGivingRequestData): List[MtdError] = {
-    // TODO  E15 / E25 / E12 / E16 / E23
     run(validationSet, data).distinct
   }
 

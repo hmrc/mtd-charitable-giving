@@ -16,24 +16,38 @@
 
 package v2.connectors.httpparsers
 
-import play.api.http.Status.OK
+import play.api.Logger
+import play.api.http.Status.{BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, OK, SERVICE_UNAVAILABLE}
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
+import v2.models.errors._
 import v2.models.outcomes.{AmendCharitableGivingConnectorOutcome, DesResponse}
 
 object AmendCharitableGivingHttpParser extends HttpParser {
+
+  val logger = Logger(AmendCharitableGivingHttpParser.getClass)
+
 
   private val jsonReads: Reads[String] = (__ \ "transactionReference").read[String]
 
   implicit val amendHttpReads: HttpReads[AmendCharitableGivingConnectorOutcome] = new HttpReads[AmendCharitableGivingConnectorOutcome] {
     override def read(method: String, url: String, response: HttpResponse): AmendCharitableGivingConnectorOutcome = {
 
-      response.status match {
-        case OK => response.validateJson[String](jsonReads) match {
-          case Some(ref) => Right(DesResponse(retrieveCorrelationId(response), ref))
-        }
-
+      if(response.status != OK) {
+        logger.info("[AmendCharitableGivingHttpParser][read] - " +
+          s"Error response received from DES with status: ${response.status} and body\n" +
+          s"${response.body} when calling $url")
       }
+
+      response.status match {
+        case OK => parseResponse(response)
+        case BAD_REQUEST | FORBIDDEN => Left(parseErrors(response))
+        case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(GenericError(DownstreamError))
+      }
+    }
+    private def parseResponse(response: HttpResponse) = response.validateJson[String](jsonReads) match {
+      case Some(ref) => Right(DesResponse(retrieveCorrelationId(response), ref))
+      case None => Left(GenericError(DownstreamError))
     }
   }
 }

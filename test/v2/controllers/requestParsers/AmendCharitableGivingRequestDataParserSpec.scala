@@ -19,7 +19,7 @@ package v2.controllers.requestParsers
 import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
 import uk.gov.hmrc.domain.Nino
-import v2.fixtures.Fixtures.AmendCharitableGivingFixture
+import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.mocks.validators.MockAmendCharitableGivingValidator
 import v2.models.errors.{BadRequestError, ErrorWrapper, InvalidStartDateError, NinoFormatError}
 import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRequestData, DesTaxYear}
@@ -28,7 +28,7 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
 
   val validNino = "AA123456A"
   val validTaxYear = "2017-18"
-  val validJsonBody = AnyContentAsJson(AmendCharitableGivingFixture.inputJson)
+  val validJsonBody = AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)
 
   trait Test extends MockAmendCharitableGivingValidator {
     lazy val parser = new AmendCharitableGivingRequestDataParser(mockValidator)
@@ -44,7 +44,7 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
         AmendCharitableGivingRequestData(validNino, validTaxYear, validJsonBody)
 
         val amendCharitableGivingRequest =
-          AmendCharitableGivingRequest(Nino(validNino), DesTaxYear(validTaxYear), AmendCharitableGivingFixture.amendCharitableGivingModel)
+          AmendCharitableGivingRequest(Nino(validNino), DesTaxYear(validTaxYear), CharitableGivingFixture.charitableGivingModel)
 
         MockedAmendCharitableGivingValidator.validate(amendCharitableGivingRequestData)
           .returns(List())

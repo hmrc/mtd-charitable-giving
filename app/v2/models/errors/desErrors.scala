@@ -23,7 +23,6 @@ sealed trait DesError
 
 case class SingleError(error: MtdError) extends DesError
 case class MultipleErrors(errors: Seq[MtdError]) extends DesError
-case class BvrErrors(errors: Seq[MtdError]) extends DesError
 case class GenericError(error: MtdError) extends DesError
 
 object DesErrorCode extends Enumeration {

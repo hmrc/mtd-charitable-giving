@@ -24,6 +24,6 @@ package object outcomes {
   type AuthOutcome = Either[MtdError, UserDetails]
   type MtdIdLookupOutcome = Either[MtdError, String]
 
-  type AmendCharitableGivingConnectorOutcome = Either[MtdError, DesResponse[String, String]]
+  type AmendCharitableGivingConnectorOutcome = Either[DesError, DesResponse[String]]
   type AmendCharitableGivingOutcome = Either[ErrorWrapper, String]
 }

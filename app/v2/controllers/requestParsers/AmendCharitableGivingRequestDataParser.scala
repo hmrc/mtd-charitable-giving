@@ -19,7 +19,7 @@ package v2.controllers.requestParsers
 import javax.inject.Inject
 import uk.gov.hmrc.domain.Nino
 import v2.controllers.requestParsers.validators.AmendCharitableGivingValidator
-import v2.models.AmendCharitableGiving
+import v2.models.CharitableGiving
 import v2.models.errors.{BadRequestError, ErrorWrapper}
 import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRequestData, DesTaxYear}
 
@@ -29,7 +29,7 @@ class AmendCharitableGivingRequestDataParser @Inject()(validator: AmendCharitabl
     validator.validate(data) match {
       case List() =>
         //Validation passed.  Request data is ok to transform.
-        Right(AmendCharitableGivingRequest(Nino(data.nino), DesTaxYear(data.taxYear), data.body.json.as[AmendCharitableGiving]))
+        Right(AmendCharitableGivingRequest(Nino(data.nino), DesTaxYear(data.taxYear), data.body.json.as[CharitableGiving]))
       case err :: Nil => Left(ErrorWrapper(err, None))
       case errs => Left(ErrorWrapper(BadRequestError, Some(errs)))
     }

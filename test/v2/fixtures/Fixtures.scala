@@ -17,13 +17,13 @@
 package v2.fixtures
 
 import play.api.libs.json.{JsValue, Json}
-import v2.models.{AmendCharitableGiving, GiftAidPayments, Gifts}
+import v2.models.{CharitableGiving, GiftAidPayments, Gifts}
 
 object Fixtures {
 
-  object AmendCharitableGivingFixture {
+  object CharitableGivingFixture {
 
-    val inputJson: JsValue = Json.parse(
+    val mtdFormatJson: JsValue = Json.parse(
       s"""{
          |  "giftAidPayments": {
          |    "specifiedYear": 10000.00,
@@ -42,7 +42,7 @@ object Fixtures {
          |}""".stripMargin
     )
 
-    val outputJson: JsValue = Json.parse(
+    val desFormatJson: JsValue = Json.parse(
       s"""{
          |  "giftAidPayments": {
          |    "currentYear": 10000.00,
@@ -61,7 +61,7 @@ object Fixtures {
          |}""".stripMargin
     )
 
-    val amendCharitableGivingModel: AmendCharitableGiving = AmendCharitableGiving(
+    val charitableGivingModel: CharitableGiving = CharitableGiving(
       giftAidPayments = GiftAidPayments(
         specifiedYear = Some(10000.00),
         oneOffSpecifiedYear = Some(1000.00),
