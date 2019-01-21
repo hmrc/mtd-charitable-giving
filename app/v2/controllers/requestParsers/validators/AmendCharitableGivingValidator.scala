@@ -46,7 +46,9 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
     val gifts = amendCharitableGiving.gifts
 
     lazy val nonUKNamesNotSpecifiedRuleErrorCheck = giftAidPayments.nonUKCharities.exists(_ > 0 && giftAidPayments.nonUKCharityNames.isEmpty)
+    lazy val nonUKInvestmentsNamesNotSpecifiedRuleErrorCheck = gifts.investmentsNonUKCharities.exists(_ > 0 && gifts.investmentsNonUKCharityNames.isEmpty)
     lazy val namesSuppliedButIncorrectAmountCheck = giftAidPayments.nonUKCharityNames.exists(_.nonEmpty && giftAidPayments.nonUKCharities.forall(_ == 0))
+    lazy val investmentsNamesSuppliedButIncorrectAmountCheck = gifts.investmentsNonUKCharityNames.exists(_.nonEmpty && gifts.investmentsNonUKCharities.forall(_ == 0))
 
     List(
       AmountValidation.validate(giftAidPayments.specifiedYear, GiftAidSpecifiedYearFormatError),
@@ -59,7 +61,10 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
       AmountValidation.validate(gifts.investmentsNonUKCharities, GiftsInvestmentsAmountFormatError),
       PredicateValidation.validate(nonUKNamesNotSpecifiedRuleErrorCheck, NonUKNamesNotSpecifiedRuleError),
       PredicateValidation.validate(namesSuppliedButIncorrectAmountCheck, NonUKAmountNotSpecifiedRuleError),
-      ArrayElementsRegexValidation.validate(giftAidPayments.nonUKCharityNames, "^[^|]{1,75}$", GiftAidNonUKNamesFormatError)
+      PredicateValidation.validate(nonUKInvestmentsNamesNotSpecifiedRuleErrorCheck, NonUKInvestmentsNamesNotSpecifiedRuleError),
+      PredicateValidation.validate(investmentsNamesSuppliedButIncorrectAmountCheck, NonUKInvestmentAmountNotSpecifiedRuleError),
+      ArrayElementsRegexValidation.validate(giftAidPayments.nonUKCharityNames, "^[^|]{1,75}$", GiftAidNonUKNamesFormatError),
+      ArrayElementsRegexValidation.validate(gifts.investmentsNonUKCharityNames, "^[^|]{1,75}$", GiftsNonUKInvestmentsNamesFormatError)
     )
 
   }

@@ -228,6 +228,17 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
 
       }
 
+      "the supplied tax year is before 2017" in new Test {
+
+        val invalidTaxYear = "2015-16"
+        val inputData = AmendCharitableGivingRequestData(validNino, invalidTaxYear, AnyContentAsJson(createJson(amendCharitableGivingModel)))
+
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe TaxYearNotSpecifiedRuleError
+      }
+
       "giftAidPayments.nonUKCharities is supplied with greater than 0 amount but giftAidPayments.nonUKCharityNames is not supplied " in new Test {
         val mutatedData = amendCharitableGivingModel.copy(
           giftAidPayments = amendCharitableGivingModel.giftAidPayments.copy(
@@ -297,16 +308,6 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
 
       }
 
-      "the supplied tax year is before 2017" in new Test {
-        val invalidTaxYear = "2015-16"
-        val inputData = AmendCharitableGivingRequestData(validNino, invalidTaxYear, AnyContentAsJson(createJson(amendCharitableGivingModel)))
-
-        val result: Seq[MtdError] = validator.validate(inputData)
-
-        result.size shouldBe 1
-        result.head shouldBe TaxYearNotSpecifiedRuleError
-      }
-
       "giftAidPayments.nonUKCharities is provided and giftAidPayments.nonUKCharities is greater than zero and " +
         "giftAidPayments.nonUKCharityNames is not provided " in new Test {
         val mutatedData = amendCharitableGivingModel.copy(
@@ -322,6 +323,94 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
         result.size shouldBe 1
         result.head shouldBe NonUKNamesNotSpecifiedRuleError
       }
+
+      "gifts.investmentsNonUKCharities is supplied with greater than 0 amount but gifts.investmentsNonUKCharityNames is not supplied " in new Test {
+        val mutatedData = amendCharitableGivingModel.copy(
+          gifts = amendCharitableGivingModel.gifts.copy(
+            investmentsNonUKCharities = Some(BigDecimal(12.34)),
+            investmentsNonUKCharityNames = None
+          )
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe NonUKInvestmentsNamesNotSpecifiedRuleError
+
+      }
+
+      "gifts.investmentsNonUKCharities is supplied with amount equal to 0 " +
+        "and gifts.investmentsNonUKCharityNames is supplied " in new Test {
+        val mutatedData = amendCharitableGivingModel.copy(
+          gifts = amendCharitableGivingModel.gifts.copy(
+            investmentsNonUKCharities = Some(BigDecimal(0)),
+            investmentsNonUKCharityNames = Some(List("A", "B"))
+          )
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe NonUKInvestmentAmountNotSpecifiedRuleError
+
+      }
+
+      "gifts.investmentsNonUKCharities is not supplied and gifts.investmentsNonUKCharityNames is supplied" in new Test {
+
+        val mutatedData = amendCharitableGivingModel.copy(
+          gifts = amendCharitableGivingModel.gifts.copy(
+            investmentsNonUKCharities = None,
+            investmentsNonUKCharityNames = Some(List("A", "B"))
+          )
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe NonUKInvestmentAmountNotSpecifiedRuleError
+
+      }
+
+      "gifts.investmentsNonUKCharities is supplied with value(s) not meeting the regex" in new Test {
+
+        val mutatedData = amendCharitableGivingModel.copy(
+          gifts = amendCharitableGivingModel.gifts.copy(
+            investmentsNonUKCharities = Some(BigDecimal(12.34)),
+            investmentsNonUKCharityNames = Some(Seq("|||INVALID||||", "VALID", "VALID"))
+          )
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe GiftsNonUKInvestmentsNamesFormatError
+
+      }
+
+      "gifts.investmentsNonUKCharities is provided and giftAidPayments.investmentsNonUKCharities is greater than zero and " +
+        "gifts.investmentsNonUKCharityNames is not provided " in new Test {
+        val mutatedData = amendCharitableGivingModel.copy(
+          gifts = amendCharitableGivingModel.gifts.copy(
+            investmentsNonUKCharities = Some(BigDecimal(11.00)),
+            investmentsNonUKCharityNames = None
+          )
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe NonUKInvestmentsNamesNotSpecifiedRuleError
+      }
+
 
     }
 
@@ -341,7 +430,7 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
         result.size shouldBe 2
         result.contains(GiftsInvestmentsAmountFormatError) shouldBe true
         result.contains(GiftsSharesSecuritiesFormatError) shouldBe true
-        
+
       }
     }
 
