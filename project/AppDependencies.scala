@@ -34,7 +34,7 @@ object AppDependencies {
 
     "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
 
-    "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % scope,
+    "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % scope,
 
     "com.github.tomakehurst" % "wiremock" % "2.20.0" % scope
   )
