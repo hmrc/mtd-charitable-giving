@@ -62,9 +62,8 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
       AmountValidation.validate(gifts.sharesOrSecurities, GiftsSharesSecuritiesFormatError),
       AmountValidation.validate(gifts.landAndBuildings, GiftsLandsBuildingsFormatError),
       AmountValidation.validate(gifts.investmentsNonUKCharities, GiftsInvestmentsAmountFormatError),
-      //      DependentDefinedValidation.validate(giftAidPayments.nonUKCharities, giftAidPayments.nonUKCharityNames, NonUKNamesNotSpecifiedRuleError),
-      //      DependentDefinedValidation.validate(giftAidPayments.nonUKCharityNames, giftAidPayments.nonUKCharities, NonUKAmountNotSpecifiedRuleError),
-      PredicateValidation.validate(nonUKNamesNotSpecifiedRuleErrorCheck, NonUKNamesNotSpecifiedRuleError)
+      PredicateValidation.validate(nonUKNamesNotSpecifiedRuleErrorCheck, NonUKNamesNotSpecifiedRuleError),
+      ArrayElementsRegexValidation.validate(giftAidPayments.nonUKCharityNames, "^[^|]{1,75}$", GiftAidNonUKNamesFormatError)
     )
 
   }

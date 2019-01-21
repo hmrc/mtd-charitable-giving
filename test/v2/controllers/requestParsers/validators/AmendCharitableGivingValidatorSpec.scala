@@ -228,8 +228,7 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
 
       }
 
-      // TODO REVIEW if should exist anymore
-      "giftAidPayments.nonUKCharities is supplied but giftAidPayments.nonUKCharityNames is not supplied " in new Test {
+      "giftAidPayments.nonUKCharities is supplied with greater than 0 amount but giftAidPayments.nonUKCharityNames is not supplied " in new Test {
         val mutatedData = amendCharitableGivingModel.copy(
           giftAidPayments = amendCharitableGivingModel.giftAidPayments.copy(
             nonUKCharities = Some(BigDecimal(12.34)),
@@ -245,6 +244,25 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
         result.head shouldBe NonUKNamesNotSpecifiedRuleError
 
       }
+
+      "giftAidPayments.nonUKCharities is supplied with value(s) not meeting the regex" in new Test {
+        val mutatedData = amendCharitableGivingModel.copy(
+          giftAidPayments = amendCharitableGivingModel.giftAidPayments.copy(
+            nonUKCharities = Some(BigDecimal(12.34)),
+            nonUKCharityNames = Some(Seq("|||INVALID||||", "VALID", "VALID"))
+          )
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe GiftAidNonUKNamesFormatError
+
+      }
+
+
 
       // TODO REVIEW FOR opposite way field
 //      "giftAidPayments.nonUKCharityNames is supplied but giftAidPayments.nonUKCharities is not supplied " in new Test {

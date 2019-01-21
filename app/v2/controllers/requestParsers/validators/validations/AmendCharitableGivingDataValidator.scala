@@ -16,10 +16,9 @@
 
 package v2.controllers.requestParsers.validators.validations
 
-import play.api.mvc.AnyContentAsJson
-import v2.models.{AmendCharitableGiving, GiftAidPayments, Gifts, errors}
 import v2.models.errors._
 
+// TODO DELETE AS NO LONGER USED
 object AmendCharitableGivingDataValidator {
   val nameFormat = "^[^|]{1,75}$".r
 

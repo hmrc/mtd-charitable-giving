@@ -18,14 +18,14 @@ package v2.controllers.requestParsers.validators.validations
 
 import v2.models.errors.MtdError
 
-object AmountValidation {
+object ArrayElementsRegexValidation {
 
-  def validate(amount: Option[BigDecimal], error: MtdError): List[MtdError] = {
+  def validate(arr: Option[Seq[String]], regex: String, errorToReturn: MtdError): List[MtdError] = {
 
-    if (amount.exists(x => x <= 99999999999.99 && x >= 0) || amount.isEmpty) {
+    if (arr.forall(_.forall(_.matches(regex)))) {
       NoValidationErrors
     } else {
-      List(error)
+      List(errorToReturn)
     }
 
   }
