@@ -17,6 +17,6 @@
 package v2.models.requestData
 
 import uk.gov.hmrc.domain.Nino
-import v2.models.AmendCharitableGiving
+import v2.models.CharitableGiving
 
-case class AmendCharitableGivingRequest(nino: Nino, desTaxYear: DesTaxYear, model: AmendCharitableGiving)
+case class AmendCharitableGivingRequest(nino: Nino, desTaxYear: DesTaxYear, model: CharitableGiving)

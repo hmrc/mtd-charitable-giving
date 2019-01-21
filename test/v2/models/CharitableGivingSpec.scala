@@ -18,68 +18,68 @@ package v2.models
 
 import play.api.libs.json.JsValue
 import support.UnitSpec
-import v2.fixtures.Fixtures.AmendCharitableGivingFixture._
+import v2.fixtures.Fixtures.CharitableGivingFixture._
 import v2.models.utils.JsonErrorValidators
 
-class AmendCharitableGivingSpec extends UnitSpec with JsonErrorValidators {
+class CharitableGivingSpec extends UnitSpec with JsonErrorValidators {
 
 
   "reads" should {
 
     "return an AmendCharitablGiving model" when {
       "correct json is supplied" in {
-        val model = AmendCharitableGiving.reads.reads(inputJson).get
-        model shouldBe amendCharitableGivingModel
+        val model = CharitableGiving.reads.reads(mtdFormatJson).get
+        model shouldBe charitableGivingModel
       }
     }
 
-    testPropertyType[AmendCharitableGiving](inputJson)(
+    testPropertyType[CharitableGiving](mtdFormatJson)(
       path = "/giftAidPayments/specifiedYear",
       replacement = "notANumber".toJson,
       expectedError = JsonError.NUMBER_FORMAT_EXCEPTION
     )
-    testPropertyType[AmendCharitableGiving](inputJson)(
+    testPropertyType[CharitableGiving](mtdFormatJson)(
       path = "/giftAidPayments/oneOffSpecifiedYear",
       replacement = "notANumber".toJson,
       expectedError = JsonError.NUMBER_FORMAT_EXCEPTION
     )
-    testPropertyType[AmendCharitableGiving](inputJson)(
+    testPropertyType[CharitableGiving](mtdFormatJson)(
       path = "/giftAidPayments/specifiedYearTreatedAsPreviousYear",
       replacement = "notANumber".toJson,
       expectedError = JsonError.NUMBER_FORMAT_EXCEPTION
     )
-    testPropertyType[AmendCharitableGiving](inputJson)(
+    testPropertyType[CharitableGiving](mtdFormatJson)(
       path = "/giftAidPayments/followingYearTreatedAsSpecifiedYear",
       replacement = "notANumber".toJson,
       expectedError = JsonError.NUMBER_FORMAT_EXCEPTION
     )
-    testPropertyType[AmendCharitableGiving](inputJson)(
+    testPropertyType[CharitableGiving](mtdFormatJson)(
       path = "/giftAidPayments/nonUKCharities",
       replacement = "notANumber".toJson,
       expectedError = JsonError.NUMBER_FORMAT_EXCEPTION
     )
-    testPropertyType[AmendCharitableGiving](inputJson)(
+    testPropertyType[CharitableGiving](mtdFormatJson)(
       path = "/giftAidPayments/nonUKCharityNames",
       replacement = "notAnArray".toJson,
       expectedError = JsonError.JSARRAY_FORMAT_EXCEPTION
     )
 
-    testPropertyType[AmendCharitableGiving](inputJson)(
+    testPropertyType[CharitableGiving](mtdFormatJson)(
       path = "/gifts/landAndBuildings",
       replacement = "notANumber".toJson,
       expectedError = JsonError.NUMBER_FORMAT_EXCEPTION
     )
-    testPropertyType[AmendCharitableGiving](inputJson)(
+    testPropertyType[CharitableGiving](mtdFormatJson)(
       path = "/gifts/sharesOrSecurities",
       replacement = "notANumber".toJson,
       expectedError = JsonError.NUMBER_FORMAT_EXCEPTION
     )
-    testPropertyType[AmendCharitableGiving](inputJson)(
+    testPropertyType[CharitableGiving](mtdFormatJson)(
       path = "/gifts/investmentsNonUKCharities",
       replacement = "notANumber".toJson,
       expectedError = JsonError.NUMBER_FORMAT_EXCEPTION
     )
-    testPropertyType[AmendCharitableGiving](inputJson)(
+    testPropertyType[CharitableGiving](mtdFormatJson)(
       path = "/gifts/investmentsNonUKCharityNames",
       replacement = "notAnArray".toJson,
       expectedError = JsonError.JSARRAY_FORMAT_EXCEPTION
@@ -90,8 +90,28 @@ class AmendCharitableGivingSpec extends UnitSpec with JsonErrorValidators {
 
     "create the DES formatted JSON" when {
       "a correct model is supplied" in {
-        val json: JsValue = AmendCharitableGiving.writes.writes(amendCharitableGivingModel)
-        json shouldBe outputJson
+        val json: JsValue = CharitableGiving.writes.writes(charitableGivingModel)
+        json shouldBe desFormatJson
+      }
+    }
+  }
+
+  "desReads" should {
+
+    "return an CharitableGiving model" when {
+      "DES returns a valid json" in {
+        val model = CharitableGiving.desReads.reads(desFormatJson).get
+        model shouldBe charitableGivingModel
+      }
+    }
+  }
+
+  "desWrites" should {
+
+    "generate a valid JSON" when {
+      "a valid model is retrieved" in {
+        val json: JsValue = CharitableGiving.desWrites.writes(charitableGivingModel)
+        json shouldBe mtdFormatJson
       }
     }
   }
