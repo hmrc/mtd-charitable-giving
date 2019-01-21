@@ -27,7 +27,7 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
 
   val validNino = "AA123456A"
   val validTaxYear = "2017-18"
-  val validJsonBody = AnyContentAsJson(AmendCharitableGivingFixture.inputJson)
+  val validJsonBody = AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)
 
   private trait Test {
     val validator = new AmendCharitableGivingValidator()

@@ -21,7 +21,7 @@ import v2.mocks.connectors.MockDesConnector
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear}
-import v2.models.{AmendCharitableGiving, GiftAidPayments, Gifts}
+import v2.models.{CharitableGiving, GiftAidPayments, Gifts}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -39,7 +39,7 @@ class CharitableGivingServiceSpec extends ServiceSpec {
   val taxYear = "2017-18"
   val expectedDesResponse = DesResponse("X-123", expectedRef)
   val input = AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
-    AmendCharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))
+    CharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))
 
   "calling amend" should {
     "return a valid correlationId" when {
