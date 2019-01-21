@@ -41,7 +41,7 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
       "valid request data is supplied" in new Test {
 
         val amendCharitableGivingRequestData =
-        AmendCharitableGivingRequestData(validNino, validTaxYear, validJsonBody)
+          AmendCharitableGivingRequestData(validNino, validTaxYear, validJsonBody)
 
         val amendCharitableGivingRequest =
           AmendCharitableGivingRequest(Nino(validNino), DesTaxYear(validTaxYear), CharitableGivingFixture.charitableGivingModel)
@@ -66,7 +66,7 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
           ErrorWrapper(NinoFormatError, None)
 
         MockedAmendCharitableGivingValidator.validate(amendCharitableGivingRequestData)
-         .returns(List(NinoFormatError))
+          .returns(List(NinoFormatError))
 
 
         parser.parseRequest(amendCharitableGivingRequestData) shouldBe Left(singleErrorWrapper)

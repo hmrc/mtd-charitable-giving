@@ -44,7 +44,7 @@ class DependentDefinedValidationSpec extends UnitSpec with JsonErrorValidators {
 
       "the first field is missing and the second field is supplied" in {
         // One way dependency check
-        
+
         val firstValue = None
         val secondValue = Some("SECOND")
         val validationResult = DependentDefinedValidation.validate(firstValue, secondValue, dummyError)
