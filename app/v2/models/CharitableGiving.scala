@@ -21,22 +21,21 @@ import play.api.libs.json._
 
 case class CharitableGiving(giftAidPayments: GiftAidPayments, gifts: Gifts)
 
-
 object CharitableGiving {
 
   implicit val reads: Reads[CharitableGiving] = Json.reads[CharitableGiving]
 
   implicit val writes: Writes[CharitableGiving] = Json.writes[CharitableGiving]
 
-  val desReads:Reads[CharitableGiving] = (
+  val desReads: Reads[CharitableGiving] = (
     (__ \ "giftAidPayments").read[GiftAidPayments](GiftAidPayments.desReads) and
       (__ \ "gifts").read[Gifts](Gifts.desReads)
-    )(CharitableGiving.apply _)
+    ) (CharitableGiving.apply _)
 
-  val desWrites:Writes[CharitableGiving] = (
+  val desWrites: Writes[CharitableGiving] = (
     (__ \ "giftAidPayments").write[GiftAidPayments](GiftAidPayments.desWrites) and
       (__ \ "gifts").write[Gifts](Gifts.desWrites)
-    )(unlift(CharitableGiving.unapply))
+    ) (unlift(CharitableGiving.unapply))
 }
 
 case class GiftAidPayments(specifiedYear: Option[BigDecimal],
@@ -51,13 +50,13 @@ object GiftAidPayments {
   implicit val reads: Reads[GiftAidPayments] = Json.reads[GiftAidPayments]
 
   implicit val writes: Writes[GiftAidPayments] = (
-      (JsPath \ "currentYear").writeNullable[BigDecimal] and
-        (JsPath \ "oneOffCurrentYear").writeNullable[BigDecimal] and
-        (JsPath \ "currentYearTreatedAsPreviousYear").writeNullable[BigDecimal] and
-        (JsPath \ "nextYearTreatedAsCurrentYear").writeNullable[BigDecimal] and
-        (JsPath \ "nonUkCharities").writeNullable[BigDecimal] and
-        (JsPath \ "nonUkCharitiesCharityNames").writeNullable[Seq[String]]
-    )(unlift(GiftAidPayments.unapply))
+    (JsPath \ "currentYear").writeNullable[BigDecimal] and
+      (JsPath \ "oneOffCurrentYear").writeNullable[BigDecimal] and
+      (JsPath \ "currentYearTreatedAsPreviousYear").writeNullable[BigDecimal] and
+      (JsPath \ "nextYearTreatedAsCurrentYear").writeNullable[BigDecimal] and
+      (JsPath \ "nonUkCharities").writeNullable[BigDecimal] and
+      (JsPath \ "nonUkCharitiesCharityNames").writeNullable[Seq[String]]
+    ) (unlift(GiftAidPayments.unapply))
 
   val desReads: Reads[GiftAidPayments] = (
     (JsPath \ "currentYear").readNullable[BigDecimal] and
@@ -66,7 +65,7 @@ object GiftAidPayments {
       (JsPath \ "nextYearTreatedAsCurrentYear").readNullable[BigDecimal] and
       (JsPath \ "nonUkCharities").readNullable[BigDecimal] and
       (JsPath \ "nonUkCharitiesCharityNames").readNullable[Seq[String]]
-    )(GiftAidPayments.apply _)
+    ) (GiftAidPayments.apply _)
 
   val desWrites: Writes[GiftAidPayments] = Json.writes[GiftAidPayments]
 
@@ -85,14 +84,14 @@ object Gifts {
       (JsPath \ "sharesOrSecurities").writeNullable[BigDecimal] and
       (JsPath \ "investmentsNonUkCharities").writeNullable[BigDecimal] and
       (JsPath \ "investmentsNonUkCharitiesCharityNames").writeNullable[Seq[String]]
-  )(unlift(Gifts.unapply))
+    ) (unlift(Gifts.unapply))
 
   val desReads: Reads[Gifts] = (
     (JsPath \ "landAndBuildings").readNullable[BigDecimal] and
       (JsPath \ "sharesOrSecurities").readNullable[BigDecimal] and
       (JsPath \ "investmentsNonUkCharities").readNullable[BigDecimal] and
       (JsPath \ "investmentsNonUkCharitiesCharityNames").readNullable[Seq[String]]
-    )(Gifts.apply _)
+    ) (Gifts.apply _)
 
   val desWrites: Writes[Gifts] = Json.writes[Gifts]
 }

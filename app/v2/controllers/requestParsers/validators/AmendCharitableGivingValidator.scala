@@ -16,7 +16,7 @@
 
 package v2.controllers.requestParsers.validators
 
-import v2.controllers.requestParsers.validators.validations.JsonFormatValidation
+import v2.controllers.requestParsers.validators.validations._
 import v2.models.CharitableGiving
 import v2.models.errors._
 import v2.models.requestData.AmendCharitableGivingRequestData
@@ -27,33 +27,51 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
 
   private def levelOneValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
     List(
-      //Raw input format validation
+      NinoValidation.validate(data.nino),
+      TaxYearValidation.validate(data.taxYear)
     )
   }
 
   private def levelTwoValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
     List(
-      //Converted input data validation
-      JsonFormatValidation.validate[CharitableGiving](data.body)
+      JsonFormatValidation.validate[CharitableGiving](data.body),
+      MtdTaxYearValidation.validate(data.taxYear, TaxYearNotSpecifiedRuleError)
     )
   }
 
   private def levelThreeValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
+
+    val amendCharitableGiving = data.body.json.as[CharitableGiving]
+    val giftAidPayments = amendCharitableGiving.giftAidPayments
+    val gifts = amendCharitableGiving.gifts
+
+    lazy val nonUKNamesNotSpecifiedRuleErrorCheck = giftAidPayments.nonUKCharities.exists(_ > 0 && giftAidPayments.nonUKCharityNames.isEmpty)
+    lazy val nonUKInvestmentsNamesNotSpecifiedRuleErrorCheck = gifts.investmentsNonUKCharities.exists(_ > 0 && gifts.investmentsNonUKCharityNames.isEmpty)
+    lazy val namesSuppliedButIncorrectAmountCheck = giftAidPayments.nonUKCharityNames.exists(_.nonEmpty && giftAidPayments.nonUKCharities.forall(_ == 0))
+    lazy val investmentsNamesSuppliedButIncorrectAmountCheck = gifts.investmentsNonUKCharityNames.exists(_.nonEmpty && gifts.investmentsNonUKCharities.forall(_ == 0))
+
     List(
-      //Business rule validation
+      AmountValidation.validate(giftAidPayments.specifiedYear, GiftAidSpecifiedYearFormatError),
+      AmountValidation.validate(giftAidPayments.oneOffSpecifiedYear, GiftAidOneOffSpecifiedYearFormatError),
+      AmountValidation.validate(giftAidPayments.specifiedYearTreatedAsPreviousYear, GiftAidSpecifiedYearPreviousFormatError),
+      AmountValidation.validate(giftAidPayments.followingYearTreatedAsSpecifiedYear, GiftAidFollowingYearSpecifiedFormatError),
+      AmountValidation.validate(giftAidPayments.nonUKCharities, GiftAidNonUKCharityAmountFormatError),
+      AmountValidation.validate(gifts.sharesOrSecurities, GiftsSharesSecuritiesFormatError),
+      AmountValidation.validate(gifts.landAndBuildings, GiftsLandsBuildingsFormatError),
+      AmountValidation.validate(gifts.investmentsNonUKCharities, GiftsInvestmentsAmountFormatError),
+      PredicateValidation.validate(nonUKNamesNotSpecifiedRuleErrorCheck, NonUKNamesNotSpecifiedRuleError),
+      PredicateValidation.validate(namesSuppliedButIncorrectAmountCheck, NonUKAmountNotSpecifiedRuleError),
+      PredicateValidation.validate(nonUKInvestmentsNamesNotSpecifiedRuleErrorCheck, NonUKInvestmentsNamesNotSpecifiedRuleError),
+      PredicateValidation.validate(investmentsNamesSuppliedButIncorrectAmountCheck, NonUKInvestmentAmountNotSpecifiedRuleError),
+      ArrayElementsRegexValidation.validate(giftAidPayments.nonUKCharityNames, "^[^|]{1,75}$", GiftAidNonUKNamesFormatError),
+      ArrayElementsRegexValidation.validate(gifts.investmentsNonUKCharityNames, "^[^|]{1,75}$", GiftsNonUKInvestmentsNamesFormatError)
     )
+
   }
 
+
   override def validate(data: AmendCharitableGivingRequestData): List[MtdError] = {
-    run(validationSet, data) match {
-      case Nil => List()
-        //TODO
-      /**
-        * Add back in during unhappy path
-        *
-      case err :: Nil => Left(List(err))
-      case errs => Left(errs)
-        **/
-    }
+    run(validationSet, data).distinct
   }
+
 }

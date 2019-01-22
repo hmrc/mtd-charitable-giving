@@ -33,7 +33,7 @@ trait AppConfig {
 
 @Singleton
 class AppConfigImpl @Inject()(environment: Environment,
-                              config: Configuration) extends AppConfig with ServicesConfig {
+                              config: Configuration) extends AppConfig with ServicesConfig with FixedConfig {
 
   override protected def mode: Mode = environment.mode
 
@@ -43,4 +43,10 @@ class AppConfigImpl @Inject()(environment: Environment,
   val desBaseUrl: String = baseUrl("des")
   val desEnv: String = getString("microservice.services.des.env")
   val desToken: String = getString("microservice.services.des.token")
+
+}
+
+trait FixedConfig {
+  // Minimum tax year for MTD
+  val minimumTaxYear = 2017
 }

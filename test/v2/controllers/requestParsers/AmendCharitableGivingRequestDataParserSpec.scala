@@ -21,7 +21,7 @@ import support.UnitSpec
 import uk.gov.hmrc.domain.Nino
 import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.mocks.validators.MockAmendCharitableGivingValidator
-import v2.models.errors.{BadRequestError, ErrorWrapper, InvalidStartDateError, NinoFormatError}
+import v2.models.errors.{BadRequestError, ErrorWrapper, NinoFormatError, TaxYearFormatError}
 import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRequestData, DesTaxYear}
 
 class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
@@ -41,7 +41,7 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
       "valid request data is supplied" in new Test {
 
         val amendCharitableGivingRequestData =
-        AmendCharitableGivingRequestData(validNino, validTaxYear, validJsonBody)
+          AmendCharitableGivingRequestData(validNino, validTaxYear, validJsonBody)
 
         val amendCharitableGivingRequest =
           AmendCharitableGivingRequest(Nino(validNino), DesTaxYear(validTaxYear), CharitableGivingFixture.charitableGivingModel)
@@ -66,7 +66,7 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
           ErrorWrapper(NinoFormatError, None)
 
         MockedAmendCharitableGivingValidator.validate(amendCharitableGivingRequestData)
-         .returns(List(NinoFormatError))
+          .returns(List(NinoFormatError))
 
 
         parser.parseRequest(amendCharitableGivingRequestData) shouldBe Left(singleErrorWrapper)
@@ -77,10 +77,10 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
           AmendCharitableGivingRequestData(validNino, invalidDate, validJsonBody)
 
         val multipleErrorWrapper =
-          ErrorWrapper(BadRequestError, Some(Seq(NinoFormatError, InvalidStartDateError)))
+          ErrorWrapper(BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
 
         MockedAmendCharitableGivingValidator.validate(amendCharitableGivingRequestData)
-          .returns(List(NinoFormatError, InvalidStartDateError))
+          .returns(List(NinoFormatError, TaxYearFormatError))
 
 
         parser.parseRequest(amendCharitableGivingRequestData) shouldBe Left(multipleErrorWrapper)
