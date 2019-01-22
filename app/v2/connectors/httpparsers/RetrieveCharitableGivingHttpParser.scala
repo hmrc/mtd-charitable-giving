@@ -19,24 +19,24 @@ package v2.connectors.httpparsers
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import v2.models.CharitableGiving
 import play.api.http.Status.OK
-import v2.models.errors.{BadRequestError, SingleError}
+//import v2.models.errors.{BadRequestError, SingleError}
 import v2.models.outcomes.{DesResponse, RetrieveCharitableGivingConnectorOutcome}
 
 object RetrieveCharitableGivingHttpParser extends HttpParser {
 
-  val retrieveHttpReads = new HttpReads[RetrieveCharitableGivingConnectorOutcome] {
+  implicit val retrieveHttpReads: HttpReads[RetrieveCharitableGivingConnectorOutcome] = new HttpReads[RetrieveCharitableGivingConnectorOutcome] {
     override def read(method: String, url: String, response: HttpResponse): RetrieveCharitableGivingConnectorOutcome = {
 
       response.status match {
         case OK => parseResponse(response)
-        case _ => Left(DesResponse(retrieveCorrelationId(response), SingleError(BadRequestError)))
+        //case _ => Left(DesResponse(retrieveCorrelationId(response), SingleError(BadRequestError)))
       }
     }
   }
 
-  private def parseResponse(response: HttpResponse) =
+  private def parseResponse(response: HttpResponse): RetrieveCharitableGivingConnectorOutcome =
     response.validateJson[CharitableGiving](CharitableGiving.desReads) match {
       case Some(charitableGiving) => Right(DesResponse(retrieveCorrelationId(response), charitableGiving))
+      //case None => Left(DesResponse(retrieveCorrelationId(response), SingleError(BadRequestError)))
     }
-
 }
