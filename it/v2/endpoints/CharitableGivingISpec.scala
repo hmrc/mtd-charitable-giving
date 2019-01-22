@@ -18,9 +18,12 @@ package v2.endpoints
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
+import play.api.http.Status._
+import play.api.libs.json.Json
 import play.api.libs.ws.{WSRequest, WSResponse}
 import support.IntegrationBaseSpec
 import v2.fixtures.Fixtures.CharitableGivingFixture
+import v2.models.errors.DownstreamError
 import v2.models.requestData.DesTaxYear
 import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
 
@@ -33,7 +36,7 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
 
     def setupStubs(): StubMapping
 
-    def request(): WSRequest = {  // This should be DES tests, as charitable giving will integrate with DES
+    def request(): WSRequest = { // This should be DES tests, as charitable giving will integrate with DES
       setupStubs()
       buildRequest(s"/2.0/ni/$nino/charitable-giving/$taxYear")
     }
@@ -58,5 +61,47 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
         response.status shouldBe Status.NO_CONTENT
       }
     }
+
+
+    def errorBody(code: String): String =
+      s"""
+         |      {
+         |        "code": "$code",
+         |        "reason": "Does not matter."
+         |      }
+      """.stripMargin
+
+    "return 500" when {
+      "des returns an invalid type error" in new Test {
+        override val nino: String = "AA123456A"
+        override val taxYear: String = "2018-19"
+
+        override def setupStubs(): StubMapping = {
+          AuditStub.audit()
+          AuthStub.authorised()
+          MtdIdLookupStub.ninoFound(nino)
+          DesStub.amendError(nino, DesTaxYear(taxYear).toDesTaxYear, BAD_REQUEST, errorBody("INVALID_TYPE"))
+        }
+
+        val response: WSResponse = await(request().put(CharitableGivingFixture.mtdFormatJson))
+        response.status shouldBe Status.INTERNAL_SERVER_ERROR
+        response.json shouldBe Json.toJson(DownstreamError)
+      }
+    }
+
+    "return 500" when {
+      "des returns a not found income source error" in new Test {
+        override val nino: String = "AA123456A"
+        override val taxYear: String = "2018-19"
+
+        override def setupStubs(): StubMapping = {
+          AuditStub.audit()
+          AuthStub.authorised()
+          MtdIdLookupStub.ninoFound(nino)
+          DesStub.amendError(nino, DesTaxYear(taxYear).toDesTaxYear, FORBIDDEN, errorBody("NOT_FOUND_INCOME_SOURCE"))
+        }
+      }
+    }
   }
 }
+
