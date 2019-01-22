@@ -24,7 +24,7 @@ import v2.models.errors._
 import v2.models.outcomes.DesResponse
 
 
-class CharitableGivingHttpParserSpec extends UnitSpec {
+class AmendCharitableGivingHttpParserSpec extends UnitSpec {
 
   val method = "PUT"
   val url = "test-url"
