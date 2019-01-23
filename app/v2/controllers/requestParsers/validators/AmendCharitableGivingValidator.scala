@@ -45,10 +45,17 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
     val giftAidPayments = amendCharitableGiving.giftAidPayments
     val gifts = amendCharitableGiving.gifts
 
-    lazy val nonUKNamesNotSpecifiedRuleErrorCheck = giftAidPayments.nonUKCharities.exists(_ > 0 && giftAidPayments.nonUKCharityNames.isEmpty)
-    lazy val nonUKInvestmentsNamesNotSpecifiedRuleErrorCheck = gifts.investmentsNonUKCharities.exists(_ > 0 && gifts.investmentsNonUKCharityNames.isEmpty)
-    lazy val namesSuppliedButIncorrectAmountCheck = giftAidPayments.nonUKCharityNames.exists(_.nonEmpty && giftAidPayments.nonUKCharities.forall(_ == 0))
-    lazy val investmentsNamesSuppliedButIncorrectAmountCheck = gifts.investmentsNonUKCharityNames.exists(_.nonEmpty && gifts.investmentsNonUKCharities.forall(_ == 0))
+    lazy val nonUKNamesNotSpecifiedRuleErrorCheck =
+      giftAidPayments.nonUKCharities.exists(_ > 0 && (giftAidPayments.nonUKCharityNames.isEmpty || giftAidPayments.nonUKCharityNames.get.isEmpty))
+
+    lazy val nonUKInvestmentsNamesNotSpecifiedRuleErrorCheck =
+      gifts.investmentsNonUKCharities.exists(_ > 0 && (gifts.investmentsNonUKCharityNames.isEmpty || gifts.investmentsNonUKCharityNames.get.isEmpty))
+
+    lazy val namesSuppliedButIncorrectAmountCheck =
+      giftAidPayments.nonUKCharityNames.exists(_.nonEmpty && giftAidPayments.nonUKCharities.forall(_ == 0))
+
+    lazy val investmentsNamesSuppliedButIncorrectAmountCheck =
+      gifts.investmentsNonUKCharityNames.exists(_.nonEmpty && gifts.investmentsNonUKCharities.forall(_ == 0))
 
     List(
       AmountValidation.validate(giftAidPayments.specifiedYear, GiftAidSpecifiedYearFormatError),
