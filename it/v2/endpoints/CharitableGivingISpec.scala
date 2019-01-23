@@ -23,7 +23,7 @@ import play.api.libs.json.Json
 import play.api.libs.ws.{WSRequest, WSResponse}
 import support.IntegrationBaseSpec
 import v2.fixtures.Fixtures.CharitableGivingFixture
-import v2.models.errors.DownstreamError
+import v2.models.errors._
 import v2.models.requestData.DesTaxYear
 import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
 
@@ -62,8 +62,78 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
       }
     }
 
+    "return 500 (Internal Server Error)" when {
 
-    def errorBody(code: String): String =
+      errorTest(Status.BAD_REQUEST, "INVALID_TYPE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      errorTest(Status.FORBIDDEN, "NOT_FOUND_INCOME_SOURCE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      errorTest(Status.INTERNAL_SERVER_ERROR, "SERVER_ERROR", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+      errorTest(Status.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
+    }
+
+    "return 400 (Bad Request)" when {
+      errorTest(Status.BAD_REQUEST, "INVALID_NINO", Status.BAD_REQUEST, NinoFormatError)
+      errorTest(Status.BAD_REQUEST, "INVALID_TAXYEAR", Status.BAD_REQUEST, TaxYearFormatError)
+      errorTest(Status.BAD_REQUEST, "INVALID_PAYLOAD", Status.BAD_REQUEST, BadRequestError)
+      errorTest(Status.FORBIDDEN, "MISSING_CHARITIES_NAME_GIFT_AID", Status.BAD_REQUEST, NonUKNamesNotSpecifiedRuleError)
+      errorTest(Status.FORBIDDEN, "MISSING_GIFT_AID_AMOUNT", Status.BAD_REQUEST, NonUKAmountNotSpecifiedRuleError)
+      errorTest(Status.FORBIDDEN, "MISSING_CHARITIES_NAME_INVESTMENT", Status.BAD_REQUEST, NonUKInvestmentsNamesNotSpecifiedRuleError)
+      errorTest(Status.FORBIDDEN, "MISSING_INVESTMENT_AMOUNT", Status.BAD_REQUEST, NonUKInvestmentAmountNotSpecifiedRuleError)
+    }
+
+    "return a 400 (Bad Request) with multiple errors" when {
+
+      val multipleErrors: String =
+        s"""
+           | [
+           |      {
+           |        "code": "INVALID_NINO",
+           |        "reason": "Does not matter."
+           |      },
+           |      {
+           |        "code": "INVALID_TAXYEAR",
+           |        "reason": "Does not matter."
+           |      }
+           |  ]
+      """.stripMargin
+
+      s"des returns multiple errors" in new Test {
+        override val nino: String = "AA123456A"
+        override val taxYear: String = "2018-19"
+
+        override def setupStubs(): StubMapping = {
+          AuditStub.audit()
+          AuthStub.authorised()
+          MtdIdLookupStub.ninoFound(nino)
+          DesStub.amendError(nino, DesTaxYear(taxYear).toDesTaxYear, BAD_REQUEST, multipleErrors)
+        }
+
+        val response: WSResponse = await(request().put(CharitableGivingFixture.mtdFormatJson))
+        response.status shouldBe Status.BAD_REQUEST
+        response.json shouldBe Json.toJson(ErrorWrapper(BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
+      }
+
+    }
+
+    def errorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: MtdError): Unit = {
+      s"des returns an $desCode error" in new Test {
+        override val nino: String = "AA123456A"
+        override val taxYear: String = "2018-19"
+
+        override def setupStubs(): StubMapping = {
+          AuditStub.audit()
+          AuthStub.authorised()
+          MtdIdLookupStub.ninoFound(nino)
+          DesStub.amendError(nino, DesTaxYear(taxYear).toDesTaxYear, desStatus, errorBody(desCode))
+        }
+
+        val response: WSResponse = await(request().put(CharitableGivingFixture.mtdFormatJson))
+        response.status shouldBe expectedStatus
+        response.json shouldBe Json.toJson(expectedBody)
+      }
+    }
+
+
+   def errorBody(code: String): String =
       s"""
          |      {
          |        "code": "$code",
@@ -71,37 +141,6 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
          |      }
       """.stripMargin
 
-    "return 500" when {
-      "des returns an invalid type error" in new Test {
-        override val nino: String = "AA123456A"
-        override val taxYear: String = "2018-19"
-
-        override def setupStubs(): StubMapping = {
-          AuditStub.audit()
-          AuthStub.authorised()
-          MtdIdLookupStub.ninoFound(nino)
-          DesStub.amendError(nino, DesTaxYear(taxYear).toDesTaxYear, BAD_REQUEST, errorBody("INVALID_TYPE"))
-        }
-
-        val response: WSResponse = await(request().put(CharitableGivingFixture.mtdFormatJson))
-        response.status shouldBe Status.INTERNAL_SERVER_ERROR
-        response.json shouldBe Json.toJson(DownstreamError)
-      }
-    }
-
-    "return 500" when {
-      "des returns a not found income source error" in new Test {
-        override val nino: String = "AA123456A"
-        override val taxYear: String = "2018-19"
-
-        override def setupStubs(): StubMapping = {
-          AuditStub.audit()
-          AuthStub.authorised()
-          MtdIdLookupStub.ninoFound(nino)
-          DesStub.amendError(nino, DesTaxYear(taxYear).toDesTaxYear, FORBIDDEN, errorBody("NOT_FOUND_INCOME_SOURCE"))
-        }
-      }
-    }
   }
 }
 
