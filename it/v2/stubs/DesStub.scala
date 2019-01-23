@@ -17,7 +17,7 @@
 package v2.stubs
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import play.api.http.Status.OK
+import play.api.http.Status.{OK, BAD_REQUEST}
 import support.WireMockMethods
 
 object DesStub extends WireMockMethods {
@@ -30,9 +30,22 @@ object DesStub extends WireMockMethods {
       |{"transactionReference": "12121"}
     """.stripMargin
 
+  private val errorBody =
+    """
+      {
+        "code": "INVALID_TYPE",
+        "reason": "Does not matter."
+      }
+    """
+
+
   def amendSuccess(nino: String, taxYear: String): StubMapping = {
     when(method = POST, uri = amendCharitableGivingUrl(nino, taxYear))
       .thenReturn(status = OK, body)
   }
 
+  def amendError(nino: String, taxYear: String, errorStatus: Int, errorBody: String): StubMapping = {
+    when(method = POST, uri = amendCharitableGivingUrl(nino, taxYear))
+    .thenReturn(status = errorStatus, errorBody)
+  }
 }
