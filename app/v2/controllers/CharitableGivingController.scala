@@ -16,6 +16,8 @@
 
 package v2.controllers
 
+import java.util.UUID
+
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, AnyContentAsJson}
@@ -44,10 +46,10 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
 
       case Right(amendCharitableGivingRequest) => charitableGivingService.amend(amendCharitableGivingRequest).map {
         case Right(correlationId) => NoContent.withHeaders("X-CorrelationId" -> correlationId)
-        case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId)
+        case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
       }
       case Left(errorWrapper) => Future.successful {
-        processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId)
+        processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
       }
     }
   }
@@ -77,4 +79,10 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
     }
   }
 
+  private def getCorrelationId(errorWrapper: ErrorWrapper) : String = {
+    errorWrapper.correlationId match {
+      case Some(correlationId) => correlationId
+      case None => UUID.randomUUID().toString
+    }
+  }
 }
