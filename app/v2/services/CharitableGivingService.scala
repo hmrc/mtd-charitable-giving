@@ -21,7 +21,7 @@ import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.errors._
-import v2.models.outcomes.AmendCharitableGivingOutcome
+import v2.models.outcomes.{AmendCharitableGivingOutcome, DesResponse}
 import v2.models.requestData.AmendCharitableGivingRequest
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,16 +35,16 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
     val logger: Logger = Logger(this.getClass)
 
     connector.amend(amendCharitableGivingRequest).map {
-      case Left(MultipleErrors(errors)) =>
+      case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
         val mtdErrors = errors.map(error => desErrorToMtdError(error.code))
         if (mtdErrors.contains(DownstreamError)) {
           logger.info("[CharitableGivingService] [amend] - downstream returned INVALID_IDTYPE or NOT_FOUND_INCOME_SOURCE. Revert to ISE")
-          Left(ErrorWrapper(DownstreamError, None))
+          Left(ErrorWrapper(correlationId, DownstreamError, None))
         } else {
-          Left(ErrorWrapper(BadRequestError, Some(mtdErrors)))
+          Left(ErrorWrapper(correlationId, BadRequestError, Some(mtdErrors)))
         }
-      case Left(SingleError(error)) => Left(ErrorWrapper(desErrorToMtdError(error.code), None))
-      case Left(GenericError(error)) => Left(ErrorWrapper(error, None))
+      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(correlationId, desErrorToMtdError(error.code), None))
+      case Left(DesResponse(correlationId, GenericError(error))) => Left(ErrorWrapper(correlationId, error, None))
       case Right(desResponse) => Right(desResponse.correlationId)
     }
   }

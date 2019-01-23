@@ -21,8 +21,10 @@ import support.UnitSpec
 
 class ErrorWrapperSpec extends UnitSpec {
 
+  val correlationId = "X-123"
+
   "Rendering a error response with one error" should {
-    val error = ErrorWrapper(NinoFormatError, None)
+    val error = ErrorWrapper(correlationId, NinoFormatError, None)
 
     val json = Json.parse(
       """
@@ -39,7 +41,7 @@ class ErrorWrapperSpec extends UnitSpec {
   }
 
   "Rendering a error response with one error and an empty sequence of errors" should {
-    val error = ErrorWrapper(TaxYearFormatError, Some(Seq.empty))
+    val error = ErrorWrapper(correlationId, TaxYearFormatError, Some(Seq.empty))
 
     val json = Json.parse(
       """
@@ -56,7 +58,7 @@ class ErrorWrapperSpec extends UnitSpec {
   }
 
   "Rendering a error response with two errors" should {
-    val error = ErrorWrapper(BadRequestError,
+    val error = ErrorWrapper(correlationId, BadRequestError,
       Some (
         Seq(
           NinoFormatError,

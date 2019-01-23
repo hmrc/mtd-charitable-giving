@@ -19,7 +19,7 @@ package v2.connectors.httpparsers
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import v2.models.CharitableGiving
 import play.api.http.Status.OK
-//import v2.models.errors.{BadRequestError, SingleError}
+import v2.models.errors.{DownstreamError, GenericError}
 import v2.models.outcomes.{DesResponse, RetrieveCharitableGivingConnectorOutcome}
 
 object RetrieveCharitableGivingHttpParser extends HttpParser {
@@ -29,7 +29,7 @@ object RetrieveCharitableGivingHttpParser extends HttpParser {
 
       response.status match {
         case OK => parseResponse(response)
-        //case _ => Left(DesResponse(retrieveCorrelationId(response), SingleError(BadRequestError)))
+        //case _ => Left(DesResponse(retrieveCorrelationId(response), parseErrors(response)))
       }
     }
   }
@@ -37,6 +37,6 @@ object RetrieveCharitableGivingHttpParser extends HttpParser {
   private def parseResponse(response: HttpResponse): RetrieveCharitableGivingConnectorOutcome =
     response.validateJson[CharitableGiving](CharitableGiving.desReads) match {
       case Some(charitableGiving) => Right(DesResponse(retrieveCorrelationId(response), charitableGiving))
-      //case None => Left(DesResponse(retrieveCorrelationId(response), SingleError(BadRequestError)))
+      //case None => Left(DesResponse(retrieveCorrelationId(response), GenericError(DownstreamError)))
     }
 }

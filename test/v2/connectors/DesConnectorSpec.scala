@@ -19,6 +19,7 @@ package v2.connectors
 import uk.gov.hmrc.domain.Nino
 import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.mocks.{MockAppConfig, MockHttpClient}
+import v2.models.errors.{SingleError, TaxYearFormatError}
 import v2.models.outcomes.{AmendCharitableGivingConnectorOutcome, DesResponse, RetrieveCharitableGivingConnectorOutcome}
 import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear}
 import v2.models.{CharitableGiving, GiftAidPayments, Gifts}
@@ -40,7 +41,7 @@ class DesConnectorSpec extends ConnectorSpec{
   lazy val baseUrl = "test-BaseUrl"
 
   "Amend charitable giving tax relief" should {
-    "return a successful 204 response" when {
+    "return a successful response with transactionId and correlationId" when {
       "a valid request is supplied" in new Test() {
 
         val expectedRef = "000000000001013"
@@ -60,6 +61,26 @@ class DesConnectorSpec extends ConnectorSpec{
         result shouldBe Right(expectedDesResponse)
       }
     }
+
+    "return an error response with correlationId" when{
+      "an request supplied with invalid tax year" in new Test(){
+
+        val expectedDesResponse = DesResponse("X-123", SingleError(TaxYearFormatError))
+        val nino = "AA123456A"
+        val taxYear = "1111-12"
+        val charitableGiving = CharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None))
+
+        MockedHttpClient.post[CharitableGiving, AmendCharitableGivingConnectorOutcome] (
+           s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}",
+          charitableGiving)
+          .returns(Future.successful(Left(expectedDesResponse)))
+
+        val result = await(connector.amend(AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
+          charitableGiving)))
+
+        result shouldBe Left(expectedDesResponse)
+      }
+    }
   }
 
   "Retrieve charitable giving tax relief" should {
@@ -67,7 +88,6 @@ class DesConnectorSpec extends ConnectorSpec{
       "a valid request is supplied" in new Test(){
         val nino = "AA123456A"
         val taxYear = "2017-18"
-        val expectedResponse = CharitableGivingFixture.charitableGivingModel
         val httpParsedDesResponse = DesResponse("X-123", CharitableGivingFixture.charitableGivingModel)
 
         MockedHttpClient.get[RetrieveCharitableGivingConnectorOutcome](

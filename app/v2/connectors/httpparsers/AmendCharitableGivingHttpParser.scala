@@ -41,13 +41,13 @@ object AmendCharitableGivingHttpParser extends HttpParser {
 
       response.status match {
         case OK => parseResponse(response)
-        case BAD_REQUEST | FORBIDDEN => Left(parseErrors(response))
-        case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(GenericError(DownstreamError))
+        case BAD_REQUEST | FORBIDDEN => Left(DesResponse(retrieveCorrelationId(response),parseErrors(response)))
+        case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(DesResponse(retrieveCorrelationId(response), GenericError(DownstreamError)))
       }
     }
-    private def parseResponse(response: HttpResponse) = response.validateJson[String](jsonReads) match {
+    private def parseResponse(response: HttpResponse): AmendCharitableGivingConnectorOutcome = response.validateJson[String](jsonReads) match {
       case Some(ref) => Right(DesResponse(retrieveCorrelationId(response), ref))
-      case None => Left(GenericError(DownstreamError))
+      case None => Left(DesResponse(retrieveCorrelationId(response), GenericError(DownstreamError)))
     }
   }
 }
