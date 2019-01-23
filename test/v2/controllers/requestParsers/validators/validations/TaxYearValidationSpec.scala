@@ -34,7 +34,7 @@ class TaxYearValidationSpec extends UnitSpec with JsonErrorValidators {
     }
 
     "return an error" when {
-      "when an invalid tax year is supplied" in {
+      "when an invalid tax year format is supplied" in {
 
         val invalidTaxYear = "2019"
         val validationResult = TaxYearValidation.validate(invalidTaxYear)
@@ -43,6 +43,36 @@ class TaxYearValidationSpec extends UnitSpec with JsonErrorValidators {
         validationResult.head shouldBe TaxYearFormatError
 
       }
+    }
+
+    "the difference in years is greater than 1 year" in {
+
+      val invalidTaxYear = "2017-19"
+      val validationResult = TaxYearValidation.validate(invalidTaxYear)
+      validationResult.isEmpty shouldBe false
+      validationResult.length shouldBe 1
+      validationResult.head shouldBe TaxYearFormatError
+
+    }
+
+    "the end year is before the start year" in {
+
+      val invalidTaxYear = "2018-17"
+      val validationResult = TaxYearValidation.validate(invalidTaxYear)
+      validationResult.isEmpty shouldBe false
+      validationResult.length shouldBe 1
+      validationResult.head shouldBe TaxYearFormatError
+
+    }
+
+    "the start and end years are the same" in {
+
+      val invalidTaxYear = "2017-17"
+      val validationResult = TaxYearValidation.validate(invalidTaxYear)
+      validationResult.isEmpty shouldBe false
+      validationResult.length shouldBe 1
+      validationResult.head shouldBe TaxYearFormatError
+
     }
 
   }

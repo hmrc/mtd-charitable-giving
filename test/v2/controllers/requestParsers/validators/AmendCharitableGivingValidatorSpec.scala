@@ -256,6 +256,22 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
 
       }
 
+      "giftAidPayments.nonUKCharities is supplied with greater than 0 amount but giftAidPayments.nonUKCharityNames is supplied but is empty" in new Test {
+        val mutatedData = charitableGivingModel.copy(
+          giftAidPayments = charitableGivingModel.giftAidPayments.copy(
+            nonUKCharities = Some(BigDecimal(12.34)),
+            nonUKCharityNames = Some(List())
+          )
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe NonUKNamesNotSpecifiedRuleError
+
+      }
+
       "giftAidPayments.nonUKCharities is supplied with amount equal to 0 " +
         "and giftAidPayments.nonUKCharityNames is supplied " in new Test {
         val mutatedData = charitableGivingModel.copy(
@@ -401,6 +417,22 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           gifts = charitableGivingModel.gifts.copy(
             investmentsNonUKCharities = Some(BigDecimal(11.00)),
             investmentsNonUKCharityNames = None
+          )
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val result: Seq[MtdError] = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe NonUKInvestmentsNamesNotSpecifiedRuleError
+      }
+
+      "gifts.investmentsNonUKCharities is provided and giftAidPayments.investmentsNonUKCharities is greater than zero and " +
+        "gifts.investmentsNonUKCharityNames is supplied but is empty " in new Test {
+        val mutatedData = charitableGivingModel.copy(
+          gifts = charitableGivingModel.gifts.copy(
+            investmentsNonUKCharities = Some(BigDecimal(11.00)),
+            investmentsNonUKCharityNames = Some(List())
           )
         )
 
