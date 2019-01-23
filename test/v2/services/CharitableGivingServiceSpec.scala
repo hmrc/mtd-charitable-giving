@@ -37,7 +37,7 @@ class CharitableGivingServiceSpec extends ServiceSpec {
   val expectedRef = "000000000001013"
   val nino = "AA123456A"
   val taxYear = "2017-18"
-  val expectedDesResponse = DesResponse("X-123", expectedRef)
+  val expectedDesResponse = DesResponse(correlationId, expectedRef)
   val input = AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
     CharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))
 
@@ -45,7 +45,7 @@ class CharitableGivingServiceSpec extends ServiceSpec {
     "return a valid correlationId" when {
       "a valid data is passed" in new Test {
 
-        val expected = correlationId
+        private val expected = correlationId
 
         MockedDesConnector.amend(input).returns(Future.successful(Right(expectedDesResponse)))
 
@@ -58,9 +58,10 @@ class CharitableGivingServiceSpec extends ServiceSpec {
     "return multiple errors" when {
       "the DesConnector returns multiple errors" in new Test {
 
-        val response = MultipleErrors(Seq(MtdError("INVALID_NINO", "doesn't matter"), MtdError("INVALID_TAXYEAR", "doesn't matter")))
+        val response = DesResponse(correlationId,
+          MultipleErrors(Seq(MtdError("INVALID_NINO", "doesn't matter"), MtdError("INVALID_TAXYEAR", "doesn't matter"))))
 
-        val expected = ErrorWrapper(BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
+        val expected = ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
 
         MockedDesConnector.amend(input).returns(Future.successful(Left(response)))
 
@@ -71,9 +72,10 @@ class CharitableGivingServiceSpec extends ServiceSpec {
     }
     "return a single error" when {
       "the DesConnector returns multiple errors and one maps to a DownstreamError" in new Test {
-        val response = MultipleErrors(Seq(MtdError("INVALID_NINO", "doesn't matter"), MtdError("INVALID_TYPE", "doesn't matter")))
+        val response = DesResponse(correlationId,
+          MultipleErrors(Seq(MtdError("INVALID_NINO", "doesn't matter"), MtdError("INVALID_TYPE", "doesn't matter"))))
 
-        val expected = ErrorWrapper(DownstreamError, None)
+        val expected = ErrorWrapper(correlationId, DownstreamError, None)
 
         MockedDesConnector.amend(input).returns(Future.successful(Left(response)))
 
@@ -83,9 +85,9 @@ class CharitableGivingServiceSpec extends ServiceSpec {
     }
 
     "the DesConnector returns a GenericError" in new Test {
-      val response = GenericError(DownstreamError)
+      val response = DesResponse(correlationId, GenericError(DownstreamError))
 
-      val expected = ErrorWrapper(DownstreamError, None)
+      val expected = ErrorWrapper(correlationId, DownstreamError, None)
 
       MockedDesConnector.amend(input).returns(Future.successful(Left(response)))
 
@@ -112,9 +114,9 @@ class CharitableGivingServiceSpec extends ServiceSpec {
 
       s"the DesConnector returns a single $error error" in new Test {
 
-        val response = SingleError(MtdError(error, "doesn't matter"))
+        val response = DesResponse(correlationId, SingleError(MtdError(error, "doesn't matter")))
 
-        val expected = ErrorWrapper(errorMap(error), None)
+        val expected = ErrorWrapper(correlationId, errorMap(error), None)
 
         MockedDesConnector.amend(input).returns(Future.successful(Left(response)))
 

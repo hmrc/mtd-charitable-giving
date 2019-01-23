@@ -125,7 +125,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
     "return a valid error response" when {
       "multiple errors exist" in new Test() {
         val amendCharitableGivingRequestData = AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson))
-        val multipleErrorResponse = ErrorWrapper(BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
+        val multipleErrorResponse = ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
 
         MockAmendCharitableGivingRequestDataParser.parseRequest(
           AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
@@ -135,6 +135,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
 
         status(response) shouldBe BAD_REQUEST
         contentAsJson(response) shouldBe Json.toJson(multipleErrorResponse)
+        header("X-CorrelationId", response) shouldBe Some(correlationId)
       }
     }
   }
@@ -146,13 +147,13 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
 
       MockAmendCharitableGivingRequestDataParser.parseRequest(
         AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
-        .returns(Left(ErrorWrapper(error, None)))
+        .returns(Left(ErrorWrapper(correlationId, error, None)))
 
       val response: Future[Result] = target.amend(nino, taxYear)(fakePostRequest[JsValue](CharitableGivingFixture.mtdFormatJson))
 
       status(response) shouldBe expectedStatus
       contentAsJson(response) shouldBe Json.toJson(error)
-
+      header("X-CorrelationId", response) shouldBe Some(correlationId)
     }
   }
 
@@ -166,13 +167,13 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
         .returns(Right(amendCharitableGivingRequest))
 
       MockCharitableGivingService.amend(amendCharitableGivingRequest)
-        .returns(Future.successful(Left(ErrorWrapper(error, None))))
+        .returns(Future.successful(Left(ErrorWrapper(correlationId, error, None))))
 
       val response: Future[Result] = target.amend(nino, taxYear)(fakePostRequest[JsValue](CharitableGivingFixture.mtdFormatJson))
 
       status(response) shouldBe expectedStatus
       contentAsJson(response) shouldBe Json.toJson(error)
-
+      header("X-CorrelationId", response) shouldBe Some(correlationId)
     }
   }
 

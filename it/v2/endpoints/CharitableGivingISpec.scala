@@ -109,7 +109,7 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
 
         val response: WSResponse = await(request().put(CharitableGivingFixture.mtdFormatJson))
         response.status shouldBe Status.BAD_REQUEST
-        response.json shouldBe Json.toJson(ErrorWrapper(BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
+        response.json shouldBe Json.toJson(ErrorWrapper("", BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
       }
 
     }

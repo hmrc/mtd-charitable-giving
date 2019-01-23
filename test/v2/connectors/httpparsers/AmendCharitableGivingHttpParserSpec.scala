@@ -21,6 +21,7 @@ import play.api.test.Helpers._
 import support.UnitSpec
 import uk.gov.hmrc.http.HttpResponse
 import v2.models.errors._
+import v2.models.outcomes
 import v2.models.outcomes.DesResponse
 
 
@@ -33,10 +34,12 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
   val desExpectedJson: JsValue = Json.obj("transactionReference" -> transactionReference)
   val desResponse = DesResponse("X-123", transactionReference)
 
+  val correlationId = "X-123"
+
   "read" should {
     "return a DesResponse" when {
       "the http response contains a 200" in {
-        val correlationId = "X-123"
+
         val httpResponse = HttpResponse(OK, Some(desExpectedJson), Map("CorrelationId" -> Seq(correlationId)))
 
         val result = AmendCharitableGivingHttpParser.amendHttpReads.read(PUT, "/test", httpResponse)
@@ -53,9 +56,9 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
             |  "reason": "some reason"
             |}
           """.stripMargin)
-        val expected = SingleError(MtdError("TEST_CODE", "some reason"))
+        val expected = DesResponse(correlationId, SingleError(MtdError("TEST_CODE", "some reason")))
 
-        val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson))
+        val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
         val result = AmendCharitableGivingHttpParser.amendHttpReads.read(PUT, "/test", httpResponse)
         result shouldBe Left(expected)
       }
@@ -68,9 +71,9 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
             |  "reason": "some reason"
             |}
           """.stripMargin)
-        val expected = SingleError(MtdError("TEST_CODE", "some reason"))
+        val expected =  DesResponse(correlationId, SingleError(MtdError("TEST_CODE", "some reason")))
 
-        val httpResponse = HttpResponse(FORBIDDEN, Some(errorResponseJson))
+        val httpResponse = HttpResponse(FORBIDDEN, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
         val result = AmendCharitableGivingHttpParser.amendHttpReads.read(PUT, "/test", httpResponse)
         result shouldBe Left(expected)
       }
@@ -79,9 +82,9 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
     "return a generic error" when {
 
       "the successful json response from DES can't be read" in {
-        val correlationId = "X-123"
+
         val httpResponse = HttpResponse(OK, Some(Json.obj("foo" -> "bar")), Map("CorrelationId" -> Seq(correlationId)))
-        val expected = GenericError(DownstreamError)
+        val expected =  DesResponse(correlationId, GenericError(DownstreamError))
 
 
         val result = AmendCharitableGivingHttpParser.amendHttpReads.read(PUT, "/test", httpResponse)
@@ -97,9 +100,9 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
             |}
           """.
             stripMargin)
-        val expected = GenericError(DownstreamError)
+        val expected =  DesResponse(correlationId, GenericError(DownstreamError))
 
-        val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson))
+        val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
         val result = AmendCharitableGivingHttpParser.amendHttpReads.read(PUT, "/test", httpResponse)
         result shouldBe Left(expected)
       }
@@ -113,9 +116,9 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
             |}
           """.
             stripMargin)
-        val expected = GenericError(DownstreamError)
+        val expected =  DesResponse(correlationId, GenericError(DownstreamError))
 
-        val httpResponse = HttpResponse(INTERNAL_SERVER_ERROR, Some(errorResponseJson))
+        val httpResponse = HttpResponse(INTERNAL_SERVER_ERROR, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
         val result = AmendCharitableGivingHttpParser.amendHttpReads.read(PUT, "/test", httpResponse)
         result shouldBe Left(expected)
       }
@@ -129,9 +132,9 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
             |}
           """.
             stripMargin)
-        val expected = GenericError(DownstreamError)
+        val expected =  DesResponse(correlationId, GenericError(DownstreamError))
 
-        val httpResponse = HttpResponse(SERVICE_UNAVAILABLE, Some(errorResponseJson))
+        val httpResponse = HttpResponse(SERVICE_UNAVAILABLE, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
         val result = AmendCharitableGivingHttpParser.amendHttpReads.read(PUT, "/test", httpResponse)
         result shouldBe Left(expected)
       }
@@ -152,9 +155,9 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
             |    }
             |  ]
           """.stripMargin)
-        val expected = MultipleErrors(Seq(MtdError("TEST_CODE_1", "some reason"), MtdError("TEST_CODE_2", "some reason")))
+        val expected =  DesResponse(correlationId, MultipleErrors(Seq(MtdError("TEST_CODE_1", "some reason"), MtdError("TEST_CODE_2", "some reason"))))
 
-        val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson))
+        val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
         val result = AmendCharitableGivingHttpParser.amendHttpReads.read(POST, "/test", httpResponse)
         result shouldBe Left(expected)
       }
@@ -172,9 +175,9 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
             |    }
             |  ]
           """.stripMargin)
-        val expected = MultipleErrors(Seq(MtdError("TEST_CODE_1", "some reason"), MtdError("TEST_CODE_2", "some reason")))
+        val expected =  DesResponse(correlationId, MultipleErrors(Seq(MtdError("TEST_CODE_1", "some reason"), MtdError("TEST_CODE_2", "some reason"))))
 
-        val httpResponse = HttpResponse(FORBIDDEN, Some(errorResponseJson))
+        val httpResponse = HttpResponse(FORBIDDEN, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
         val result = AmendCharitableGivingHttpParser.amendHttpReads.read(POST, "/test", httpResponse)
         result shouldBe Left(expected)
       }

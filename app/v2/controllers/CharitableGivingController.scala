@@ -44,10 +44,10 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
 
       case Right(amendCharitableGivingRequest) => charitableGivingService.amend(amendCharitableGivingRequest).map {
         case Right(correlationId) => NoContent.withHeaders("X-CorrelationId" -> correlationId)
-        case Left(errorWrapper) => processError(errorWrapper)
+        case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId)
       }
       case Left(errorWrapper) => Future.successful {
-        processError(errorWrapper)
+        processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId)
       }
     }
   }
