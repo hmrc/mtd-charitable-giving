@@ -36,7 +36,7 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
 
     def setupStubs(): StubMapping
 
-    def request(): WSRequest = { // This should be DES tests, as charitable giving will integrate with DES
+    def request(): WSRequest = {
       setupStubs()
       buildRequest(s"/2.0/ni/$nino/charitable-giving/$taxYear")
     }
