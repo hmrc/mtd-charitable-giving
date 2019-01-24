@@ -25,6 +25,9 @@ object DesStub extends WireMockMethods {
   private def amendCharitableGivingUrl(nino: String, taxYear: String): String =
     s"/income-tax/nino/$nino/income-source/charity/annual/$taxYear"
 
+  private def retrieveCharitableGivingUrl(nino: String, taxYear: String): String =
+    s"/income-tax/nino/$nino/income-source/charity/annual/$taxYear"
+
   private val body =
     """
       |{"transactionReference": "12121"}
@@ -48,4 +51,14 @@ object DesStub extends WireMockMethods {
     when(method = POST, uri = amendCharitableGivingUrl(nino, taxYear))
     .thenReturn(status = errorStatus, errorBody)
   }
+
+  def retrieveSuccess(nino: String, taxYear: String): StubMapping = {
+    when(method = GET, uri = retrieveCharitableGivingUrl(nino, taxYear))
+      .thenReturn(status = OK, body)
+  }
+
+/*  def retrieveError(nino: String, taxYear: String, errorStatus: Int, errorBody: String): StubMapping = {
+    when(method = GET, uri = retrieveCharitableGivingUrl(nino, taxYear))
+      .thenReturn(status = errorStatus, errorBody)
+  }*/
 }

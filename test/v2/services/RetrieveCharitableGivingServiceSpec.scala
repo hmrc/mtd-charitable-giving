@@ -22,11 +22,12 @@ import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear}
 import v2.models.{CharitableGiving, GiftAidPayments, Gifts}
+import v2.fixtures.Fixtures.CharitableGivingFixture._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class AmendCharitableGivingServiceSpec extends ServiceSpec {
+class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
 
   trait Test extends MockDesConnector {
     lazy val target = new CharitableGivingService(connector)
@@ -34,28 +35,25 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
 
 
   val correlationId = "X-123"
-  val expectedRef = "000000000001013"
   val nino = "AA123456A"
   val taxYear = "2017-18"
-  val expectedDesResponse = DesResponse(correlationId, expectedRef)
+  val expectedDesResponse = DesResponse(correlationId, charitableGivingModel)
   val input = AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
     CharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))
 
-  "calling amend" should {
+  "calling retrieve" should {
     "return a valid correlationId" when {
       "a valid data is passed" in new Test {
 
-        private val expected = correlationId
+        MockedDesConnector.retrieve(Nino(nino), DesTaxYear(taxYear)).returns(Future.successful(Right(expectedDesResponse)))
 
-        MockedDesConnector.amend(input).returns(Future.successful(Right(expectedDesResponse)))
+        private val result = await(target.retrieve(Nino(nino), DesTaxYear(taxYear)))
 
-        private val result = await(target.amend(input))
-
-        result shouldBe Right(expected)
+        result shouldBe Right(charitableGivingModel)
       }
     }
 
-    "return multiple errors" when {
+    /*"return multiple errors" when {
       "the DesConnector returns multiple errors" in new Test {
 
         val response = DesResponse(correlationId,
@@ -124,7 +122,7 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
         result shouldBe Left(expected)
       }
 
-    }
+    }*/
 
   }
 }

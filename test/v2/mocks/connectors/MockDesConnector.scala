@@ -18,10 +18,12 @@ package v2.mocks.connectors
 
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
-import v2.models.outcomes.AmendCharitableGivingConnectorOutcome
-import v2.models.requestData.AmendCharitableGivingRequest
+import v2.models.outcomes
+import v2.models.outcomes.{AmendCharitableGivingConnectorOutcome, RetrieveCharitableGivingConnectorOutcome}
+import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,6 +35,11 @@ trait MockDesConnector extends MockFactory {
     def amend(amendCharitableGivingRequest: AmendCharitableGivingRequest): CallHandler[Future[AmendCharitableGivingConnectorOutcome]] = {
       (connector.amend(_: AmendCharitableGivingRequest)(_: HeaderCarrier, _: ExecutionContext))
         .expects(amendCharitableGivingRequest, *, *)
+    }
+
+    def retrieve(nino: Nino, taxYear: DesTaxYear): CallHandler[Future[RetrieveCharitableGivingConnectorOutcome]] = {
+      (connector.retrieve(_: Nino, _: DesTaxYear)(_: HeaderCarrier, _: ExecutionContext))
+        .expects(nino: Nino, taxYear: DesTaxYear, *, *)
     }
   }
 

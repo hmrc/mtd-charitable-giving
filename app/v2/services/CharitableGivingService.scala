@@ -18,11 +18,12 @@ package v2.services
 
 import javax.inject.Inject
 import play.api.Logger
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.errors._
-import v2.models.outcomes.{AmendCharitableGivingOutcome, DesResponse}
-import v2.models.requestData.AmendCharitableGivingRequest
+import v2.models.outcomes.{AmendCharitableGivingOutcome, DesResponse, RetrieveCharitableGivingOutcome}
+import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -47,6 +48,22 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
       case Left(DesResponse(correlationId, GenericError(error))) => Left(ErrorWrapper(correlationId, error, None))
       case Right(desResponse) => Right(desResponse.correlationId)
     }
+  }
+
+
+  def retrieve(nino: Nino, taxYear: DesTaxYear)
+              (implicit hc: HeaderCarrier,
+               ec: ExecutionContext): Future[RetrieveCharitableGivingOutcome] = {
+    val logger: Logger = Logger(this.getClass)
+
+    connector.retrieve(nino, taxYear).map {
+      case Right(desResponse) => Right(desResponse.responseData)
+    }
+
+
+
+
+
   }
 
   private def desErrorToMtdError: Map[String, MtdError] = Map(

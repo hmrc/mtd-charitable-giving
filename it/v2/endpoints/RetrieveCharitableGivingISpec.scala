@@ -27,7 +27,7 @@ import v2.models.errors._
 import v2.models.requestData.DesTaxYear
 import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
 
-class AmendCharitableGivingISpec extends IntegrationBaseSpec {
+class RetrieveCharitableGivingISpec extends IntegrationBaseSpec {
 
   private trait Test {
 
@@ -42,9 +42,9 @@ class AmendCharitableGivingISpec extends IntegrationBaseSpec {
     }
   }
 
-  "Calling the amend charitable giving endpoint" should {
+  "Calling the retrieve charitable giving endpoint" should {
 
-    "return a 204 status code" when {
+    "return a 200 status code" when {
 
       "any valid request is made" in new Test {
         override val nino: String = "AA123456A"
@@ -54,15 +54,15 @@ class AmendCharitableGivingISpec extends IntegrationBaseSpec {
           AuditStub.audit()
           AuthStub.authorised()
           MtdIdLookupStub.ninoFound(nino)
-          DesStub.amendSuccess(nino, DesTaxYear(taxYear).toDesTaxYear)
+          DesStub.retrieveSuccess(nino, DesTaxYear(taxYear).toDesTaxYear)
         }
 
-        val response: WSResponse = await(request().put(CharitableGivingFixture.mtdFormatJson))
-        response.status shouldBe Status.NO_CONTENT
+        val response: WSResponse = await(request().get)
+        response.status shouldBe Status.OK
       }
     }
 
-    "return 500 (Internal Server Error)" when {
+   /* "return 500 (Internal Server Error)" when {
 
       errorTest(Status.BAD_REQUEST, "INVALID_TYPE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
       errorTest(Status.FORBIDDEN, "NOT_FOUND_INCOME_SOURCE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
@@ -140,6 +140,6 @@ class AmendCharitableGivingISpec extends IntegrationBaseSpec {
          |        "reason": "Does not matter."
          |      }
       """.stripMargin
-
+*/
   }
 }
