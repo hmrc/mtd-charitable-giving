@@ -21,7 +21,7 @@ import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.mocks.{MockAppConfig, MockHttpClient}
 import v2.models.errors.{SingleError, TaxYearFormatError}
 import v2.models.outcomes.{AmendCharitableGivingConnectorOutcome, DesResponse, RetrieveCharitableGivingConnectorOutcome}
-import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear}
+import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear, RetrieveCharitableGivingRequest}
 import v2.models.{CharitableGiving, GiftAidPayments, Gifts}
 
 import scala.concurrent.Future
@@ -94,7 +94,7 @@ class DesConnectorSpec extends ConnectorSpec{
           s"$baseUrl" + s"/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}")
           .returns(Future.successful(Right(httpParsedDesResponse)))
 
-        val result = await(connector.retrieve(Nino(nino), DesTaxYear(taxYear)))
+        val result = await(connector.retrieve(RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))))
         result shouldBe Right(httpParsedDesResponse)
       }
     }

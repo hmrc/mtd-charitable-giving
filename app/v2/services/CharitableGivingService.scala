@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.errors._
 import v2.models.outcomes.{AmendCharitableGivingOutcome, DesResponse, RetrieveCharitableGivingOutcome}
-import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear}
+import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear, RetrieveCharitableGivingRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -51,19 +51,14 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
   }
 
 
-  def retrieve(nino: Nino, taxYear: DesTaxYear)
+  def retrieve(retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest)
               (implicit hc: HeaderCarrier,
                ec: ExecutionContext): Future[RetrieveCharitableGivingOutcome] = {
     val logger: Logger = Logger(this.getClass)
 
-    connector.retrieve(nino, taxYear).map {
+    connector.retrieve(retrieveCharitableGivingRequest).map {
       case Right(desResponse) => Right(desResponse.responseData)
     }
-
-
-
-
-
   }
 
   private def desErrorToMtdError: Map[String, MtdError] = Map(

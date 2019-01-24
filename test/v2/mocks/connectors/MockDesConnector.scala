@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.outcomes
 import v2.models.outcomes.{AmendCharitableGivingConnectorOutcome, RetrieveCharitableGivingConnectorOutcome}
-import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear}
+import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear, RetrieveCharitableGivingRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -37,9 +37,9 @@ trait MockDesConnector extends MockFactory {
         .expects(amendCharitableGivingRequest, *, *)
     }
 
-    def retrieve(nino: Nino, taxYear: DesTaxYear): CallHandler[Future[RetrieveCharitableGivingConnectorOutcome]] = {
-      (connector.retrieve(_: Nino, _: DesTaxYear)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(nino: Nino, taxYear: DesTaxYear, *, *)
+    def retrieve(retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest): CallHandler[Future[RetrieveCharitableGivingConnectorOutcome]] = {
+      (connector.retrieve(_: RetrieveCharitableGivingRequest)(_: HeaderCarrier, _: ExecutionContext))
+        .expects(retrieveCharitableGivingRequest, *, *)
     }
   }
 

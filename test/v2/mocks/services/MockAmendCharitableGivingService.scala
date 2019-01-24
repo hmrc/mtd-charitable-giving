@@ -31,7 +31,7 @@ trait MockAmendCharitableGivingService extends MockFactory{
 
   object MockCharitableGivingService {
     def amend(amendCharitableGivingRequest: AmendCharitableGivingRequest): CallHandler[Future[AmendCharitableGivingOutcome]] = {
-      (mockAmendCharitableGivingService.amend(_:AmendCharitableGivingRequest)(_: HeaderCarrier, _: ExecutionContext))
+      (mockAmendCharitableGivingService.amend(_: AmendCharitableGivingRequest)(_: HeaderCarrier, _: ExecutionContext))
         .expects(amendCharitableGivingRequest, *, *)
     }
   }

@@ -25,7 +25,7 @@ import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import v2.config.AppConfig
 import v2.models.CharitableGiving
 import v2.models.outcomes.{AmendCharitableGivingConnectorOutcome, RetrieveCharitableGivingConnectorOutcome}
-import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear}
+import v2.models.requestData.{AmendCharitableGivingRequest, RetrieveCharitableGivingRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -54,11 +54,14 @@ class DesConnector @Inject()(http: HttpClient,
       desHeaderCarrier, implicitly)
   }
 
-  def retrieve(nino: Nino, taxYear: DesTaxYear)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveCharitableGivingConnectorOutcome] = {
+  def retrieve(retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest)
+              (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveCharitableGivingConnectorOutcome] = {
 
+    val nino = retrieveCharitableGivingRequest.nino.nino
+    val taxYear = retrieveCharitableGivingRequest.desTaxYear.toDesTaxYear
     import v2.connectors.httpparsers.RetrieveCharitableGivingHttpParser.retrieveHttpReads
 
-    val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/income-source/charity/annual/${taxYear.toDesTaxYear}"
+    val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/income-source/charity/annual/${taxYear}"
 
     http.GET[RetrieveCharitableGivingConnectorOutcome](url)(retrieveHttpReads, desHeaderCarrier, implicitly)
   }

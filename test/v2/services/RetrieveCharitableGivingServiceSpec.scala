@@ -20,7 +20,7 @@ import uk.gov.hmrc.domain.Nino
 import v2.mocks.connectors.MockDesConnector
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear}
+import v2.models.requestData.{RetrieveCharitableGivingRequest, DesTaxYear}
 import v2.models.{CharitableGiving, GiftAidPayments, Gifts}
 import v2.fixtures.Fixtures.CharitableGivingFixture._
 
@@ -38,16 +38,15 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
   val nino = "AA123456A"
   val taxYear = "2017-18"
   val expectedDesResponse = DesResponse(correlationId, charitableGivingModel)
-  val input = AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
-    CharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))
+  val input = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))
 
   "calling retrieve" should {
     "return a valid correlationId" when {
       "a valid data is passed" in new Test {
 
-        MockedDesConnector.retrieve(Nino(nino), DesTaxYear(taxYear)).returns(Future.successful(Right(expectedDesResponse)))
+        MockedDesConnector.retrieve(input).returns(Future.successful(Right(expectedDesResponse)))
 
-        private val result = await(target.retrieve(Nino(nino), DesTaxYear(taxYear)))
+        private val result = await(target.retrieve(input))
 
         result shouldBe Right(charitableGivingModel)
       }
