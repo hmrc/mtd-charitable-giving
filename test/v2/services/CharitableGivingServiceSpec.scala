@@ -61,7 +61,7 @@ class CharitableGivingServiceSpec extends ServiceSpec {
         val response = DesResponse(correlationId,
           MultipleErrors(Seq(MtdError("INVALID_NINO", "doesn't matter"), MtdError("INVALID_TAXYEAR", "doesn't matter"))))
 
-        val expected = ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
+        val expected = ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
 
         MockedDesConnector.amend(input).returns(Future.successful(Left(response)))
 
@@ -75,7 +75,7 @@ class CharitableGivingServiceSpec extends ServiceSpec {
         val response = DesResponse(correlationId,
           MultipleErrors(Seq(MtdError("INVALID_NINO", "doesn't matter"), MtdError("INVALID_TYPE", "doesn't matter"))))
 
-        val expected = ErrorWrapper(correlationId, DownstreamError, None)
+        val expected = ErrorWrapper(Some(correlationId), DownstreamError, None)
 
         MockedDesConnector.amend(input).returns(Future.successful(Left(response)))
 
@@ -87,7 +87,7 @@ class CharitableGivingServiceSpec extends ServiceSpec {
     "the DesConnector returns a GenericError" in new Test {
       val response = DesResponse(correlationId, GenericError(DownstreamError))
 
-      val expected = ErrorWrapper(correlationId, DownstreamError, None)
+      val expected = ErrorWrapper(Some(correlationId), DownstreamError, None)
 
       MockedDesConnector.amend(input).returns(Future.successful(Left(response)))
 
@@ -116,7 +116,7 @@ class CharitableGivingServiceSpec extends ServiceSpec {
 
         val response = DesResponse(correlationId, SingleError(MtdError(error, "doesn't matter")))
 
-        val expected = ErrorWrapper(correlationId, errorMap(error), None)
+        val expected = ErrorWrapper(Some(correlationId), errorMap(error), None)
 
         MockedDesConnector.amend(input).returns(Future.successful(Left(response)))
 

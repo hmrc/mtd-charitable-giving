@@ -33,21 +33,25 @@ object AmendCharitableGivingHttpParser extends HttpParser {
   implicit val amendHttpReads: HttpReads[AmendCharitableGivingConnectorOutcome] = new HttpReads[AmendCharitableGivingConnectorOutcome] {
     override def read(method: String, url: String, response: HttpResponse): AmendCharitableGivingConnectorOutcome = {
 
+      val correlationId = retrieveCorrelationId(response)
       if(response.status != OK) {
         logger.info("[AmendCharitableGivingHttpParser][read] - " +
           s"Error response received from DES with status: ${response.status} and body\n" +
-          s"${response.body} when calling $url")
+          s"${response.body} and correlationId: $correlationId when calling $url")
       }
 
       response.status match {
-        case OK => parseResponse(response)
-        case BAD_REQUEST | FORBIDDEN => Left(DesResponse(retrieveCorrelationId(response),parseErrors(response)))
-        case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(DesResponse(retrieveCorrelationId(response), GenericError(DownstreamError)))
+        case OK => logger.info("[AmendCharitableGivingHttpParser][read] - " +
+          s"Success response received from DES with correlationId: $correlationId when calling $url")
+          parseResponse(correlationId, response)
+        case BAD_REQUEST | FORBIDDEN => Left(DesResponse(correlationId,parseErrors(response)))
+        case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(DesResponse(correlationId, GenericError(DownstreamError)))
       }
     }
-    private def parseResponse(response: HttpResponse): AmendCharitableGivingConnectorOutcome = response.validateJson[String](jsonReads) match {
-      case Some(ref) => Right(DesResponse(retrieveCorrelationId(response), ref))
-      case None => Left(DesResponse(retrieveCorrelationId(response), GenericError(DownstreamError)))
+    private def parseResponse(correlationId: String, response: HttpResponse): AmendCharitableGivingConnectorOutcome =
+      response.validateJson[String](jsonReads) match {
+      case Some(ref) => Right(DesResponse(correlationId, ref))
+      case None => Left(DesResponse(correlationId, GenericError(DownstreamError)))
     }
   }
 }
