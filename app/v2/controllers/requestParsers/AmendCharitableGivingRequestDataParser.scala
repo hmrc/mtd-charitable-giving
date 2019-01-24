@@ -16,8 +16,6 @@
 
 package v2.controllers.requestParsers
 
-import java.util.UUID
-
 import javax.inject.Inject
 import uk.gov.hmrc.domain.Nino
 import v2.controllers.requestParsers.validators.AmendCharitableGivingValidator
