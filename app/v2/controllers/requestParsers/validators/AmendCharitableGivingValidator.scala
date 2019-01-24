@@ -42,38 +42,51 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
   private def levelThreeValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
 
     val amendCharitableGiving = data.body.json.as[CharitableGiving]
-    val giftAidPayments = amendCharitableGiving.giftAidPayments
-    val gifts = amendCharitableGiving.gifts
 
-    lazy val nonUKNamesNotSpecifiedRuleErrorCheck =
-      giftAidPayments.nonUKCharities.exists(_ > 0 && (giftAidPayments.nonUKCharityNames.isEmpty || giftAidPayments.nonUKCharityNames.get.isEmpty))
+    val giftAidPaymentsValidations = if (amendCharitableGiving.giftAidPayments.nonEmpty) {
+      val giftAidPayments = amendCharitableGiving.giftAidPayments.get
 
-    lazy val nonUKInvestmentsNamesNotSpecifiedRuleErrorCheck =
-      gifts.investmentsNonUKCharities.exists(_ > 0 && (gifts.investmentsNonUKCharityNames.isEmpty || gifts.investmentsNonUKCharityNames.get.isEmpty))
+      lazy val nonUKNamesNotSpecifiedRuleErrorCheck =
+        giftAidPayments.nonUKCharities.exists(_ > 0 && (giftAidPayments.nonUKCharityNames.isEmpty || giftAidPayments.nonUKCharityNames.get.isEmpty))
+      lazy val namesSuppliedButIncorrectAmountCheck =
+        giftAidPayments.nonUKCharityNames.exists(_.nonEmpty && giftAidPayments.nonUKCharities.forall(_ == 0))
 
-    lazy val namesSuppliedButIncorrectAmountCheck =
-      giftAidPayments.nonUKCharityNames.exists(_.nonEmpty && giftAidPayments.nonUKCharities.forall(_ == 0))
+      List(
+        AmountValidation.validate(giftAidPayments.specifiedYear, GiftAidSpecifiedYearFormatError),
+        AmountValidation.validate(giftAidPayments.oneOffSpecifiedYear, GiftAidOneOffSpecifiedYearFormatError),
+        AmountValidation.validate(giftAidPayments.specifiedYearTreatedAsPreviousYear, GiftAidSpecifiedYearPreviousFormatError),
+        AmountValidation.validate(giftAidPayments.followingYearTreatedAsSpecifiedYear, GiftAidFollowingYearSpecifiedFormatError),
+        AmountValidation.validate(giftAidPayments.nonUKCharities, GiftAidNonUKCharityAmountFormatError),
+        PredicateValidation.validate(nonUKNamesNotSpecifiedRuleErrorCheck, NonUKNamesNotSpecifiedRuleError),
+        PredicateValidation.validate(namesSuppliedButIncorrectAmountCheck, NonUKAmountNotSpecifiedRuleError),
+        ArrayElementsRegexValidation.validate(giftAidPayments.nonUKCharityNames, "^[^|]{1,75}$", GiftAidNonUKNamesFormatError)
+      )
+    } else {
+      List()
+    }
 
-    lazy val investmentsNamesSuppliedButIncorrectAmountCheck =
-      gifts.investmentsNonUKCharityNames.exists(_.nonEmpty && gifts.investmentsNonUKCharities.forall(_ == 0))
+    val giftsValidations = if (amendCharitableGiving.gifts.isDefined) {
 
-    List(
-      AmountValidation.validate(giftAidPayments.specifiedYear, GiftAidSpecifiedYearFormatError),
-      AmountValidation.validate(giftAidPayments.oneOffSpecifiedYear, GiftAidOneOffSpecifiedYearFormatError),
-      AmountValidation.validate(giftAidPayments.specifiedYearTreatedAsPreviousYear, GiftAidSpecifiedYearPreviousFormatError),
-      AmountValidation.validate(giftAidPayments.followingYearTreatedAsSpecifiedYear, GiftAidFollowingYearSpecifiedFormatError),
-      AmountValidation.validate(giftAidPayments.nonUKCharities, GiftAidNonUKCharityAmountFormatError),
-      AmountValidation.validate(gifts.sharesOrSecurities, GiftsSharesSecuritiesFormatError),
-      AmountValidation.validate(gifts.landAndBuildings, GiftsLandsBuildingsFormatError),
-      AmountValidation.validate(gifts.investmentsNonUKCharities, GiftsInvestmentsAmountFormatError),
-      PredicateValidation.validate(nonUKNamesNotSpecifiedRuleErrorCheck, NonUKNamesNotSpecifiedRuleError),
-      PredicateValidation.validate(namesSuppliedButIncorrectAmountCheck, NonUKAmountNotSpecifiedRuleError),
-      PredicateValidation.validate(nonUKInvestmentsNamesNotSpecifiedRuleErrorCheck, NonUKInvestmentsNamesNotSpecifiedRuleError),
-      PredicateValidation.validate(investmentsNamesSuppliedButIncorrectAmountCheck, NonUKInvestmentAmountNotSpecifiedRuleError),
-      ArrayElementsRegexValidation.validate(giftAidPayments.nonUKCharityNames, "^[^|]{1,75}$", GiftAidNonUKNamesFormatError),
-      ArrayElementsRegexValidation.validate(gifts.investmentsNonUKCharityNames, "^[^|]{1,75}$", GiftsNonUKInvestmentsNamesFormatError)
-    )
+      val gifts = amendCharitableGiving.gifts.get
 
+      lazy val nonUKInvestmentsNamesNotSpecifiedRuleErrorCheck =
+        gifts.investmentsNonUKCharities.exists(_ > 0 && (gifts.investmentsNonUKCharityNames.isEmpty || gifts.investmentsNonUKCharityNames.get.isEmpty))
+      lazy val investmentsNamesSuppliedButIncorrectAmountCheck =
+        gifts.investmentsNonUKCharityNames.exists(_.nonEmpty && gifts.investmentsNonUKCharities.forall(_ == 0))
+
+      List(
+        AmountValidation.validate(gifts.sharesOrSecurities, GiftsSharesSecuritiesFormatError),
+        AmountValidation.validate(gifts.landAndBuildings, GiftsLandsBuildingsFormatError),
+        AmountValidation.validate(gifts.investmentsNonUKCharities, GiftsInvestmentsAmountFormatError),
+        PredicateValidation.validate(nonUKInvestmentsNamesNotSpecifiedRuleErrorCheck, NonUKInvestmentsNamesNotSpecifiedRuleError),
+        PredicateValidation.validate(investmentsNamesSuppliedButIncorrectAmountCheck, NonUKInvestmentAmountNotSpecifiedRuleError),
+        ArrayElementsRegexValidation.validate(gifts.investmentsNonUKCharityNames, "^[^|]{1,75}$", GiftsNonUKInvestmentsNamesFormatError)
+      )
+    } else {
+      List()
+    }
+
+    giftAidPaymentsValidations ++ giftsValidations
   }
 
 

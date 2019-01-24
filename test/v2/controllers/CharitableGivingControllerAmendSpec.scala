@@ -53,7 +53,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
   val taxYear = "2017-18"
   val correlationId = "X-123"
   val amendCharitableGivingRequest: AmendCharitableGivingRequest = AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
-    CharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))
+    CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None))))
 
   "amend" should {
     "return a successful response with header X-CorrelationId" when {

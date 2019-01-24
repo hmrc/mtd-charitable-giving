@@ -19,7 +19,7 @@ package v2.models
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-case class CharitableGiving(giftAidPayments: GiftAidPayments, gifts: Gifts)
+case class CharitableGiving(giftAidPayments: Option[GiftAidPayments], gifts:Option[Gifts])
 
 object CharitableGiving {
 
@@ -28,13 +28,13 @@ object CharitableGiving {
   implicit val writes: Writes[CharitableGiving] = Json.writes[CharitableGiving]
 
   val desReads: Reads[CharitableGiving] = (
-    (__ \ "giftAidPayments").read[GiftAidPayments](GiftAidPayments.desReads) and
-      (__ \ "gifts").read[Gifts](Gifts.desReads)
+    (__ \ "giftAidPayments").readNullable[GiftAidPayments](GiftAidPayments.desReads) and
+      (__ \ "gifts").readNullable[Gifts](Gifts.desReads)
     ) (CharitableGiving.apply _)
 
   val desWrites: Writes[CharitableGiving] = (
-    (__ \ "giftAidPayments").write[GiftAidPayments](GiftAidPayments.desWrites) and
-      (__ \ "gifts").write[Gifts](Gifts.desWrites)
+    (__ \ "giftAidPayments").writeNullable[GiftAidPayments](GiftAidPayments.desWrites) and
+      (__ \ "gifts").writeNullable[Gifts](Gifts.desWrites)
     ) (unlift(CharitableGiving.unapply))
 }
 

@@ -62,20 +62,25 @@ object Fixtures {
     )
 
     val charitableGivingModel: CharitableGiving = CharitableGiving(
-      giftAidPayments = GiftAidPayments(
-        specifiedYear = Some(10000.00),
-        oneOffSpecifiedYear = Some(1000.00),
-        specifiedYearTreatedAsPreviousYear = Some(300.00),
-        followingYearTreatedAsSpecifiedYear = Some(400.00),
-        nonUKCharities = Some(2000.00),
-        nonUKCharityNames = Some(Seq("International Charity A", "International Charity B"))
+      giftAidPayments = Some(
+        GiftAidPayments(
+          specifiedYear = Some(10000.00),
+          oneOffSpecifiedYear = Some(1000.00),
+          specifiedYearTreatedAsPreviousYear = Some(300.00),
+          followingYearTreatedAsSpecifiedYear = Some(400.00),
+          nonUKCharities = Some(2000.00),
+          nonUKCharityNames = Some(Seq("International Charity A", "International Charity B"))
+        )
       ),
-      gifts = Gifts(
-        landAndBuildings = Some(700.00),
-        sharesOrSecurities = Some(600.00),
-        investmentsNonUKCharities = Some(300.00),
-        investmentsNonUKCharityNames = Some(Seq("International Charity C","International Charity D"))
+      gifts = Some(
+        Gifts(
+          landAndBuildings = Some(700.00),
+          sharesOrSecurities = Some(600.00),
+          investmentsNonUKCharities = Some(300.00),
+          investmentsNonUKCharityNames = Some(Seq("International Charity C", "International Charity D"))
+        )
       )
     )
   }
+
 }
