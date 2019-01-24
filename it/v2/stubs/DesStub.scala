@@ -17,7 +17,7 @@
 package v2.stubs
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import play.api.http.Status.{OK, BAD_REQUEST}
+import play.api.http.Status.OK
 import support.WireMockMethods
 
 object DesStub extends WireMockMethods {

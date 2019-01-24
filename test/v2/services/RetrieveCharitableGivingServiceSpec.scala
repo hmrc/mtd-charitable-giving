@@ -17,12 +17,10 @@
 package v2.services
 
 import uk.gov.hmrc.domain.Nino
-import v2.mocks.connectors.MockDesConnector
-import v2.models.errors._
-import v2.models.outcomes.DesResponse
-import v2.models.requestData.{RetrieveCharitableGivingRequest, DesTaxYear}
-import v2.models.{CharitableGiving, GiftAidPayments, Gifts}
 import v2.fixtures.Fixtures.CharitableGivingFixture._
+import v2.mocks.connectors.MockDesConnector
+import v2.models.outcomes.DesResponse
+import v2.models.requestData.{DesTaxYear, RetrieveCharitableGivingRequest}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

@@ -16,12 +16,6 @@
 
 package v2.controllers
 
-import uk.gov.hmrc.http.HeaderCarrier
-import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService}
-import v2.models.errors.{NinoFormatError, UnauthorisedError}
-
-import scala.concurrent.Future
-
 class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
 
   /*trait Test extends MockEnrolmentsAuthService with MockMtdIdLookupService {

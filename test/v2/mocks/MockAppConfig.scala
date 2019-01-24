@@ -16,9 +16,9 @@
 
 package v2.mocks
 
-import v2.config.AppConfig
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
+import v2.config.AppConfig
 
 trait MockAppConfig extends MockFactory {
 

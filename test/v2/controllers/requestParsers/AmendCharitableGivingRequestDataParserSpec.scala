@@ -22,7 +22,7 @@ import uk.gov.hmrc.domain.Nino
 import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.mocks.validators.MockAmendCharitableGivingValidator
 import v2.models.errors.{BadRequestError, ErrorWrapper, NinoFormatError, TaxYearFormatError}
-import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRequestData, DesTaxYear, RetrieveCharitableGivingRequest}
+import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRequestData, DesTaxYear}
 
 class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
 
