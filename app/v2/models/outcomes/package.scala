@@ -28,4 +28,5 @@ package object outcomes {
   type AmendCharitableGivingOutcome = Either[ErrorWrapper, String]
 
   type RetrieveCharitableGivingConnectorOutcome = Either[DesResponse[DesError], DesResponse[CharitableGiving]]
+  type RetrieveCharitableGivingOutcome = Either[ErrorWrapper, ResponseWrapper[CharitableGiving]]
 }

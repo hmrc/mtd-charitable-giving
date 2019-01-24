@@ -21,18 +21,18 @@ import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.errors._
-import v2.models.outcomes.{AmendCharitableGivingOutcome, DesResponse}
-import v2.models.requestData.AmendCharitableGivingRequest
+import v2.models.outcomes.{AmendCharitableGivingOutcome, DesResponse, ResponseWrapper, RetrieveCharitableGivingOutcome}
+import v2.models.requestData.{AmendCharitableGivingRequest, RetrieveCharitableGivingRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class CharitableGivingService @Inject()(connector: DesConnector) {
 
+  val logger: Logger = Logger(this.getClass)
+
   def amend(amendCharitableGivingRequest: AmendCharitableGivingRequest)
             (implicit hc: HeaderCarrier,
              ec: ExecutionContext): Future[AmendCharitableGivingOutcome] = {
-
-    val logger: Logger = Logger(this.getClass)
 
     connector.amend(amendCharitableGivingRequest).map {
       case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
@@ -47,6 +47,15 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
       case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdError(error.code), None))
       case Left(DesResponse(correlationId, GenericError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
       case Right(desResponse) => Right(desResponse.correlationId)
+    }
+  }
+
+  def retrieve(retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest)
+              (implicit hc: HeaderCarrier,
+               ec: ExecutionContext): Future[RetrieveCharitableGivingOutcome] = {
+
+    connector.retrieve(retrieveCharitableGivingRequest).map {
+      case Right(desResponse) => Right(ResponseWrapper(desResponse.correlationId, desResponse.responseData))
     }
   }
 

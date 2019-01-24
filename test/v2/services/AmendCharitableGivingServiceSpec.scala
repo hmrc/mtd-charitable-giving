@@ -26,7 +26,7 @@ import v2.models.{CharitableGiving, GiftAidPayments, Gifts}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CharitableGivingServiceSpec extends ServiceSpec {
+class AmendCharitableGivingServiceSpec extends ServiceSpec {
 
   trait Test extends MockDesConnector {
     lazy val target = new CharitableGivingService(connector)
