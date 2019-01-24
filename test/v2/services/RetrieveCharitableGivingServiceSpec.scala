@@ -20,7 +20,7 @@ import uk.gov.hmrc.domain.Nino
 import v2.fixtures.Fixtures.CharitableGivingFixture._
 import v2.mocks.connectors.MockDesConnector
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{DesTaxYear, RetrieveCharitableGivingRequest}
+import v2.models.requestData.DesTaxYear
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

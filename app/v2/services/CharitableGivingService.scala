@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.errors._
 import v2.models.outcomes.{AmendCharitableGivingOutcome, DesResponse, RetrieveCharitableGivingOutcome}
-import v2.models.requestData.{AmendCharitableGivingRequest, RetrieveCharitableGivingRequest}
+import v2.models.requestData.AmendCharitableGivingRequest
 
 import scala.concurrent.{ExecutionContext, Future}
 

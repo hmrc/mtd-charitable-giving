@@ -52,13 +52,4 @@ object DesStub extends WireMockMethods {
     .thenReturn(status = errorStatus, errorBody)
   }
 
-  def retrieveSuccess(nino: String, taxYear: String): StubMapping = {
-    when(method = GET, uri = retrieveCharitableGivingUrl(nino, taxYear))
-      .thenReturn(status = OK, body)
-  }
-
-/*  def retrieveError(nino: String, taxYear: String, errorStatus: Int, errorBody: String): StubMapping = {
-    when(method = GET, uri = retrieveCharitableGivingUrl(nino, taxYear))
-      .thenReturn(status = errorStatus, errorBody)
-  }*/
 }

@@ -27,7 +27,7 @@ import v2.models.errors._
 import v2.models.requestData.DesTaxYear
 import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
 
-class AmendCharitableGivingISpec extends IntegrationBaseSpec {
+class CharitableGivingISpec extends IntegrationBaseSpec {
 
   private trait Test {
 
