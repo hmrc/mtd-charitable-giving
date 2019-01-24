@@ -39,7 +39,7 @@ class CharitableGivingServiceSpec extends ServiceSpec {
   val taxYear = "2017-18"
   val expectedDesResponse = DesResponse(correlationId, expectedRef)
   val input = AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
-    CharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))
+    CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None))))
 
   "calling amend" should {
     "return a valid correlationId" when {

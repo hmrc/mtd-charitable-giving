@@ -37,16 +37,18 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
   }
 
   def createJson(amendCharitableGiving: CharitableGiving): JsValue = {
-    Json.obj(
-      "giftAidPayments" -> Json.writes[GiftAidPayments].writes(amendCharitableGiving.giftAidPayments),
-      "gifts" -> Json.writes[Gifts].writes(amendCharitableGiving.gifts)
-    )
+
+    val giftAidPayments = amendCharitableGiving.giftAidPayments.map(data => Json.obj("giftAidPayments" -> Json.writes[GiftAidPayments].writes(data)))
+    val gifts = amendCharitableGiving.gifts.map(data => Json.obj("gifts" -> Json.writes[Gifts].writes(data)))
+
+    List(giftAidPayments, gifts).foldLeft(Json.obj())((a, b) => if (b.isDefined) a ++ b.get else a)
+
   }
 
   "running a validation" should {
 
     "return no errors" when {
-      "when the uri is valid and the JSON payload is Valid" in new Test {
+      "when the uri is valid and the JSON payload is Valid with all fields" in new Test {
         val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, validJsonBody)
 
         val result: Seq[MtdError] = validator.validate(inputData)
@@ -58,9 +60,11 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "giftAidPayments.nonUKCharities is provided and giftAidPayments.nonUKCharities is greater than zero and " +
         "giftAidPayments.nonUKCharityNames is provided " in new Test {
         val mutatedData = charitableGivingModel.copy(
-          giftAidPayments = charitableGivingModel.giftAidPayments.copy(
-            nonUKCharities = Some(BigDecimal(11.00)),
-            nonUKCharityNames = Some(List("A", "B"))
+          giftAidPayments = Some(
+            charitableGivingModel.giftAidPayments.get.copy(
+              nonUKCharities = Some(BigDecimal(11.00)),
+              nonUKCharityNames = Some(List("A", "B"))
+            )
           )
         )
 
@@ -74,15 +78,41 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "giftAidPayments.nonUKCharities is provided and giftAidPayments.nonUKCharities is equal to zero and " +
         "giftAidPayments.nonUKCharityNames is not provided " in new Test {
         val mutatedData = charitableGivingModel.copy(
-          giftAidPayments = charitableGivingModel.giftAidPayments.copy(
-            nonUKCharities = Some(BigDecimal(0.00)),
-            nonUKCharityNames = None
+          giftAidPayments = Some(
+            charitableGivingModel.giftAidPayments.get.copy(
+              nonUKCharities = Some(BigDecimal(0.00)),
+              nonUKCharityNames = None
+            )
           )
         )
 
         val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
         val result: Seq[MtdError] = validator.validate(inputData)
 
+        result shouldBe List()
+
+      }
+
+      "the gifts field is missing and the giftAidPayments field is provided" in new Test {
+
+        val mutatedData = charitableGivingModel.copy(
+          gifts = None
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val result: Seq[MtdError] = validator.validate(inputData)
+        result shouldBe List()
+
+      }
+
+      "the giftAidPayments field is missing and the gifts field is provided" in new Test {
+
+        val mutatedData = charitableGivingModel.copy(
+          giftAidPayments = None
+        )
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val result: Seq[MtdError] = validator.validate(inputData)
         result shouldBe List()
 
       }
@@ -95,8 +125,10 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "specifiedYear of giftAidPayments is not a valid value" in new Test {
 
         val mutatedData = charitableGivingModel.copy(
-          giftAidPayments = charitableGivingModel.giftAidPayments.copy(
-            specifiedYear = Some(BigDecimal(-11))
+          giftAidPayments = Some(
+            charitableGivingModel.giftAidPayments.get.copy(
+              specifiedYear = Some(BigDecimal(-11))
+            )
           )
         )
 
@@ -112,8 +144,10 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "oneOffSpecifiedYear of giftAidPayments is not a valid value" in new Test {
 
         val mutatedData = charitableGivingModel.copy(
-          giftAidPayments = charitableGivingModel.giftAidPayments.copy(
-            oneOffSpecifiedYear = Some(BigDecimal(-1))
+          giftAidPayments = Some(
+            charitableGivingModel.giftAidPayments.get.copy(
+              oneOffSpecifiedYear = Some(BigDecimal(-1))
+            )
           )
         )
 
@@ -129,8 +163,10 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "specifiedYearTreatedAsPreviousYear of giftAidPayments is not a valid value" in new Test {
 
         val mutatedData = charitableGivingModel.copy(
-          giftAidPayments = charitableGivingModel.giftAidPayments.copy(
-            specifiedYearTreatedAsPreviousYear = Some(BigDecimal(-1))
+          giftAidPayments = Some(
+            charitableGivingModel.giftAidPayments.get.copy(
+              specifiedYearTreatedAsPreviousYear = Some(BigDecimal(-1))
+            )
           )
         )
 
@@ -146,8 +182,10 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "followingYearTreatedAsSpecifiedYear of giftAidPayments is not a valid value" in new Test {
 
         val mutatedData = charitableGivingModel.copy(
-          giftAidPayments = charitableGivingModel.giftAidPayments.copy(
-            followingYearTreatedAsSpecifiedYear = Some(BigDecimal(-1))
+          giftAidPayments = Some(
+            charitableGivingModel.giftAidPayments.get.copy(
+              followingYearTreatedAsSpecifiedYear = Some(BigDecimal(-1))
+            )
           )
         )
 
@@ -163,8 +201,10 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "nonUKCharities of giftAidPayments is not a valid value" in new Test {
 
         val mutatedData = charitableGivingModel.copy(
-          giftAidPayments = charitableGivingModel.giftAidPayments.copy(
-            nonUKCharities = Some(BigDecimal(-1))
+          giftAidPayments = Some(
+            charitableGivingModel.giftAidPayments.get.copy(
+              nonUKCharities = Some(BigDecimal(-1))
+            )
           )
         )
 
@@ -180,8 +220,10 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "sharesOrSecurities of gifts is not a valid value" in new Test {
 
         val mutatedData = charitableGivingModel.copy(
-          gifts = charitableGivingModel.gifts.copy(
-            sharesOrSecurities = Some(BigDecimal(-1))
+          gifts = Some(
+            charitableGivingModel.gifts.get.copy(
+              sharesOrSecurities = Some(BigDecimal(-1))
+            )
           )
         )
 
@@ -197,8 +239,10 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "landAndBuildings of gifts is not a valid value" in new Test {
 
         val mutatedData = charitableGivingModel.copy(
-          gifts = charitableGivingModel.gifts.copy(
-            landAndBuildings = Some(BigDecimal(-1))
+          gifts = Some(
+            charitableGivingModel.gifts.get.copy(
+              landAndBuildings = Some(BigDecimal(-1))
+            )
           )
         )
 
@@ -214,8 +258,10 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "investmentsNonUKCharities of gifts is not a valid value" in new Test {
 
         val mutatedData = charitableGivingModel.copy(
-          gifts = charitableGivingModel.gifts.copy(
-            investmentsNonUKCharities = Some(BigDecimal(-1))
+          gifts = Some(
+            charitableGivingModel.gifts.get.copy(
+              investmentsNonUKCharities = Some(BigDecimal(-1))
+            )
           )
         )
 
@@ -241,9 +287,10 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
 
       "giftAidPayments.nonUKCharities is supplied with greater than 0 amount but giftAidPayments.nonUKCharityNames is not supplied " in new Test {
         val mutatedData = charitableGivingModel.copy(
-          giftAidPayments = charitableGivingModel.giftAidPayments.copy(
+          giftAidPayments = Some(charitableGivingModel.giftAidPayments.get.copy(
             nonUKCharities = Some(BigDecimal(12.34)),
             nonUKCharityNames = None
+          )
           )
         )
 
@@ -258,9 +305,11 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
 
       "giftAidPayments.nonUKCharities is supplied with greater than 0 amount but giftAidPayments.nonUKCharityNames is supplied but is empty" in new Test {
         val mutatedData = charitableGivingModel.copy(
-          giftAidPayments = charitableGivingModel.giftAidPayments.copy(
-            nonUKCharities = Some(BigDecimal(12.34)),
-            nonUKCharityNames = Some(List())
+          giftAidPayments = Some(
+            charitableGivingModel.giftAidPayments.get.copy(
+              nonUKCharities = Some(BigDecimal(12.34)),
+              nonUKCharityNames = Some(List())
+            )
           )
         )
 
@@ -275,9 +324,11 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "giftAidPayments.nonUKCharities is supplied with amount equal to 0 " +
         "and giftAidPayments.nonUKCharityNames is supplied " in new Test {
         val mutatedData = charitableGivingModel.copy(
-          giftAidPayments = charitableGivingModel.giftAidPayments.copy(
-            nonUKCharities = Some(BigDecimal(0)),
-            nonUKCharityNames = Some(List("A", "B"))
+          giftAidPayments = Some(
+            charitableGivingModel.giftAidPayments.get.copy(
+              nonUKCharities = Some(BigDecimal(0)),
+              nonUKCharityNames = Some(List("A", "B"))
+            )
           )
         )
 
@@ -292,9 +343,11 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
 
       "giftAidPayments.nonUKCharities is not supplied and giftAidPayments.nonUKCharityNames is supplied" in new Test {
         val mutatedData = charitableGivingModel.copy(
-          giftAidPayments = charitableGivingModel.giftAidPayments.copy(
-            nonUKCharities = None,
-            nonUKCharityNames = Some(List("A", "B"))
+          giftAidPayments = Some(
+            charitableGivingModel.giftAidPayments.get.copy(
+              nonUKCharities = None,
+              nonUKCharityNames = Some(List("A", "B"))
+            )
           )
         )
 
@@ -309,9 +362,11 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
 
       "giftAidPayments.nonUKCharities is supplied with value(s) not meeting the regex" in new Test {
         val mutatedData = charitableGivingModel.copy(
-          giftAidPayments = charitableGivingModel.giftAidPayments.copy(
-            nonUKCharities = Some(BigDecimal(12.34)),
-            nonUKCharityNames = Some(Seq("|||INVALID||||", "VALID", "VALID"))
+          giftAidPayments = Some(
+            charitableGivingModel.giftAidPayments.get.copy(
+              nonUKCharities = Some(BigDecimal(12.34)),
+              nonUKCharityNames = Some(Seq("|||INVALID||||", "VALID", "VALID"))
+            )
           )
         )
 
@@ -327,9 +382,11 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "giftAidPayments.nonUKCharities is provided and giftAidPayments.nonUKCharities is greater than zero and " +
         "giftAidPayments.nonUKCharityNames is not provided " in new Test {
         val mutatedData = charitableGivingModel.copy(
-          giftAidPayments = charitableGivingModel.giftAidPayments.copy(
-            nonUKCharities = Some(BigDecimal(11.00)),
-            nonUKCharityNames = None
+          giftAidPayments = Some(
+            charitableGivingModel.giftAidPayments.get.copy(
+              nonUKCharities = Some(BigDecimal(11.00)),
+              nonUKCharityNames = None
+            )
           )
         )
 
@@ -342,9 +399,11 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
 
       "gifts.investmentsNonUKCharities is supplied with greater than 0 amount but gifts.investmentsNonUKCharityNames is not supplied " in new Test {
         val mutatedData = charitableGivingModel.copy(
-          gifts = charitableGivingModel.gifts.copy(
-            investmentsNonUKCharities = Some(BigDecimal(12.34)),
-            investmentsNonUKCharityNames = None
+          gifts = Some(
+            charitableGivingModel.gifts.get.copy(
+              investmentsNonUKCharities = Some(BigDecimal(12.34)),
+              investmentsNonUKCharityNames = None
+            )
           )
         )
 
@@ -360,9 +419,11 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "gifts.investmentsNonUKCharities is supplied with amount equal to 0 " +
         "and gifts.investmentsNonUKCharityNames is supplied " in new Test {
         val mutatedData = charitableGivingModel.copy(
-          gifts = charitableGivingModel.gifts.copy(
-            investmentsNonUKCharities = Some(BigDecimal(0)),
-            investmentsNonUKCharityNames = Some(List("A", "B"))
+          gifts = Some(
+            charitableGivingModel.gifts.get.copy(
+              investmentsNonUKCharities = Some(BigDecimal(0)),
+              investmentsNonUKCharityNames = Some(List("A", "B"))
+            )
           )
         )
 
@@ -378,9 +439,11 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "gifts.investmentsNonUKCharities is not supplied and gifts.investmentsNonUKCharityNames is supplied" in new Test {
 
         val mutatedData = charitableGivingModel.copy(
-          gifts = charitableGivingModel.gifts.copy(
-            investmentsNonUKCharities = None,
-            investmentsNonUKCharityNames = Some(List("A", "B"))
+          gifts = Some(
+            charitableGivingModel.gifts.get.copy(
+              investmentsNonUKCharities = None,
+              investmentsNonUKCharityNames = Some(List("A", "B"))
+            )
           )
         )
 
@@ -396,9 +459,11 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "gifts.investmentsNonUKCharities is supplied with value(s) not meeting the regex" in new Test {
 
         val mutatedData = charitableGivingModel.copy(
-          gifts = charitableGivingModel.gifts.copy(
-            investmentsNonUKCharities = Some(BigDecimal(12.34)),
-            investmentsNonUKCharityNames = Some(Seq("|||INVALID||||", "VALID", "VALID"))
+          gifts = Some(
+            charitableGivingModel.gifts.get.copy(
+              investmentsNonUKCharities = Some(BigDecimal(12.34)),
+              investmentsNonUKCharityNames = Some(Seq("|||INVALID||||", "VALID", "VALID"))
+            )
           )
         )
 
@@ -414,9 +479,10 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "gifts.investmentsNonUKCharities is provided and giftAidPayments.investmentsNonUKCharities is greater than zero and " +
         "gifts.investmentsNonUKCharityNames is not provided " in new Test {
         val mutatedData = charitableGivingModel.copy(
-          gifts = charitableGivingModel.gifts.copy(
+          gifts = Some(charitableGivingModel.gifts.get.copy(
             investmentsNonUKCharities = Some(BigDecimal(11.00)),
             investmentsNonUKCharityNames = None
+          )
           )
         )
 
@@ -430,10 +496,10 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "gifts.investmentsNonUKCharities is provided and giftAidPayments.investmentsNonUKCharities is greater than zero and " +
         "gifts.investmentsNonUKCharityNames is supplied but is empty " in new Test {
         val mutatedData = charitableGivingModel.copy(
-          gifts = charitableGivingModel.gifts.copy(
+          gifts = Some(charitableGivingModel.gifts.get.copy(
             investmentsNonUKCharities = Some(BigDecimal(11.00)),
             investmentsNonUKCharityNames = Some(List())
-          )
+          ))
         )
 
         val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
@@ -449,9 +515,11 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
     "return multiple errors" when {
       "multiple validations fail" in new Test {
         val mutatedData = charitableGivingModel.copy(
-          gifts = charitableGivingModel.gifts.copy(
-            investmentsNonUKCharities = Some(BigDecimal(-1)),
-            sharesOrSecurities = Some(BigDecimal(-1))
+          gifts = Some(
+            charitableGivingModel.gifts.get.copy(
+              investmentsNonUKCharities = Some(BigDecimal(-1)),
+              sharesOrSecurities = Some(BigDecimal(-1))
+            )
           )
         )
 

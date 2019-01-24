@@ -107,6 +107,23 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
         result shouldBe Left(expected)
       }
 
+      "the error response status code is not one that is handled" in {
+        val errorResponseJson = Json.parse(
+          """
+            |{
+            |  "foo": "TEST_CODE",
+            |  "bar": "some reason"
+            |}
+          """.
+            stripMargin)
+        val expected =  DesResponse(correlationId, GenericError(DownstreamError))
+        val unHandledStatusCode = SEE_OTHER
+
+        val httpResponse = HttpResponse(unHandledStatusCode, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
+        val result = AmendCharitableGivingHttpParser.amendHttpReads.read(PUT, "/test", httpResponse)
+        result shouldBe Left(expected)
+      }
+
       "the http response contains a 500 with an error response body" in {
         val errorResponseJson = Json.parse(
           """

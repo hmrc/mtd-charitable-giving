@@ -52,11 +52,11 @@ class DesConnectorSpec extends ConnectorSpec{
 
         MockedHttpClient.post[CharitableGiving, AmendCharitableGivingConnectorOutcome](
           s"$baseUrl" + s"/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}",
-          CharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))
+          CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None))))
           .returns(Future.successful(Right(expectedDesResponse)))
 
         val result = await(connector.amend(AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
-            CharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None)))))
+            CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None))))))
 
         result shouldBe Right(expectedDesResponse)
       }
@@ -68,7 +68,7 @@ class DesConnectorSpec extends ConnectorSpec{
         val expectedDesResponse = DesResponse("X-123", SingleError(TaxYearFormatError))
         val nino = "AA123456A"
         val taxYear = "1111-12"
-        val charitableGiving = CharitableGiving(GiftAidPayments(None, None, None, None, None, None), Gifts(None, None, None, None))
+        val charitableGiving = CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None)))
 
         MockedHttpClient.post[CharitableGiving, AmendCharitableGivingConnectorOutcome] (
            s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}",
