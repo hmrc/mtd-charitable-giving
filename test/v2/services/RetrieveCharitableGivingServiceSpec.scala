@@ -19,7 +19,7 @@ package v2.services
 import uk.gov.hmrc.domain.Nino
 import v2.fixtures.Fixtures.CharitableGivingFixture._
 import v2.mocks.connectors.MockDesConnector
-import v2.models.outcomes.{DesResponse, ResponseWrapper}
+import v2.models.outcomes.DesResponse
 import v2.models.requestData.{DesTaxYear, RetrieveCharitableGivingRequest}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,7 +37,7 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
   val taxYear = "2017-18"
   val expectedDesResponse = DesResponse(correlationId, charitableGivingModel)
   val input = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))
-  val output = ResponseWrapper(correlationId, charitableGivingModel)
+  val output = DesResponse(correlationId, charitableGivingModel)
 
   "calling retrieve" should {
     "return a valid correlationId" when {

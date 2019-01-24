@@ -21,7 +21,7 @@ import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.errors._
-import v2.models.outcomes.{AmendCharitableGivingOutcome, DesResponse, ResponseWrapper, RetrieveCharitableGivingOutcome}
+import v2.models.outcomes.{AmendCharitableGivingOutcome, DesResponse, RetrieveCharitableGivingOutcome}
 import v2.models.requestData.{AmendCharitableGivingRequest, RetrieveCharitableGivingRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -55,7 +55,7 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
                ec: ExecutionContext): Future[RetrieveCharitableGivingOutcome] = {
 
     connector.retrieve(retrieveCharitableGivingRequest).map {
-      case Right(desResponse) => Right(ResponseWrapper(desResponse.correlationId, desResponse.responseData))
+      case Right(desResponse) => Right(DesResponse(desResponse.correlationId, desResponse.responseData))
     }
   }
 
