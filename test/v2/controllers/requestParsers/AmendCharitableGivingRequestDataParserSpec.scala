@@ -63,14 +63,15 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
         val amendCharitableGivingRequestData =
           AmendCharitableGivingRequestData(invalidNino, validTaxYear, validJsonBody)
 
-        val singleErrorWrapper =
-          ErrorWrapper("", NinoFormatError, None)
+        val expectedResponse =
+          ErrorWrapper(None, NinoFormatError, None)
 
         MockedAmendCharitableGivingValidator.validate(amendCharitableGivingRequestData)
           .returns(List(NinoFormatError))
 
-
-        parser.parseRequest(amendCharitableGivingRequestData) shouldBe Left(singleErrorWrapper)
+        val receivedResponse = parser.parseRequest(amendCharitableGivingRequestData)
+        expectedResponse.copy()
+        receivedResponse shouldBe Left(expectedResponse)
       }
 
       "multiple validation errors occur" in new Test {
@@ -78,7 +79,7 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
           AmendCharitableGivingRequestData(validNino, invalidDate, validJsonBody)
 
         val multipleErrorWrapper =
-          ErrorWrapper("", BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
+          ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
 
         MockedAmendCharitableGivingValidator.validate(amendCharitableGivingRequestData)
           .returns(List(NinoFormatError, TaxYearFormatError))

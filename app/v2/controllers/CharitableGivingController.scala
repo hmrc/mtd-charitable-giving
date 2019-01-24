@@ -16,7 +16,10 @@
 
 package v2.controllers
 
+import java.util.UUID
+
 import javax.inject.{Inject, Singleton}
+import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, AnyContentAsJson}
 import v2.controllers.requestParsers.AmendCharitableGivingRequestDataParser
@@ -34,6 +37,8 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
                                            amendCharitableGivingRequestDataParser: AmendCharitableGivingRequestDataParser
                                           ) extends AuthorisedController {
 
+  val logger: Logger = Logger(this.getClass)
+
   def retrieve(nino: String, taxYear: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
     Future.successful(Ok(request.userDetails.mtdId))
   }
@@ -43,11 +48,13 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
     amendCharitableGivingRequestDataParser.parseRequest(AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(request.body))) match {
 
       case Right(amendCharitableGivingRequest) => charitableGivingService.amend(amendCharitableGivingRequest).map {
-        case Right(correlationId) => NoContent.withHeaders("X-CorrelationId" -> correlationId)
-        case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId)
+        case Right(correlationId) =>
+          logger.info(s"[CharitableGivingController][amend] - Success response received with correlationId: $correlationId")
+          NoContent.withHeaders("X-CorrelationId" -> correlationId)
+        case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
       }
       case Left(errorWrapper) => Future.successful {
-        processError(errorWrapper).withHeaders("X-CorrelationId" -> errorWrapper.correlationId)
+        processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
       }
     }
   }
@@ -77,4 +84,16 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
     }
   }
 
+  private def getCorrelationId(errorWrapper: ErrorWrapper) : String = {
+    errorWrapper.correlationId match {
+      case Some(correlationId) => logger.info("[CharitableGivingController][getCorrelationId] - " +
+        s"Error received from DES ${Json.toJson(errorWrapper)} with correlationId: $correlationId")
+        correlationId
+      case None =>
+        val correlationId = UUID.randomUUID().toString
+        logger.info("[CharitableGivingController][getCorrelationId] - " +
+        s"Validation error: ${Json.toJson(errorWrapper)} with correlationId: $correlationId")
+        correlationId
+    }
+  }
 }
