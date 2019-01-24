@@ -22,9 +22,11 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, AnyContentAsJson}
-import v2.controllers.requestParsers.AmendCharitableGivingRequestDataParser
+import v2.controllers.requestParsers.{AmendCharitableGivingRequestDataParser, RetrieveCharitableGivingRequestDataParser}
+import v2.models.CharitableGiving
 import v2.models.errors._
-import v2.models.requestData.AmendCharitableGivingRequestData
+import v2.models.outcomes.DesResponse
+import v2.models.requestData.{AmendCharitableGivingRequestData, RetrieveCharitableGivingRequestData}
 import v2.services.{CharitableGivingService, EnrolmentsAuthService, MtdIdLookupService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,14 +36,22 @@ import scala.concurrent.Future
 class CharitableGivingController @Inject()(val authService: EnrolmentsAuthService,
                                            val lookupService: MtdIdLookupService,
                                            charitableGivingService: CharitableGivingService,
-                                           amendCharitableGivingRequestDataParser: AmendCharitableGivingRequestDataParser
+                                           amendCharitableGivingRequestDataParser: AmendCharitableGivingRequestDataParser,
+                                           retrieveCharitableGivingRequestDataParser: RetrieveCharitableGivingRequestDataParser
                                           ) extends AuthorisedController {
 
   val logger: Logger = Logger(this.getClass)
 
   def retrieve(nino: String, taxYear: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
-    Future.successful(Ok(request.userDetails.mtdId))
+
+    retrieveCharitableGivingRequestDataParser.parseRequest(RetrieveCharitableGivingRequestData(nino, taxYear)) match {
+      case Right(retrieveCharitableGivingRequest) => charitableGivingService.retrieve(retrieveCharitableGivingRequest).map {
+        case Right(result) => Ok(DesResponse(result.correlationId, CharitableGiving(result.responseData.giftAidPayments,result.responseData.gifts)))
+
+      }
+    }
   }
+
 
   def amend(nino: String, taxYear: String): Action[JsValue] = authorisedAction(nino).async(parse.json) { implicit request =>
 

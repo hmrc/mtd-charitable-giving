@@ -21,7 +21,7 @@ import play.api.mvc.{AnyContentAsJson, Result}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures.CharitableGivingFixture
-import v2.mocks.requestParsers.MockAmendCharitableGivingRequestDataParser
+import v2.mocks.requestParsers.{MockAmendCharitableGivingRequestDataParser, MockRetrieveCharitableGivingRequestDataParser}
 import v2.mocks.services.{MockAmendCharitableGivingService, MockEnrolmentsAuthService, MockMtdIdLookupService}
 import v2.models.errors._
 import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRequestData, DesTaxYear}
@@ -34,7 +34,8 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
   trait Test extends MockEnrolmentsAuthService
     with MockMtdIdLookupService
     with MockAmendCharitableGivingService
-    with MockAmendCharitableGivingRequestDataParser {
+    with MockAmendCharitableGivingRequestDataParser
+    with MockRetrieveCharitableGivingRequestDataParser {
 
     val hc = HeaderCarrier()
 
@@ -42,7 +43,9 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
       authService = mockEnrolmentsAuthService,
       lookupService = mockMtdIdLookupService,
       charitableGivingService = mockAmendCharitableGivingService,
-      amendCharitableGivingRequestDataParser = mockAmendCharitableGivingRequestDataParser
+      amendCharitableGivingRequestDataParser = mockAmendCharitableGivingRequestDataParser,
+      retrieveCharitableGivingRequestDataParser = mockRetrieveCharitableGivingRequestDataParser
+
     )
 
     MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
