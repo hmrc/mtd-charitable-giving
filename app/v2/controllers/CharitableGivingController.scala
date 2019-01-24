@@ -49,7 +49,7 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
 
       case Right(amendCharitableGivingRequest) => charitableGivingService.amend(amendCharitableGivingRequest).map {
         case Right(correlationId) =>
-          logger.info("[CharitableGivingController][amend] - Success response received with correlationId: $correlationId")
+          logger.info(s"[CharitableGivingController][amend] - Success response received with correlationId: $correlationId")
           NoContent.withHeaders("X-CorrelationId" -> correlationId)
         case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
       }
