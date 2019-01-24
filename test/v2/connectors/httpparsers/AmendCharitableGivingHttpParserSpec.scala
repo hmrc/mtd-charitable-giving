@@ -107,7 +107,7 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
         result shouldBe Left(expected)
       }
 
-      "the error response status code is not one that is handle" in {
+      "the error response status code is not one that is handled" in {
         val errorResponseJson = Json.parse(
           """
             |{
