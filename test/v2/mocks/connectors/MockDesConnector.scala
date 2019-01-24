@@ -20,8 +20,8 @@ import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
-import v2.models.outcomes.AmendCharitableGivingConnectorOutcome
-import v2.models.requestData.AmendCharitableGivingRequest
+import v2.models.outcomes.{AmendCharitableGivingConnectorOutcome, RetrieveCharitableGivingConnectorOutcome}
+import v2.models.requestData.{AmendCharitableGivingRequest, RetrieveCharitableGivingRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,6 +33,11 @@ trait MockDesConnector extends MockFactory {
     def amend(amendCharitableGivingRequest: AmendCharitableGivingRequest): CallHandler[Future[AmendCharitableGivingConnectorOutcome]] = {
       (connector.amend(_: AmendCharitableGivingRequest)(_: HeaderCarrier, _: ExecutionContext))
         .expects(amendCharitableGivingRequest, *, *)
+    }
+
+    def retrieve(retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest): CallHandler[Future[RetrieveCharitableGivingConnectorOutcome]] = {
+      (connector.retrieve(_: RetrieveCharitableGivingRequest)(_: HeaderCarrier, _: ExecutionContext))
+        .expects(retrieveCharitableGivingRequest, *, *)
     }
   }
 
