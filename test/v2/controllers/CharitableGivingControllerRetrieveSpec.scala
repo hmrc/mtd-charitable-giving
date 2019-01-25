@@ -70,7 +70,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
 
         MockCharitableGivingService.retrieve(retrieveCharitableGivingRequest)
           .returns(Future.successful(Right(DesResponse(correlationId, charitableGivingModel))))
-it a
+
         val result: Future[Result] = target.retrieve(nino, taxYear)(fakeGetRequest)
         status(result) shouldBe OK
         contentAsJson(result) shouldBe Json.toJson(charitableGivingModel)
