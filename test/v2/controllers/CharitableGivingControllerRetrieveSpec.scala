@@ -16,59 +16,65 @@
 
 package v2.controllers
 
+import play.api.libs.json.Json
+import play.api.mvc.Result
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
-import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService}
-import v2.models.errors.{NinoFormatError, UnauthorisedError}
+import v2.fixtures.Fixtures.CharitableGivingFixture.charitableGivingModel
+import v2.mocks.requestParsers.{MockAmendCharitableGivingRequestDataParser, MockRetrieveCharitableGivingRequestDataParser}
+import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService, MockRetrieveCharitableGivingService}
+import v2.models.errors.{ErrorWrapper, MtdError}
+import v2.models.outcomes.DesResponse
+import v2.models.requestData._
 
 import scala.concurrent.Future
 
 class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
 
-  /*trait Test extends MockEnrolmentsAuthService with MockMtdIdLookupService {
+  trait Test extends
+    MockEnrolmentsAuthService
+    with MockMtdIdLookupService
+    with MockRetrieveCharitableGivingService
+    with MockRetrieveCharitableGivingRequestDataParser
+    with MockAmendCharitableGivingRequestDataParser {
     val hc = HeaderCarrier()
 
-    lazy val target = new CharitableGivingController(
+    val target = new CharitableGivingController(
       authService = mockEnrolmentsAuthService,
-      lookupService = mockMtdIdLookupService
+      lookupService = mockMtdIdLookupService,
+      charitableGivingService = mockRetrieveCharitableGivingService,
+      amendCharitableGivingRequestDataParser = mockAmendCharitableGivingRequestDataParser,
+      retrieveCharitableGivingRequestDataParser = mockRetrieveCharitableGivingRequestDataParser
     )
+
+    MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
+    MockedEnrolmentsAuthService.authoriseUser()
   }
 
-  val nino = "test-nino"
-  val taxYear = "2018-19"
+  val nino = "AA123456A"
+  val taxYear = "2017-18"
+  val correlationId = "X-123"
+  val retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))
+  val errorWrapper: ErrorWrapper = ErrorWrapper(None, MtdError("abc", "abc"), None)
 
-  "getTaxCalculation" should {
-    "return a 200" in new Test {
+  "retrieve" should {
+    "return a successful response with header X-CorrelationId and body" when {
+      "the request received is valid" in new Test() {
 
-      MockedMtdIdLookupService.lookup(nino)
-        .returns(Future.successful(Right("test-mtd-id")))
+        MockRetrieveCharitableGivingRequestDataParser.parseRequest(
+          RetrieveCharitableGivingRequestData(nino, taxYear))
+          .returns(Right(retrieveCharitableGivingRequest))
 
-      MockedEnrolmentsAuthService.authoriseUser()
+        MockCharitableGivingService.retrieve(retrieveCharitableGivingRequest)
+          .returns(Future.successful(Right(DesResponse(correlationId, charitableGivingModel))))
 
-      private val result = target.retrieve(nino, taxYear)(fakeGetRequest)
-      status(result) shouldBe OK
-      contentAsString(result) shouldBe "test-mtd-id"
-    }
+        val result: Future[Result] = target.retrieve(nino, taxYear)(fakeGetRequest)
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(charitableGivingModel)
+        header("X-CorrelationId", result) shouldBe Some(correlationId)
 
-    "return a 400" when {
-      "a invalid NI number is passed" in new Test {
-
-        MockedMtdIdLookupService.lookup(nino)
-          .returns(Future.successful(Left(NinoFormatError)))
-
-        private val result = target.retrieve(nino, taxYear)(fakeGetRequest)
-        status(result) shouldBe BAD_REQUEST
       }
     }
 
-    "return a 500" when {
-      "the details passed or not authorised" in new Test {
-
-        MockedMtdIdLookupService.lookup(nino)
-          .returns(Future.successful(Left(UnauthorisedError)))
-
-        private val result = target.retrieve(nino, taxYear)(fakeGetRequest)
-        status(result) shouldBe FORBIDDEN
-      }
-    }
-  }*/
+  }
 }

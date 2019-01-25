@@ -22,9 +22,9 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, AnyContentAsJson}
-import v2.controllers.requestParsers.AmendCharitableGivingRequestDataParser
+import v2.controllers.requestParsers.{AmendCharitableGivingRequestDataParser, RetrieveCharitableGivingRequestDataParser}
 import v2.models.errors._
-import v2.models.requestData.AmendCharitableGivingRequestData
+import v2.models.requestData.{AmendCharitableGivingRequestData, RetrieveCharitableGivingRequestData}
 import v2.services.{CharitableGivingService, EnrolmentsAuthService, MtdIdLookupService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,14 +34,11 @@ import scala.concurrent.Future
 class CharitableGivingController @Inject()(val authService: EnrolmentsAuthService,
                                            val lookupService: MtdIdLookupService,
                                            charitableGivingService: CharitableGivingService,
-                                           amendCharitableGivingRequestDataParser: AmendCharitableGivingRequestDataParser
+                                           amendCharitableGivingRequestDataParser: AmendCharitableGivingRequestDataParser,
+                                           retrieveCharitableGivingRequestDataParser: RetrieveCharitableGivingRequestDataParser
                                           ) extends AuthorisedController {
 
   val logger: Logger = Logger(this.getClass)
-
-  def retrieve(nino: String, taxYear: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
-    Future.successful(Ok(request.userDetails.mtdId))
-  }
 
   def amend(nino: String, taxYear: String): Action[JsValue] = authorisedAction(nino).async(parse.json) { implicit request =>
 
@@ -56,6 +53,18 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
       case Left(errorWrapper) => Future.successful {
         processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
       }
+    }
+  }
+
+  def retrieve(nino: String, taxYear: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
+
+    retrieveCharitableGivingRequestDataParser.parseRequest(RetrieveCharitableGivingRequestData(nino, taxYear)) match {
+      case Right(retrieveCharitableGivingRequest) =>
+        charitableGivingService.retrieve(retrieveCharitableGivingRequest).map {
+          case Right(desResponse) =>
+            logger.info(s"[CharitableGivingController][retrieve] - Success response received with correlationId: ${desResponse.correlationId}")
+            Ok(Json.toJson(desResponse.responseData)).withHeaders("X-CorrelationId" -> desResponse.correlationId)
+        }
     }
   }
 
@@ -84,7 +93,7 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
     }
   }
 
-  private def getCorrelationId(errorWrapper: ErrorWrapper) : String = {
+  private def getCorrelationId(errorWrapper: ErrorWrapper): String = {
     errorWrapper.correlationId match {
       case Some(correlationId) => logger.info("[CharitableGivingController][getCorrelationId] - " +
         s"Error received from DES ${Json.toJson(errorWrapper)} with correlationId: $correlationId")
@@ -92,7 +101,7 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
       case None =>
         val correlationId = UUID.randomUUID().toString
         logger.info("[CharitableGivingController][getCorrelationId] - " +
-        s"Validation error: ${Json.toJson(errorWrapper)} with correlationId: $correlationId")
+          s"Validation error: ${Json.toJson(errorWrapper)} with correlationId: $correlationId")
         correlationId
     }
   }
