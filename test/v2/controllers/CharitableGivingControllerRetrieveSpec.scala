@@ -16,19 +16,16 @@
 
 package v2.controllers
 
-import play.api.libs.Jsonp
 import play.api.libs.json.Json
-import play.api.mvc.{AnyContentAsJson, Result}
+import play.api.mvc.Result
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
-import v2.fixtures.Fixtures.CharitableGivingFixture
+import v2.fixtures.Fixtures.CharitableGivingFixture.charitableGivingModel
 import v2.mocks.requestParsers.{MockAmendCharitableGivingRequestDataParser, MockRetrieveCharitableGivingRequestDataParser}
 import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService, MockRetrieveCharitableGivingService}
-import v2.models.requestData._
-import v2.fixtures.Fixtures.CharitableGivingFixture.charitableGivingModel
-import v2.models.CharitableGiving
 import v2.models.errors.{ErrorWrapper, MtdError}
-import v2.models.outcomes.{DesResponse, RetrieveCharitableGivingOutcome}
+import v2.models.outcomes.DesResponse
+import v2.models.requestData._
 
 import scala.concurrent.Future
 
@@ -58,7 +55,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
   val taxYear = "2017-18"
   val correlationId = "X-123"
   val retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))
-  val errorWrapper: ErrorWrapper = ErrorWrapper(None,MtdError("abc", "abc"),None)
+  val errorWrapper: ErrorWrapper = ErrorWrapper(None, MtdError("abc", "abc"), None)
 
   "retrieve" should {
     "return a successful response with header X-CorrelationId and body" when {

@@ -22,13 +22,14 @@ import v2.controllers.requestParsers.RetrieveCharitableGivingRequestDataParser
 import v2.models.errors.ErrorWrapper
 import v2.models.requestData.{RetrieveCharitableGivingRequest, RetrieveCharitableGivingRequestData}
 
-trait MockRetrieveCharitableGivingRequestDataParser extends MockFactory{
+trait MockRetrieveCharitableGivingRequestDataParser extends MockFactory {
 
   val mockRetrieveCharitableGivingRequestDataParser = mock[RetrieveCharitableGivingRequestDataParser]
 
   object MockRetrieveCharitableGivingRequestDataParser {
     def parseRequest(data: RetrieveCharitableGivingRequestData): CallHandler[Either[ErrorWrapper, RetrieveCharitableGivingRequest]] = {
-      (mockRetrieveCharitableGivingRequestDataParser.parseRequest(_:RetrieveCharitableGivingRequestData)).expects(data)
+      (mockRetrieveCharitableGivingRequestDataParser.parseRequest(_: RetrieveCharitableGivingRequestData)).expects(data)
     }
   }
+
 }

@@ -25,13 +25,13 @@ import v2.services.CharitableGivingService
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait MockRetrieveCharitableGivingService extends MockFactory{
+trait MockRetrieveCharitableGivingService extends MockFactory {
 
   val mockRetrieveCharitableGivingService: CharitableGivingService = mock[CharitableGivingService]
 
   object MockCharitableGivingService {
     def retrieve(retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest): CallHandler[Future[RetrieveCharitableGivingOutcome]] = {
-      (mockRetrieveCharitableGivingService.retrieve(_:RetrieveCharitableGivingRequest)(_: HeaderCarrier, _: ExecutionContext))
+      (mockRetrieveCharitableGivingService.retrieve(_: RetrieveCharitableGivingRequest)(_: HeaderCarrier, _: ExecutionContext))
         .expects(retrieveCharitableGivingRequest, *, *)
     }
   }
