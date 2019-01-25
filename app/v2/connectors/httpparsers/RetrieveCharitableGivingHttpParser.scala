@@ -19,7 +19,7 @@ package v2.connectors.httpparsers
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import v2.models.CharitableGiving
 import play.api.http.Status.OK
-import v2.models.errors.{DownstreamError, GenericError}
+//import v2.models.errors.{DownstreamError, GenericError}
 import v2.models.outcomes.{DesResponse, RetrieveCharitableGivingConnectorOutcome}
 
 object RetrieveCharitableGivingHttpParser extends HttpParser {

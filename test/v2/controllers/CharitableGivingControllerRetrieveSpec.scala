@@ -20,6 +20,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Result
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
+import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.fixtures.Fixtures.CharitableGivingFixture.charitableGivingModel
 import v2.mocks.requestParsers.{MockAmendCharitableGivingRequestDataParser, MockRetrieveCharitableGivingRequestDataParser}
 import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService, MockRetrieveCharitableGivingService}
@@ -70,7 +71,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
 
         val result: Future[Result] = target.retrieve(nino, taxYear)(fakeGetRequest)
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(charitableGivingModel)
+        contentAsJson(result) shouldBe CharitableGivingFixture.mtdFormatJson
         header("X-CorrelationId", result) shouldBe Some(correlationId)
 
       }
