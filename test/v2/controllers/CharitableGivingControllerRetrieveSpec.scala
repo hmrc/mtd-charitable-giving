@@ -16,6 +16,8 @@
 
 package v2.controllers
 
+import play.api.libs.Jsonp
+import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsJson, Result}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
@@ -47,6 +49,9 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
       amendCharitableGivingRequestDataParser = mockAmendCharitableGivingRequestDataParser,
       retrieveCharitableGivingRequestDataParser = mockRetrieveCharitableGivingRequestDataParser
     )
+
+    MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
+    MockedEnrolmentsAuthService.authoriseUser()
   }
 
   val nino = "AA123456A"
@@ -54,7 +59,6 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
   val correlationId = "X-123"
   val retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))
   val errorWrapper: ErrorWrapper = ErrorWrapper(None,MtdError("abc", "abc"),None)
-  val charitableGiving = charitableGivingModel
 
   "retrieve" should {
     "return a successful response with header X-CorrelationId and body" when {
@@ -66,10 +70,12 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
 
         MockCharitableGivingService.retrieve(retrieveCharitableGivingRequest)
           .returns(Future.successful(Right(DesResponse(correlationId, charitableGivingModel))))
-
+it a
         val result: Future[Result] = target.retrieve(nino, taxYear)(fakeGetRequest)
         status(result) shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(charitableGivingModel)
         header("X-CorrelationId", result) shouldBe Some(correlationId)
+
       }
     }
 
