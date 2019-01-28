@@ -19,6 +19,7 @@ package v2.services
 import uk.gov.hmrc.domain.Nino
 import v2.fixtures.Fixtures.CharitableGivingFixture._
 import v2.mocks.connectors.MockDesConnector
+import v2.models.errors.{MtdError, _}
 import v2.models.outcomes.DesResponse
 import v2.models.requestData.{DesTaxYear, RetrieveCharitableGivingRequest}
 
@@ -42,13 +43,79 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
   "calling retrieve" should {
     "return a valid correlationId" when {
       "a valid data is passed" in new Test {
-
         MockedDesConnector.retrieve(input).returns(Future.successful(Right(expectedDesResponse)))
-
         private val result = await(target.retrieve(input))
 
         result shouldBe Right(output)
       }
     }
   }
+
+  "return multiple errors" when {
+    "the desConnector returns multiple errors" in new Test {
+
+      val response = DesResponse(correlationId, MultipleErrors(Seq(
+        MtdError("NOT_FOUND_PERIOD", "Doesn't matter"),
+        MtdError("INVALID_TAXYEAR", "Doesn't matter"))))
+      val expected = ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NotFoundError, TaxYearFormatError)))
+
+      MockedDesConnector.retrieve(input).returns(Future.successful(Left(response)))
+      private val result = await(target.retrieve(input))
+      result shouldBe Left(expected)
+    }
+  }
+
+  "return a single error" when {
+    "the desConnector returns multiple errors and one maps to a DownstreamError" in new Test {
+
+      val response = DesResponse(correlationId, MultipleErrors(Seq(
+        MtdError("NOT_FOUND_PERIOD", "Doesn't matter"),
+        MtdError("INVALID_INCOME_SOURCE", "Doesn't matter"))))
+      val expected = ErrorWrapper(Some(correlationId), DownstreamError, None)
+
+      MockedDesConnector.retrieve(input).returns(Future.successful(Left(response)))
+      private val result = await(target.retrieve(input))
+      result shouldBe Left(expected)
+    }
+  }
+
+  "return a generic error" in new Test {
+    val response = DesResponse(correlationId, GenericError(DownstreamError))
+    val expected = ErrorWrapper(Some(correlationId), DownstreamError, None)
+
+    MockedDesConnector.retrieve(input).returns(Future.successful(Left(response)))
+    private val result = await(target.retrieve(input))
+    result shouldBe Left(expected)
+
+  }
+
+  val errorMap: Map[String, MtdError] = Map(
+    "INVALID_TYPE" -> DownstreamError,
+    "INVALID_NINO" -> NinoFormatError,
+    "INVALID_TAXYEAR" -> TaxYearFormatError,
+    "INVALID_INCOME_SOURCE" -> DownstreamError,
+    "NOT_FOUND_PERIOD" -> NotFoundError,
+    "NOT_FOUND_INCOME_SOURCE" -> DownstreamError,
+    "SERVER_ERROR" -> DownstreamError,
+    "SERVICE_UNAVAILABLE" -> DownstreamError
+  )
+
+
+  for (error <- errorMap.keys) {
+    s"the DesConnector returns a single $error error" in new Test {
+      val response = DesResponse(correlationId, SingleError(MtdError(error, "doesn't matter")))
+      val expected = ErrorWrapper(Some(correlationId), errorMap(error), None)
+
+      MockedDesConnector.retrieve(input).returns(Future.successful(Left(response)))
+
+      private val result = await(target.retrieve(input))
+      result shouldBe Left(expected)
+    }
+
+  }
+
+
+
+
+
 }
