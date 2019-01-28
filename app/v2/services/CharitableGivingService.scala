@@ -58,7 +58,7 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
       case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
         val mtdErrors = errors.map(error => desErrorToMtdError(error.code))
         if (mtdErrors.contains(DownstreamError)) {
-          logger.info(s"[CharitableGivingService] [amend] [CorrelationId - $correlationId]" +
+          logger.info(s"[CharitableGivingService] [retrieve] [CorrelationId - $correlationId]" +
             s" - downstream returned INVALID_IDTYPE, NOT_FOUND_INCOME_SOURCE or INVALID_INCOME_SOURCE. Revert to ISE")
           Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
         } else {
