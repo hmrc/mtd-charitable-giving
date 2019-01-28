@@ -16,7 +16,8 @@
 
 package v2.controllers.requestParsers.validators
 
-import v2.models.errors.MtdError
+import v2.controllers.requestParsers.validators.validations.{MtdTaxYearValidation, NinoValidation, TaxYearValidation}
+import v2.models.errors.{MtdError, TaxYearNotSpecifiedRuleError}
 import v2.models.requestData.RetrieveCharitableGivingRequestData
 
 class RetrieveCharitableGivingValidator extends Validator[RetrieveCharitableGivingRequestData] {
@@ -25,15 +26,21 @@ class RetrieveCharitableGivingValidator extends Validator[RetrieveCharitableGivi
 
   private def levelOneValidations: RetrieveCharitableGivingRequestData => List[List[MtdError]] =
     (data: RetrieveCharitableGivingRequestData) => {
-      List()
+      List(
+        NinoValidation.validate(data.nino),
+        TaxYearValidation.validate(data.taxYear)
+      )
     }
 
   private def levelTwoValidations: RetrieveCharitableGivingRequestData => List[List[MtdError]] =
     (data: RetrieveCharitableGivingRequestData) => {
-      List()
+      List(
+        MtdTaxYearValidation.validate(data.taxYear, TaxYearNotSpecifiedRuleError)
+      )
     }
 
   override def validate(data: RetrieveCharitableGivingRequestData): List[MtdError] = {
     run(validationSet, data).distinct
   }
+
 }

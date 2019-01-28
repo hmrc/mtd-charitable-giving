@@ -17,20 +17,50 @@
 package v2.controllers.requestParsers.validators
 
 import support.UnitSpec
+import v2.models.errors.{NinoFormatError, TaxYearFormatError, TaxYearNotSpecifiedRuleError}
 import v2.models.requestData.RetrieveCharitableGivingRequestData
 
-class RetrieveCharitableGivingValidatorSpec extends UnitSpec{
+class RetrieveCharitableGivingValidatorSpec extends UnitSpec {
+
+  val validNino = "AA123456A"
+  val validTaxYear = "2017-18"
+
+  private trait Test {
+    val validator = new RetrieveCharitableGivingValidator()
+  }
 
   "calling validate" should {
     "return no errors" when {
-      "a valid request data supplied" in {
-        val nino = "AA123456A"
-        val taxYear = "2017-18"
-        val inputData = RetrieveCharitableGivingRequestData(nino, taxYear)
-
-        val result = new RetrieveCharitableGivingValidator().validate(inputData)
+      "valid request data is supplied" in new Test {
+        val inputData = RetrieveCharitableGivingRequestData(validNino, validTaxYear)
+        val result = validator.validate(inputData)
         result shouldBe List()
       }
     }
+
+    "return a single error" when {
+      "an invalid NINO is supplied" in new Test {
+        val inputData = RetrieveCharitableGivingRequestData("BAD_NINO_HERE", validTaxYear)
+        val result = validator.validate(inputData)
+        result.size shouldBe 1
+        result.head shouldBe NinoFormatError
+      }
+
+      "an invalid tax year is supplied" in new Test {
+        val inputData = RetrieveCharitableGivingRequestData(validNino, "61725465142")
+        val result = validator.validate(inputData)
+        result.size shouldBe 1
+        result.head shouldBe TaxYearFormatError
+      }
+
+      "a tax year below the minimum allowed year is supplied" in new Test {
+        val inputData = RetrieveCharitableGivingRequestData(validNino, "2014-15")
+        val result = validator.validate(inputData)
+        result.size shouldBe 1
+        result.head shouldBe TaxYearNotSpecifiedRuleError
+      }
+
+    }
+
   }
 }
