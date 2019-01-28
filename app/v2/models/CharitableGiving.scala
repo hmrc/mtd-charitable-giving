@@ -32,9 +32,9 @@ object CharitableGiving {
       (__ \ "gifts").readNullable[Gifts](Gifts.desReads)
     ) (CharitableGiving.apply _)
 
-  val desWrites: Writes[CharitableGiving] = (
-    (__ \ "giftAidPayments").writeNullable[GiftAidPayments](GiftAidPayments.desWrites) and
-      (__ \ "gifts").writeNullable[Gifts](Gifts.desWrites)
+  val desToMtdWrites: Writes[CharitableGiving] = (
+    (__ \ "giftAidPayments").writeNullable[GiftAidPayments](GiftAidPayments.desToMtdWrites) and
+      (__ \ "gifts").writeNullable[Gifts](Gifts.desToMtdWrites)
     ) (unlift(CharitableGiving.unapply))
 }
 
@@ -67,7 +67,7 @@ object GiftAidPayments {
       (JsPath \ "nonUkCharitiesCharityNames").readNullable[Seq[String]]
     ) (GiftAidPayments.apply _)
 
-  val desWrites: Writes[GiftAidPayments] = Json.writes[GiftAidPayments]
+  val desToMtdWrites: Writes[GiftAidPayments] = Json.writes[GiftAidPayments]
 
 }
 
@@ -93,7 +93,7 @@ object Gifts {
       (JsPath \ "investmentsNonUkCharitiesCharityNames").readNullable[Seq[String]]
     ) (Gifts.apply _)
 
-  val desWrites: Writes[Gifts] = Json.writes[Gifts]
+  val desToMtdWrites: Writes[Gifts] = Json.writes[Gifts]
 }
 
 

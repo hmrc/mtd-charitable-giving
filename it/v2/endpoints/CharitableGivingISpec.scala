@@ -33,7 +33,7 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
 
     val nino: String
     val taxYear: String
-
+    val correlationId = "X-123"
     def setupStubs(): StubMapping
 
     def request(): WSRequest = {
@@ -141,6 +141,28 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
          |      }
       """.stripMargin
 
+  }
+
+  "Calling the retrieve charitable giving endpoint" should {
+
+    "return status 200 with valid body" when {
+
+      "any valid request is made" in new Test {
+        override val nino: String = "AA123456A"
+        override val taxYear: String = "2018-19"
+
+        override def setupStubs(): StubMapping = {
+          AuditStub.audit()
+          AuthStub.authorised()
+          MtdIdLookupStub.ninoFound(nino)
+          DesStub.retrieveSuccess(nino, DesTaxYear(taxYear).toDesTaxYear)
+        }
+
+        val response: WSResponse = await(request().get())
+        response.status shouldBe Status.OK
+        response.json shouldBe CharitableGivingFixture.mtdFormatJson
+      }
+    }
   }
 }
 

@@ -17,35 +17,50 @@
 package v2.stubs
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import play.api.http.Status.{OK, BAD_REQUEST}
+import play.api.http.Status.OK
 import support.WireMockMethods
 
 object DesStub extends WireMockMethods {
 
-  private def amendCharitableGivingUrl(nino: String, taxYear: String): String =
+  private def charitableGivingUrl(nino: String, taxYear: String): String =
     s"/income-tax/nino/$nino/income-source/charity/annual/$taxYear"
 
-  private val body =
+  private val amendResponseBody =
     """
       |{"transactionReference": "12121"}
     """.stripMargin
 
-  private val errorBody =
-    """
-      {
-        "code": "INVALID_TYPE",
-        "reason": "Does not matter."
-      }
-    """
+  private val retrieveResponseBody =
+    s"""{
+       |  "giftAidPayments": {
+       |    "currentYear": 10000.00,
+       |    "oneOffCurrentYear": 1000.00,
+       |    "currentYearTreatedAsPreviousYear": 300.00,
+       |    "nextYearTreatedAsCurrentYear": 400.00,
+       |    "nonUkCharities": 2000.00,
+       |    "nonUkCharitiesCharityNames": ["International Charity A","International Charity B"]
+       |  },
+       |  "gifts": {
+       |    "landAndBuildings": 700.00,
+       |    "sharesOrSecurities": 600.00,
+       |    "investmentsNonUkCharities": 300.00,
+       |    "investmentsNonUkCharitiesCharityNames": ["International Charity C","International Charity D"]
+       |  }
+       |}""".stripMargin
 
 
   def amendSuccess(nino: String, taxYear: String): StubMapping = {
-    when(method = POST, uri = amendCharitableGivingUrl(nino, taxYear))
-      .thenReturn(status = OK, body)
+    when(method = POST, uri = charitableGivingUrl(nino, taxYear))
+      .thenReturn(status = OK, amendResponseBody)
   }
 
   def amendError(nino: String, taxYear: String, errorStatus: Int, errorBody: String): StubMapping = {
-    when(method = POST, uri = amendCharitableGivingUrl(nino, taxYear))
+    when(method = POST, uri = charitableGivingUrl(nino, taxYear))
     .thenReturn(status = errorStatus, errorBody)
+  }
+
+  def retrieveSuccess(nino: String, taxYear: String): StubMapping = {
+    when(method = GET, uri = charitableGivingUrl(nino, taxYear))
+      .thenReturn(status = OK, retrieveResponseBody)
   }
 }

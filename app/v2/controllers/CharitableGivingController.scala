@@ -23,6 +23,7 @@ import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, AnyContentAsJson}
 import v2.controllers.requestParsers.{AmendCharitableGivingRequestDataParser, RetrieveCharitableGivingRequestDataParser}
+import v2.models.CharitableGiving
 import v2.models.errors._
 import v2.models.requestData.{AmendCharitableGivingRequestData, RetrieveCharitableGivingRequestData}
 import v2.services.{CharitableGivingService, EnrolmentsAuthService, MtdIdLookupService}
@@ -63,7 +64,7 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
         charitableGivingService.retrieve(retrieveCharitableGivingRequest).map {
           case Right(desResponse) =>
             logger.info(s"[CharitableGivingController][retrieve] - Success response received with correlationId: ${desResponse.correlationId}")
-            Ok(Json.toJson(desResponse.responseData)).withHeaders("X-CorrelationId" -> desResponse.correlationId)
+            Ok(Json.toJson(desResponse.responseData)(CharitableGiving.desToMtdWrites)).withHeaders("X-CorrelationId" -> desResponse.correlationId)
         }
     }
   }

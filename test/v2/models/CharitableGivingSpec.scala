@@ -106,11 +106,11 @@ class CharitableGivingSpec extends UnitSpec with JsonErrorValidators {
     }
   }
 
-  "desWrites" should {
+  "desToMtdWrites" should {
 
     "generate a valid JSON" when {
       "a valid model is retrieved" in {
-        val json: JsValue = CharitableGiving.desWrites.writes(charitableGivingModel)
+        val json: JsValue = CharitableGiving.desToMtdWrites.writes(charitableGivingModel)
         json shouldBe mtdFormatJson
       }
     }
