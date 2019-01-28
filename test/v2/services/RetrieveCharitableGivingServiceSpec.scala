@@ -19,7 +19,7 @@ package v2.services
 import uk.gov.hmrc.domain.Nino
 import v2.fixtures.Fixtures.CharitableGivingFixture._
 import v2.mocks.connectors.MockDesConnector
-import v2.models.errors.{MtdError, _}
+import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData.{DesTaxYear, RetrieveCharitableGivingRequest}
 
