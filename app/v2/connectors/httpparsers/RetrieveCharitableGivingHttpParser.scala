@@ -16,10 +16,11 @@
 
 package v2.connectors.httpparsers
 
+import play.api.http.Status._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
+import v2.connectors.httpparsers.AmendCharitableGivingHttpParser.logger
 import v2.models.CharitableGiving
-import play.api.http.Status.OK
-//import v2.models.errors.{DownstreamError, GenericError}
+import v2.models.errors.{DownstreamError, GenericError}
 import v2.models.outcomes.{DesResponse, RetrieveCharitableGivingConnectorOutcome}
 
 object RetrieveCharitableGivingHttpParser extends HttpParser {
@@ -27,9 +28,19 @@ object RetrieveCharitableGivingHttpParser extends HttpParser {
   implicit val retrieveHttpReads: HttpReads[RetrieveCharitableGivingConnectorOutcome] = new HttpReads[RetrieveCharitableGivingConnectorOutcome] {
     override def read(method: String, url: String, response: HttpResponse): RetrieveCharitableGivingConnectorOutcome = {
 
+      val correlationId = retrieveCorrelationId(response)
+
+      if (response.status != OK) {
+        logger.info("[RetrieveCharitableGivingHttpParser][read] - " +
+          s"Error response received from DES with status: ${response.status} and body\n" +
+          s"${response.body} and correlationId: $correlationId when calling $url")
+      }
+
       response.status match {
         case OK => parseResponse(response)
-        //case _ => Left(DesResponse(retrieveCorrelationId(response), parseErrors(response)))
+        case BAD_REQUEST | NOT_FOUND => Left(DesResponse(correlationId, parseErrors(response)))
+        case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(DesResponse(correlationId, GenericError(DownstreamError)))
+        case _ => Left(DesResponse(correlationId, GenericError(DownstreamError)))
       }
     }
   }
@@ -37,6 +48,6 @@ object RetrieveCharitableGivingHttpParser extends HttpParser {
   private def parseResponse(response: HttpResponse): RetrieveCharitableGivingConnectorOutcome =
     response.validateJson[CharitableGiving](CharitableGiving.desReads) match {
       case Some(charitableGiving) => Right(DesResponse(retrieveCorrelationId(response), charitableGiving))
-      //case None => Left(DesResponse(retrieveCorrelationId(response), GenericError(DownstreamError)))
+      case None => Left(DesResponse(retrieveCorrelationId(response), GenericError(DownstreamError)))
     }
 }
