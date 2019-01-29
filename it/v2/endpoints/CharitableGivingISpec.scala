@@ -84,7 +84,8 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
 
       val multipleErrors: String =
         s"""
-           | [
+           |{
+           |	"failures" : [
            |      {
            |        "code": "INVALID_NINO",
            |        "reason": "Does not matter."
@@ -94,6 +95,7 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
            |        "reason": "Does not matter."
            |      }
            |  ]
+           |}
       """.stripMargin
 
       s"des returns multiple errors" in new Test {
