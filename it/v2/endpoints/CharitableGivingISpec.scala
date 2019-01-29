@@ -181,7 +181,8 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
 
       val multipleErrors: String =
         s"""
-           | [
+           |{
+           |	"failures" : [
            |      {
            |        "code": "INVALID_NINO",
            |        "reason": "Does not matter."
@@ -191,6 +192,7 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
            |        "reason": "Does not matter."
            |      }
            |  ]
+           |}
       """.stripMargin
 
       s"des returns multiple errors" in new Test {
@@ -201,10 +203,10 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
           AuditStub.audit()
           AuthStub.authorised()
           MtdIdLookupStub.ninoFound(nino)
-          DesStub.amendError(nino, DesTaxYear(taxYear).toDesTaxYear, BAD_REQUEST, multipleErrors)
+          DesStub.retrieveError(nino, DesTaxYear(taxYear).toDesTaxYear, BAD_REQUEST, multipleErrors)
         }
 
-        val response: WSResponse = await(request().put(CharitableGivingFixture.mtdFormatJson))
+        val response: WSResponse = await(request().get)
         response.status shouldBe Status.BAD_REQUEST
         response.json shouldBe Json.toJson(ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
       }
