@@ -19,6 +19,7 @@ package v2.stubs
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status.OK
 import support.WireMockMethods
+import v2.controllers.requestParsers.validators.validations.TaxYearValidationSpec
 
 object DesStub extends WireMockMethods {
 
@@ -62,5 +63,10 @@ object DesStub extends WireMockMethods {
   def retrieveSuccess(nino: String, taxYear: String): StubMapping = {
     when(method = GET, uri = charitableGivingUrl(nino, taxYear))
       .thenReturn(status = OK, retrieveResponseBody)
+  }
+
+  def retrieveError(nino: String, taxYear: String, errorStatus: Int, errorBody: String): StubMapping = {
+    when(method = GET, uri = charitableGivingUrl(nino, taxYear))
+      .thenReturn(status = errorStatus, errorBody)
   }
 }
