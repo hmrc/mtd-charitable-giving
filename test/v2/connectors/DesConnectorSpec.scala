@@ -19,14 +19,14 @@ package v2.connectors
 import uk.gov.hmrc.domain.Nino
 import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.mocks.{MockAppConfig, MockHttpClient}
-import v2.models.errors.{SingleError, TaxYearFormatError}
+import v2.models.errors.{MultipleErrors, NinoFormatError, SingleError, TaxYearFormatError}
 import v2.models.outcomes.{AmendCharitableGivingConnectorOutcome, DesResponse, RetrieveCharitableGivingConnectorOutcome}
 import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear, RetrieveCharitableGivingRequest}
 import v2.models.{CharitableGiving, GiftAidPayments, Gifts}
 
 import scala.concurrent.Future
 
-class DesConnectorSpec extends ConnectorSpec{
+class DesConnectorSpec extends ConnectorSpec {
 
   class Test extends MockHttpClient with MockAppConfig {
     val connector = new DesConnector(
@@ -56,22 +56,22 @@ class DesConnectorSpec extends ConnectorSpec{
           .returns(Future.successful(Right(expectedDesResponse)))
 
         val result = await(connector.amend(AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
-            CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None))))))
+          CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None))))))
 
         result shouldBe Right(expectedDesResponse)
       }
     }
 
-    "return an error response with correlationId" when{
-      "an request supplied with invalid tax year" in new Test(){
+    "return an error response with correlationId" when {
+      "an request supplied with invalid tax year" in new Test() {
 
         val expectedDesResponse = DesResponse("X-123", SingleError(TaxYearFormatError))
         val nino = "AA123456A"
         val taxYear = "1111-12"
         val charitableGiving = CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None)))
 
-        MockedHttpClient.post[CharitableGiving, AmendCharitableGivingConnectorOutcome] (
-           s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}",
+        MockedHttpClient.post[CharitableGiving, AmendCharitableGivingConnectorOutcome](
+          s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}",
           charitableGiving)
           .returns(Future.successful(Left(expectedDesResponse)))
 
@@ -81,11 +81,33 @@ class DesConnectorSpec extends ConnectorSpec{
         result shouldBe Left(expectedDesResponse)
       }
     }
+
+    "return a response with multiple errors and correlationId" when {
+      "an request supplied with invalid tax year and invalid Nino " in new Test() {
+
+        val expectedDesResponse = DesResponse("X-123", MultipleErrors(Seq(TaxYearFormatError, NinoFormatError)))
+        val nino = "AA123456A"
+        val taxYear = "1111-12"
+        val charitableGiving = CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None)))
+
+        MockedHttpClient.post[CharitableGiving, AmendCharitableGivingConnectorOutcome](
+          s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}",
+          charitableGiving)
+          .returns(Future.successful(Left(expectedDesResponse)))
+
+        val result = await(connector.amend(AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
+          charitableGiving)))
+
+        result shouldBe Left(expectedDesResponse)
+      }
+    }
+
+
   }
 
   "Retrieve charitable giving tax relief" should {
     "return a valid charitable giving json" when {
-      "a valid request is supplied" in new Test(){
+      "a valid request is supplied" in new Test() {
         val nino = "AA123456A"
         val taxYear = "2017-18"
         val httpParsedDesResponse = DesResponse("X-123", CharitableGivingFixture.charitableGivingModel)
@@ -98,5 +120,41 @@ class DesConnectorSpec extends ConnectorSpec{
         result shouldBe Right(httpParsedDesResponse)
       }
     }
+
+    "return an error response with correlationId" when {
+      "an request supplied with invalid tax year" in new Test() {
+
+        val expectedDesResponse = DesResponse("X-123", SingleError(TaxYearFormatError))
+        val nino = "AA123456A"
+        val taxYear = "1111-12"
+
+        MockedHttpClient.get[RetrieveCharitableGivingConnectorOutcome](
+          s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}")
+          .returns(Future.successful(Left(expectedDesResponse)))
+
+        val result = await(connector.retrieve(RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))))
+
+        result shouldBe Left(expectedDesResponse)
+      }
+    }
+
+    "return a response with multiple errors and correlationId" when {
+      "an request supplied with invalid tax year and invalid Nino " in new Test() {
+
+        val expectedDesResponse = DesResponse("X-123", MultipleErrors(Seq(TaxYearFormatError, NinoFormatError)))
+        val nino = "AA123456A"
+        val taxYear = "1111-12"
+
+        MockedHttpClient.get[RetrieveCharitableGivingConnectorOutcome](
+          s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}")
+          .returns(Future.successful(Left(expectedDesResponse)))
+
+        val result = await(connector.retrieve(RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))))
+
+        result shouldBe Left(expectedDesResponse)
+      }
+    }
+
+
   }
 }

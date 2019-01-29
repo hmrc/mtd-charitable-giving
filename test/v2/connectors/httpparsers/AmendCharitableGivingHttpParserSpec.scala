@@ -161,7 +161,8 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
       "the http response contains a 400 with an error response body with multiple errors" in {
         val errorResponseJson = Json.parse(
           """
-            | [
+            |{
+            |	"failures" : [
             |    {
             |      "code": "TEST_CODE_1",
             |      "reason": "some reason"
@@ -171,6 +172,7 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
             |      "reason": "some reason"
             |    }
             |  ]
+            |}
           """.stripMargin)
         val expected =  DesResponse(correlationId, MultipleErrors(Seq(MtdError("TEST_CODE_1", "some reason"), MtdError("TEST_CODE_2", "some reason"))))
 
@@ -181,7 +183,8 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
       "the http response contains a 403 with an error response body with multiple errors" in {
         val errorResponseJson = Json.parse(
           """
-            | [
+            |{
+            |	"failures" : [
             |    {
             |      "code": "TEST_CODE_1",
             |      "reason": "some reason"
@@ -191,6 +194,7 @@ class AmendCharitableGivingHttpParserSpec extends UnitSpec {
             |      "reason": "some reason"
             |    }
             |  ]
+            |}
           """.stripMargin)
         val expected =  DesResponse(correlationId, MultipleErrors(Seq(MtdError("TEST_CODE_1", "some reason"), MtdError("TEST_CODE_2", "some reason"))))
 
