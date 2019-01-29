@@ -17,7 +17,7 @@
 package v2.models.errors
 
 // Nino Errors
-object NinoFormatError extends MtdError("FORMAT_NINO", "The NINO format is invalid")
+object NinoFormatError extends MtdError("FORMAT_NINO", "The provided NINO is invalid")
 
 //Format Rules
 object TaxYearFormatError extends MtdError("FORMAT_TAX_YEAR", "The provided tax year is invalid")
