@@ -24,7 +24,7 @@ import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.fixtures.Fixtures.CharitableGivingFixture.charitableGivingModel
 import v2.mocks.requestParsers.{MockAmendCharitableGivingRequestDataParser, MockRetrieveCharitableGivingRequestDataParser}
 import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService, MockRetrieveCharitableGivingService}
-import v2.models.errors.{ErrorWrapper, MtdError}
+import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData._
 
@@ -40,7 +40,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
     with MockAmendCharitableGivingRequestDataParser {
     val hc = HeaderCarrier()
 
-    val target = new CharitableGivingController(
+    val controller = new CharitableGivingController(
       authService = mockEnrolmentsAuthService,
       lookupService = mockMtdIdLookupService,
       charitableGivingService = mockRetrieveCharitableGivingService,
@@ -69,7 +69,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
         MockCharitableGivingService.retrieve(retrieveCharitableGivingRequest)
           .returns(Future.successful(Right(DesResponse(correlationId, charitableGivingModel))))
 
-        val result: Future[Result] = target.retrieve(nino, taxYear)(fakeGetRequest)
+        val result: Future[Result] = controller.retrieve(nino, taxYear)(fakeGetRequest)
         status(result) shouldBe OK
         contentAsJson(result) shouldBe CharitableGivingFixture.mtdFormatJson
         header("X-CorrelationId", result) shouldBe Some(correlationId)
@@ -77,5 +77,81 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
       }
     }
 
+    "return a 400 Bad Request with a single error" when {
+
+      val badRequestErrorsFromParser = List(
+        NinoFormatError,
+        TaxYearFormatError,
+        TaxYearNotSpecifiedRuleError
+      )
+
+      val badRequestErrorsFromService = List(
+        NinoFormatError,
+        TaxYearFormatError
+      )
+
+      badRequestErrorsFromParser.foreach(errorsFromParserTester(_, BAD_REQUEST))
+      badRequestErrorsFromService.foreach(errorsFromServiceTester(_, BAD_REQUEST))
+
+    }
+
+    "return a 500 Internal Server Error with a single error" when {
+
+      val internalServerErrorErrors = List(
+        DownstreamError
+      )
+
+      internalServerErrorErrors.foreach(errorsFromParserTester(_, INTERNAL_SERVER_ERROR))
+      internalServerErrorErrors.foreach(errorsFromServiceTester(_, INTERNAL_SERVER_ERROR))
+
+    }
+
+    "return a 404 Not Found Error with a single error" when {
+
+      val notFoundErrors = List(
+        NotFoundError
+      )
+
+      notFoundErrors.foreach(errorsFromServiceTester(_, NOT_FOUND))
+
+    }
+
   }
+
+  def errorsFromParserTester(error: MtdError, expectedStatus: Int): Unit = {
+    s"a ${error.code} error is returned from the parser" in new Test {
+
+      val retrieveCharitableGivingRequestData = RetrieveCharitableGivingRequestData(nino, taxYear)
+
+      MockRetrieveCharitableGivingRequestDataParser.parseRequest(retrieveCharitableGivingRequestData)
+        .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
+
+      val response: Future[Result] = controller.retrieve(nino, taxYear)(fakeGetRequest)
+
+      status(response) shouldBe expectedStatus
+      contentAsJson(response) shouldBe Json.toJson(error)
+      header("X-CorrelationId", response) shouldBe Some(correlationId)
+    }
+  }
+
+  def errorsFromServiceTester(error: MtdError, expectedStatus: Int): Unit = {
+    s"a ${error.code} error is returned from the service" in new Test {
+
+      val retrieveCharitableGivingRequestData = RetrieveCharitableGivingRequestData(nino, taxYear)
+      val retrieveCharitableGivingRequest = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))
+
+      MockRetrieveCharitableGivingRequestDataParser.parseRequest(retrieveCharitableGivingRequestData)
+        .returns(Right(retrieveCharitableGivingRequest))
+
+      MockCharitableGivingService.retrieve(retrieveCharitableGivingRequest)
+        .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
+
+      val response: Future[Result] = controller.retrieve(nino, taxYear)(fakeGetRequest)
+
+      status(response) shouldBe expectedStatus
+      contentAsJson(response) shouldBe Json.toJson(error)
+      header("X-CorrelationId", response) shouldBe Some(correlationId)
+    }
+  }
+
 }

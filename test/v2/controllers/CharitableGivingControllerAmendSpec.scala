@@ -141,6 +141,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
         header("X-CorrelationId", response) shouldBe Some(correlationId)
       }
     }
+
   }
 
   def errorsFromParserTester(error: MtdError, expectedStatus: Int): Unit = {
