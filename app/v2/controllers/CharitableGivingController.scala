@@ -65,7 +65,11 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
           case Right(desResponse) =>
             logger.info(s"[CharitableGivingController][retrieve] - Success response received with correlationId: ${desResponse.correlationId}")
             Ok(Json.toJson(desResponse.responseData)(CharitableGiving.desToMtdWrites)).withHeaders("X-CorrelationId" -> desResponse.correlationId)
+          case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
         }
+      case Left(errorWrapper) => Future.successful {
+        processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
+      }
     }
   }
 
@@ -89,6 +93,7 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
            | NonUKInvestmentsNamesNotSpecifiedRuleError
            | NonUKInvestmentAmountNotSpecifiedRuleError
            | TaxYearNotSpecifiedRuleError => BadRequest(Json.toJson(errorWrapper))
+      case NotFoundError => NotFound(Json.toJson(errorWrapper))
       case DownstreamError => InternalServerError(Json.toJson(errorWrapper))
 
     }
