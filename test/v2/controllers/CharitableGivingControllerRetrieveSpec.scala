@@ -26,7 +26,7 @@ import v2.mocks.requestParsers.{MockAmendCharitableGivingRequestDataParser, Mock
 import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService, MockRetrieveCharitableGivingService}
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData.{RetrieveCharitableGivingRequest, _}
+import v2.models.requestData._
 
 import scala.concurrent.Future
 
@@ -87,8 +87,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
 
       val badRequestErrorsFromService = List(
         NinoFormatError,
-        TaxYearFormatError,
-        TaxYearNotSpecifiedRuleError // TODO Check why this is not in the Technical spec?
+        TaxYearFormatError
       )
 
       badRequestErrorsFromParser.foreach(errorsFromParserTester(_, BAD_REQUEST))
