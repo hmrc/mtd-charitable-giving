@@ -21,9 +21,9 @@ import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
 import v2.fixtures.Fixtures.CharitableGivingFixture.charitableGivingModel
 import v2.fixtures.Fixtures._
+import v2.models.domain.{CharitableGiving, GiftAidPayments, Gifts}
 import v2.models.errors._
-import v2.models.requestData.AmendCharitableGivingRequestData
-import v2.models.{CharitableGiving, GiftAidPayments, Gifts}
+import v2.models.requestData.AmendCharitableGivingRawData
 
 class AmendCharitableGivingValidatorSpec extends UnitSpec {
 
@@ -49,9 +49,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
 
     "return no errors" when {
       "when the uri is valid and the JSON payload is Valid with all fields" in new Test {
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, validJsonBody)
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, validJsonBody)
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result shouldBe List()
 
@@ -68,8 +68,8 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val result: Seq[Error] = validator.validate(inputData)
 
         result shouldBe List()
 
@@ -86,8 +86,8 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val result: Seq[Error] = validator.validate(inputData)
 
         result shouldBe List()
 
@@ -99,8 +99,8 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           gifts = None
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val result: Seq[Error] = validator.validate(inputData)
         result shouldBe List()
 
       }
@@ -111,8 +111,8 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           giftAidPayments = None
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val result: Seq[Error] = validator.validate(inputData)
         result shouldBe List()
 
       }
@@ -132,9 +132,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe GiftAidSpecifiedYearFormatError
@@ -151,9 +151,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe GiftAidOneOffSpecifiedYearFormatError
@@ -170,9 +170,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe GiftAidSpecifiedYearPreviousFormatError
@@ -189,9 +189,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe GiftAidFollowingYearSpecifiedFormatError
@@ -208,9 +208,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe GiftAidNonUKCharityAmountFormatError
@@ -227,9 +227,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe GiftsSharesSecuritiesFormatError
@@ -246,9 +246,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe GiftsLandsBuildingsFormatError
@@ -265,9 +265,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe GiftsInvestmentsAmountFormatError
@@ -277,9 +277,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "the supplied tax year is before 2017" in new Test {
 
         val invalidTaxYear = "2015-16"
-        val inputData = AmendCharitableGivingRequestData(validNino, invalidTaxYear, AnyContentAsJson(createJson(charitableGivingModel)))
+        val inputData = AmendCharitableGivingRawData(validNino, invalidTaxYear, AnyContentAsJson(createJson(charitableGivingModel)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe TaxYearNotSpecifiedRuleError
@@ -294,9 +294,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe NonUKNamesNotSpecifiedRuleError
@@ -313,8 +313,8 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe NonUKNamesNotSpecifiedRuleError
@@ -332,9 +332,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe NonUKAmountNotSpecifiedRuleError
@@ -351,9 +351,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe NonUKAmountNotSpecifiedRuleError
@@ -370,9 +370,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe GiftAidNonUKNamesFormatError
@@ -390,8 +390,8 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe NonUKNamesNotSpecifiedRuleError
@@ -407,9 +407,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe NonUKInvestmentsNamesNotSpecifiedRuleError
@@ -427,9 +427,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe NonUKInvestmentAmountNotSpecifiedRuleError
@@ -447,9 +447,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe NonUKInvestmentAmountNotSpecifiedRuleError
@@ -467,9 +467,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe GiftsNonUKInvestmentsNamesFormatError
@@ -486,8 +486,8 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe NonUKInvestmentsNamesNotSpecifiedRuleError
@@ -502,8 +502,8 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           ))
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
         result.head shouldBe NonUKInvestmentsNamesNotSpecifiedRuleError
@@ -523,9 +523,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
           )
         )
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
 
-        val result: Seq[MtdError] = validator.validate(inputData)
+        val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 2
         result.contains(GiftsInvestmentsAmountFormatError) shouldBe true

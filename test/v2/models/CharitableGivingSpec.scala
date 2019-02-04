@@ -19,6 +19,7 @@ package v2.models
 import play.api.libs.json.JsValue
 import support.UnitSpec
 import v2.fixtures.Fixtures.CharitableGivingFixture._
+import v2.models.domain.CharitableGiving
 import v2.models.utils.JsonErrorValidators
 
 class CharitableGivingSpec extends UnitSpec with JsonErrorValidators {

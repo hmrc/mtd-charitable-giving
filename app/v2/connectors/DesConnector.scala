@@ -22,8 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import v2.config.AppConfig
-import v2.models.CharitableGiving
-import v2.models.outcomes.{AmendCharitableGivingConnectorOutcome, RetrieveCharitableGivingConnectorOutcome}
+import v2.models.domain.CharitableGiving
 import v2.models.requestData.{AmendCharitableGivingRequest, RetrieveCharitableGivingRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -42,7 +41,7 @@ class DesConnector @Inject()(http: HttpClient,
            (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AmendCharitableGivingConnectorOutcome] = {
 
     import v2.connectors.httpparsers.AmendCharitableGivingHttpParser.amendHttpReads
-    import v2.models.CharitableGiving.writes
+    import CharitableGiving.writes
 
     val nino = amendCharitableGivingRequest.nino.nino
     val taxYear = amendCharitableGivingRequest.desTaxYear.toDesTaxYear

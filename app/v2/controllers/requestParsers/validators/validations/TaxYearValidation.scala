@@ -16,13 +16,13 @@
 
 package v2.controllers.requestParsers.validators.validations
 
-import v2.models.errors.{MtdError, TaxYearFormatError}
+import v2.models.errors.{Error, TaxYearFormatError}
 
 object TaxYearValidation {
 
   val taxYearFormat = "20[1-9][0-9]\\-[1-9][0-9]"
 
-    def validate(taxYear: String): List[MtdError] = {
+    def validate(taxYear: String): List[Error] = {
       if (taxYear.matches(taxYearFormat)) {
 
         val start = taxYear.substring(2, 4).toInt

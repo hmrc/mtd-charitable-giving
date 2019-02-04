@@ -14,29 +14,10 @@
  * limitations under the License.
  */
 
-package v2.models
+package v2.models.domain
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-
-case class CharitableGiving(giftAidPayments: Option[GiftAidPayments], gifts:Option[Gifts])
-
-object CharitableGiving {
-
-  implicit val reads: Reads[CharitableGiving] = Json.reads[CharitableGiving]
-
-  implicit val writes: Writes[CharitableGiving] = Json.writes[CharitableGiving]
-
-  val desReads: Reads[CharitableGiving] = (
-    (__ \ "giftAidPayments").readNullable[GiftAidPayments](GiftAidPayments.desReads) and
-      (__ \ "gifts").readNullable[Gifts](Gifts.desReads)
-    ) (CharitableGiving.apply _)
-
-  val desToMtdWrites: Writes[CharitableGiving] = (
-    (__ \ "giftAidPayments").writeNullable[GiftAidPayments](GiftAidPayments.desToMtdWrites) and
-      (__ \ "gifts").writeNullable[Gifts](Gifts.desToMtdWrites)
-    ) (unlift(CharitableGiving.unapply))
-}
 
 case class GiftAidPayments(specifiedYear: Option[BigDecimal],
                            oneOffSpecifiedYear: Option[BigDecimal],
@@ -70,30 +51,3 @@ object GiftAidPayments {
   val desToMtdWrites: Writes[GiftAidPayments] = Json.writes[GiftAidPayments]
 
 }
-
-case class Gifts(landAndBuildings: Option[BigDecimal],
-                 sharesOrSecurities: Option[BigDecimal],
-                 investmentsNonUKCharities: Option[BigDecimal],
-                 investmentsNonUKCharityNames: Option[Seq[String]])
-
-object Gifts {
-  implicit val reads: Reads[Gifts] = Json.reads[Gifts]
-
-  implicit val write: Writes[Gifts] = (
-    (JsPath \ "landAndBuildings").writeNullable[BigDecimal] and
-      (JsPath \ "sharesOrSecurities").writeNullable[BigDecimal] and
-      (JsPath \ "investmentsNonUkCharities").writeNullable[BigDecimal] and
-      (JsPath \ "investmentsNonUkCharitiesCharityNames").writeNullable[Seq[String]]
-    ) (unlift(Gifts.unapply))
-
-  val desReads: Reads[Gifts] = (
-    (JsPath \ "landAndBuildings").readNullable[BigDecimal] and
-      (JsPath \ "sharesOrSecurities").readNullable[BigDecimal] and
-      (JsPath \ "investmentsNonUkCharities").readNullable[BigDecimal] and
-      (JsPath \ "investmentsNonUkCharitiesCharityNames").readNullable[Seq[String]]
-    ) (Gifts.apply _)
-
-  val desToMtdWrites: Writes[Gifts] = Json.writes[Gifts]
-}
-
-

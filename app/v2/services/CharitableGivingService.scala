@@ -21,7 +21,7 @@ import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.errors._
-import v2.models.outcomes.{AmendCharitableGivingOutcome, DesResponse, RetrieveCharitableGivingOutcome}
+import v2.models.outcomes.DesResponse
 import v2.models.requestData.{AmendCharitableGivingRequest, RetrieveCharitableGivingRequest}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -45,7 +45,7 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
           Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
         }
       case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdError(error.code), None))
-      case Left(DesResponse(correlationId, GenericError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
+      case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
       case Right(desResponse) => Right(desResponse.correlationId)
     }
   }
@@ -64,13 +64,13 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
         } else {
           Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
         }
-      case Left(DesResponse(correlationId, GenericError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
+      case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
       case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdError(error.code), None))
       case Right(desResponse) => Right(DesResponse(desResponse.correlationId, desResponse.responseData))
     }
   }
 
-  private def desErrorToMtdError: Map[String, MtdError] = Map(
+  private def desErrorToMtdError: Map[String, Error] = Map(
     "INVALID_NINO" -> NinoFormatError,
     "INVALID_TYPE" -> DownstreamError,
     "INVALID_TAXYEAR" -> TaxYearFormatError,

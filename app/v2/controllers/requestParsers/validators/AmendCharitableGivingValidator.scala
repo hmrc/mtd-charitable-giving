@@ -17,29 +17,29 @@
 package v2.controllers.requestParsers.validators
 
 import v2.controllers.requestParsers.validators.validations._
-import v2.models.CharitableGiving
+import v2.models.domain.CharitableGiving
 import v2.models.errors._
-import v2.models.requestData.AmendCharitableGivingRequestData
+import v2.models.requestData.AmendCharitableGivingRawData
 
-class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequestData] {
+class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRawData] {
 
   private val validationSet = List(levelOneValidations, levelTwoValidations, levelThreeValidations)
 
-  private def levelOneValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
+  private def levelOneValidations: AmendCharitableGivingRawData => List[List[Error]] = (data: AmendCharitableGivingRawData) => {
     List(
       NinoValidation.validate(data.nino),
       TaxYearValidation.validate(data.taxYear)
     )
   }
 
-  private def levelTwoValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
+  private def levelTwoValidations: AmendCharitableGivingRawData => List[List[Error]] = (data: AmendCharitableGivingRawData) => {
     List(
       JsonFormatValidation.validate[CharitableGiving](data.body),
       MtdTaxYearValidation.validate(data.taxYear, TaxYearNotSpecifiedRuleError)
     )
   }
 
-  private def levelThreeValidations: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
+  private def levelThreeValidations: AmendCharitableGivingRawData => List[List[Error]] = (data: AmendCharitableGivingRawData) => {
 
     val amendCharitableGiving = data.body.json.as[CharitableGiving]
 
@@ -90,7 +90,7 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
   }
 
 
-  override def validate(data: AmendCharitableGivingRequestData): List[MtdError] = {
+  override def validate(data: AmendCharitableGivingRawData): List[Error] = {
     run(validationSet, data).distinct
   }
 

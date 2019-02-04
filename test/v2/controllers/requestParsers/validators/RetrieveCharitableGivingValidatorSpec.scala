@@ -18,7 +18,7 @@ package v2.controllers.requestParsers.validators
 
 import support.UnitSpec
 import v2.models.errors.{NinoFormatError, TaxYearFormatError, TaxYearNotSpecifiedRuleError}
-import v2.models.requestData.RetrieveCharitableGivingRequestData
+import v2.models.requestData.RetrieveCharitableGivingRawData
 
 class RetrieveCharitableGivingValidatorSpec extends UnitSpec {
 
@@ -32,7 +32,7 @@ class RetrieveCharitableGivingValidatorSpec extends UnitSpec {
   "calling validate" should {
     "return no errors" when {
       "valid request data is supplied" in new Test {
-        val inputData = RetrieveCharitableGivingRequestData(validNino, validTaxYear)
+        val inputData = RetrieveCharitableGivingRawData(validNino, validTaxYear)
         val result = validator.validate(inputData)
         result shouldBe List()
       }
@@ -40,21 +40,21 @@ class RetrieveCharitableGivingValidatorSpec extends UnitSpec {
 
     "return a single error" when {
       "an invalid NINO is supplied" in new Test {
-        val inputData = RetrieveCharitableGivingRequestData("BAD_NINO_HERE", validTaxYear)
+        val inputData = RetrieveCharitableGivingRawData("BAD_NINO_HERE", validTaxYear)
         val result = validator.validate(inputData)
         result.size shouldBe 1
         result.head shouldBe NinoFormatError
       }
 
       "an invalid tax year is supplied" in new Test {
-        val inputData = RetrieveCharitableGivingRequestData(validNino, "61725465142")
+        val inputData = RetrieveCharitableGivingRawData(validNino, "61725465142")
         val result = validator.validate(inputData)
         result.size shouldBe 1
         result.head shouldBe TaxYearFormatError
       }
 
       "a tax year below the minimum allowed year is supplied" in new Test {
-        val inputData = RetrieveCharitableGivingRequestData(validNino, "2014-15")
+        val inputData = RetrieveCharitableGivingRawData(validNino, "2014-15")
         val result = validator.validate(inputData)
         result.size shouldBe 1
         result.head shouldBe TaxYearNotSpecifiedRuleError

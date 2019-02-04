@@ -20,9 +20,9 @@ import support.UnitSpec
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.validators.MockRetrieveCharitableGivingValidator
 import v2.models.errors.{BadRequestError, ErrorWrapper, NinoFormatError, TaxYearFormatError}
-import v2.models.requestData.{DesTaxYear, RetrieveCharitableGivingRequest, RetrieveCharitableGivingRequestData}
+import v2.models.requestData.{DesTaxYear, RetrieveCharitableGivingRequest, RetrieveCharitableGivingRawData}
 
-class RetrieveCharitableGivingRequestDataParserSpec extends UnitSpec {
+class RetrieveCharitableGivingRawDataParserSpec extends UnitSpec {
 
   class Test extends MockRetrieveCharitableGivingValidator {
     val parser = new RetrieveCharitableGivingRequestDataParser(mockRetrieveCharitableGivingValidator)
@@ -36,7 +36,7 @@ class RetrieveCharitableGivingRequestDataParserSpec extends UnitSpec {
   "calling parseRequest" should {
     "return a valid retrieve request" when {
       "a valid request data is supplied" in new Test() {
-        val inputData = RetrieveCharitableGivingRequestData(validNino, validTaxYear)
+        val inputData = RetrieveCharitableGivingRawData(validNino, validTaxYear)
         val expectedResult = RetrieveCharitableGivingRequest(Nino(validNino), DesTaxYear(validTaxYear))
         MockRetrieveCharitableGivingValidator.validate(inputData).returns(List())
 
@@ -48,7 +48,7 @@ class RetrieveCharitableGivingRequestDataParserSpec extends UnitSpec {
     "return an ErrorWrapper" when {
 
       "a single validation error occurs" in new Test {
-        val retrieveCharitableGivingRequestData = RetrieveCharitableGivingRequestData(invalidNino, validTaxYear)
+        val retrieveCharitableGivingRequestData = RetrieveCharitableGivingRawData(invalidNino, validTaxYear)
         val expectedResponse = ErrorWrapper(None, NinoFormatError, None)
         MockRetrieveCharitableGivingValidator.validate(retrieveCharitableGivingRequestData).returns(List(NinoFormatError))
 
@@ -58,7 +58,7 @@ class RetrieveCharitableGivingRequestDataParserSpec extends UnitSpec {
       }
 
       "multiple validation errors occur" in new Test {
-        val retrieveCharitableGivingRequestData = RetrieveCharitableGivingRequestData(invalidNino, invalidTaxYear)
+        val retrieveCharitableGivingRequestData = RetrieveCharitableGivingRawData(invalidNino, invalidTaxYear)
         val expectedResponse = ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
         MockRetrieveCharitableGivingValidator.validate(retrieveCharitableGivingRequestData).returns(List(NinoFormatError, TaxYearFormatError))
 

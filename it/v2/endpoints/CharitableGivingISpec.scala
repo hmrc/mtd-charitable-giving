@@ -117,7 +117,7 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
 
     }
 
-    def amendErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: MtdError): Unit = {
+    def amendErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
       s"des returns an $desCode error" in new Test {
         override val nino: String = "AA123456A"
         override val taxYear: String = "2018-19"
@@ -213,7 +213,7 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
 
     }
 
-    def retrieveErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: MtdError): Unit = {
+    def retrieveErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
       s"des returns an $desCode error" in new Test {
         override val nino: String = "AA123456A"
         override val taxYear: String = "2018-19"

@@ -37,7 +37,7 @@ class HttpParserSpec extends UnitSpec {
             |  "reason": "some reason"
             |}
           """.stripMargin)
-        val expected = SingleError(MtdError("TEST_CODE", "some reason"))
+        val expected = SingleError(Error("TEST_CODE", "some reason"))
         val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
 
         val result = parseErrors(httpResponse)
@@ -64,8 +64,8 @@ class HttpParserSpec extends UnitSpec {
             |}
           """.stripMargin)
         val expected =  MultipleErrors(Seq(
-          MtdError("TEST_CODE_1", "some reason"),
-          MtdError("TEST_CODE_2", "some reason")
+          Error("TEST_CODE_1", "some reason"),
+          Error("TEST_CODE_2", "some reason")
         ))
         val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
 
@@ -85,7 +85,7 @@ class HttpParserSpec extends UnitSpec {
             | "can't" : "understand"
             |}
           """.stripMargin)
-        val expected =  GenericError(DownstreamError)
+        val expected =  OutboundError(DownstreamError)
         val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
 
         val result = parseErrors(httpResponse)

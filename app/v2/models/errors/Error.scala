@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2.models.errors
 
-case class RetrieveCharitableGivingRequestData(nino: String, taxYear: String) extends InputData
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
+
+case class Error(code: String, message: String)
+
+object Error {
+  implicit val writes: Writes[Error] = Json.writes[Error]
+  implicit val reads: Reads[Error] = (
+    (__ \ "code").read[String] and
+      (__ \ "reason").read[String]
+    ) (Error.apply _)
+}

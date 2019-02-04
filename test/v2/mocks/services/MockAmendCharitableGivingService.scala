@@ -19,9 +19,8 @@ package v2.mocks.services
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.http.HeaderCarrier
-import v2.models.outcomes.AmendCharitableGivingOutcome
 import v2.models.requestData.AmendCharitableGivingRequest
-import v2.services.CharitableGivingService
+import v2.services.{AmendCharitableGivingOutcome, CharitableGivingService}
 
 import scala.concurrent.{ExecutionContext, Future}
 
