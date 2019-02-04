@@ -21,7 +21,7 @@ import play.api.test.Helpers._
 import support.UnitSpec
 import uk.gov.hmrc.http.HttpResponse
 import v2.fixtures.Fixtures.CharitableGivingFixture
-import v2.models.errors.{DownstreamError, GenericError, MtdError, SingleError}
+import v2.models.errors.{DownstreamError, OutboundError, Error, SingleError}
 import v2.models.outcomes.DesResponse
 
 class RetrieveCharitableGivingHttpParserSpec extends UnitSpec {
@@ -55,7 +55,7 @@ class RetrieveCharitableGivingHttpParserSpec extends UnitSpec {
             |  "reason": "some reason"
             |}
           """.stripMargin)
-        val expected = DesResponse(correlationId, SingleError(MtdError("TEST_CODE", "some reason")))
+        val expected = DesResponse(correlationId, SingleError(Error("TEST_CODE", "some reason")))
 
         val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
         val result = RetrieveCharitableGivingHttpParser.retrieveHttpReads.read(GET, "/", httpResponse)
@@ -70,7 +70,7 @@ class RetrieveCharitableGivingHttpParserSpec extends UnitSpec {
             |  "reason": "some reason"
             |}
           """.stripMargin)
-        val expected = DesResponse(correlationId, SingleError(MtdError("TEST_CODE", "some reason")))
+        val expected = DesResponse(correlationId, SingleError(Error("TEST_CODE", "some reason")))
 
         val httpResponse = HttpResponse(NOT_FOUND, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
         val result = RetrieveCharitableGivingHttpParser.retrieveHttpReads.read(GET, "/", httpResponse)
@@ -89,7 +89,7 @@ class RetrieveCharitableGivingHttpParserSpec extends UnitSpec {
             |}
           """.
             stripMargin)
-        val expected =  DesResponse(correlationId, GenericError(DownstreamError))
+        val expected =  DesResponse(correlationId, OutboundError(DownstreamError))
         val unHandledStatusCode = SEE_OTHER
 
         val httpResponse = HttpResponse(unHandledStatusCode, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
@@ -99,7 +99,7 @@ class RetrieveCharitableGivingHttpParserSpec extends UnitSpec {
 
 
       "the error response from DES can't be read" in {
-        val expected =  DesResponse(correlationId, GenericError(DownstreamError))
+        val expected =  DesResponse(correlationId, OutboundError(DownstreamError))
 
         val httpResponse = HttpResponse(OK, None, Map("CorrelationId" -> Seq(correlationId)))
         val result = RetrieveCharitableGivingHttpParser.retrieveHttpReads.read(PUT, "/test", httpResponse)
@@ -115,7 +115,7 @@ class RetrieveCharitableGivingHttpParserSpec extends UnitSpec {
             |}
           """.
             stripMargin)
-        val expected =  DesResponse(correlationId, GenericError(DownstreamError))
+        val expected =  DesResponse(correlationId, OutboundError(DownstreamError))
 
         val httpResponse = HttpResponse(INTERNAL_SERVER_ERROR, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
         val result = RetrieveCharitableGivingHttpParser.retrieveHttpReads.read(PUT, "/test", httpResponse)
@@ -131,7 +131,7 @@ class RetrieveCharitableGivingHttpParserSpec extends UnitSpec {
             |}
           """.
             stripMargin)
-        val expected =  DesResponse(correlationId, GenericError(DownstreamError))
+        val expected =  DesResponse(correlationId, OutboundError(DownstreamError))
 
         val httpResponse = HttpResponse(SERVICE_UNAVAILABLE, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
         val result = RetrieveCharitableGivingHttpParser.retrieveHttpReads.read(PUT, "/test", httpResponse)

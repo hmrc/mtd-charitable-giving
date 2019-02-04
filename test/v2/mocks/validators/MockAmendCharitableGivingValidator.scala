@@ -19,16 +19,16 @@ package v2.mocks.validators
 import org.scalamock.handlers.CallHandler1
 import org.scalamock.scalatest.MockFactory
 import v2.controllers.requestParsers.validators.AmendCharitableGivingValidator
-import v2.models.errors.MtdError
-import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRequestData}
+import v2.models.errors.Error
+import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRawData}
 
 class MockAmendCharitableGivingValidator extends MockFactory {
 
   val mockValidator: AmendCharitableGivingValidator = mock[AmendCharitableGivingValidator]
 
   object MockedAmendCharitableGivingValidator {
-    def validate(data: AmendCharitableGivingRequestData): CallHandler1[AmendCharitableGivingRequestData, List[MtdError]] = {
-      (mockValidator.validate(_: AmendCharitableGivingRequestData))
+    def validate(data: AmendCharitableGivingRawData): CallHandler1[AmendCharitableGivingRawData, List[Error]] = {
+      (mockValidator.validate(_: AmendCharitableGivingRawData))
         .expects(data)
     }
   }

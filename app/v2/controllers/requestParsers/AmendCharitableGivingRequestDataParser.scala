@@ -19,13 +19,13 @@ package v2.controllers.requestParsers
 import javax.inject.Inject
 import uk.gov.hmrc.domain.Nino
 import v2.controllers.requestParsers.validators.AmendCharitableGivingValidator
-import v2.models.CharitableGiving
+import v2.models.domain.CharitableGiving
 import v2.models.errors.{BadRequestError, ErrorWrapper}
-import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRequestData, DesTaxYear}
+import v2.models.requestData.{AmendCharitableGivingRawData, AmendCharitableGivingRequest, DesTaxYear}
 
 class AmendCharitableGivingRequestDataParser @Inject()(validator: AmendCharitableGivingValidator) {
 
-  def parseRequest(data: AmendCharitableGivingRequestData): Either[ErrorWrapper, AmendCharitableGivingRequest] = {
+  def parseRequest(data: AmendCharitableGivingRawData): Either[ErrorWrapper, AmendCharitableGivingRequest] = {
     validator.validate(data) match {
       case List() =>
         //Validation passed.  Request data is ok to transform.

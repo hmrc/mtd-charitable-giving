@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-package v2.models.requestData
+package v2
 
-import play.api.mvc.AnyContentAsJson
+import v2.models.domain.CharitableGiving
+import v2.models.errors.{DesError, Error}
+import v2.models.outcomes.DesResponse
 
-case class AmendCharitableGivingRequestData(nino: String, taxYear: String, body: AnyContentAsJson) extends InputData
+package object connectors {
+
+  type MtdIdLookupOutcome = Either[Error, String]
+
+  type AmendCharitableGivingConnectorOutcome = Either[DesResponse[DesError], DesResponse[String]]
+  type RetrieveCharitableGivingConnectorOutcome = Either[DesResponse[DesError], DesResponse[CharitableGiving]]
+
+}

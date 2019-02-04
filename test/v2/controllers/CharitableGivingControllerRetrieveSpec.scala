@@ -56,14 +56,14 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
   val taxYear = "2017-18"
   val correlationId = "X-123"
   val retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))
-  val errorWrapper: ErrorWrapper = ErrorWrapper(None, MtdError("abc", "abc"), None)
+  val errorWrapper: ErrorWrapper = ErrorWrapper(None, Error("abc", "abc"), None)
 
   "retrieve" should {
     "return a successful response with header X-CorrelationId and body" when {
       "the request received is valid" in new Test() {
 
         MockRetrieveCharitableGivingRequestDataParser.parseRequest(
-          RetrieveCharitableGivingRequestData(nino, taxYear))
+          RetrieveCharitableGivingRawData(nino, taxYear))
           .returns(Right(retrieveCharitableGivingRequest))
 
         MockCharitableGivingService.retrieve(retrieveCharitableGivingRequest)
@@ -118,10 +118,10 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
 
   }
 
-  def errorsFromParserTester(error: MtdError, expectedStatus: Int): Unit = {
+  def errorsFromParserTester(error: Error, expectedStatus: Int): Unit = {
     s"a ${error.code} error is returned from the parser" in new Test {
 
-      val retrieveCharitableGivingRequestData = RetrieveCharitableGivingRequestData(nino, taxYear)
+      val retrieveCharitableGivingRequestData = RetrieveCharitableGivingRawData(nino, taxYear)
 
       MockRetrieveCharitableGivingRequestDataParser.parseRequest(retrieveCharitableGivingRequestData)
         .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
@@ -134,10 +134,10 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
     }
   }
 
-  def errorsFromServiceTester(error: MtdError, expectedStatus: Int): Unit = {
+  def errorsFromServiceTester(error: Error, expectedStatus: Int): Unit = {
     s"a ${error.code} error is returned from the service" in new Test {
 
-      val retrieveCharitableGivingRequestData = RetrieveCharitableGivingRequestData(nino, taxYear)
+      val retrieveCharitableGivingRequestData = RetrieveCharitableGivingRawData(nino, taxYear)
       val retrieveCharitableGivingRequest = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))
 
       MockRetrieveCharitableGivingRequestDataParser.parseRequest(retrieveCharitableGivingRequestData)

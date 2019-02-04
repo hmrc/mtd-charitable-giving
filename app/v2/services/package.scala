@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package v2.models
+package v2
 
 import v2.models.auth.UserDetails
-import v2.models.errors.{DesError, ErrorWrapper, MtdError}
+import v2.models.domain.CharitableGiving
+import v2.models.errors.{Error, ErrorWrapper}
+import v2.models.outcomes.DesResponse
 
-package object outcomes {
+package object services {
 
-  type AuthOutcome = Either[MtdError, UserDetails]
-  type MtdIdLookupOutcome = Either[MtdError, String]
+  type AuthOutcome = Either[Error, UserDetails]
 
-  type AmendCharitableGivingConnectorOutcome = Either[DesResponse[DesError], DesResponse[String]]
   type AmendCharitableGivingOutcome = Either[ErrorWrapper, String]
-
-  type RetrieveCharitableGivingConnectorOutcome = Either[DesResponse[DesError], DesResponse[CharitableGiving]]
   type RetrieveCharitableGivingOutcome = Either[ErrorWrapper, DesResponse[CharitableGiving]]
+
 }

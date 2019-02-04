@@ -20,15 +20,15 @@ import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
 import v2.controllers.requestParsers.RetrieveCharitableGivingRequestDataParser
 import v2.models.errors.ErrorWrapper
-import v2.models.requestData.{RetrieveCharitableGivingRequest, RetrieveCharitableGivingRequestData}
+import v2.models.requestData.{RetrieveCharitableGivingRequest, RetrieveCharitableGivingRawData}
 
 trait MockRetrieveCharitableGivingRequestDataParser extends MockFactory {
 
   val mockRetrieveCharitableGivingRequestDataParser = mock[RetrieveCharitableGivingRequestDataParser]
 
   object MockRetrieveCharitableGivingRequestDataParser {
-    def parseRequest(data: RetrieveCharitableGivingRequestData): CallHandler[Either[ErrorWrapper, RetrieveCharitableGivingRequest]] = {
-      (mockRetrieveCharitableGivingRequestDataParser.parseRequest(_: RetrieveCharitableGivingRequestData)).expects(data)
+    def parseRequest(data: RetrieveCharitableGivingRawData): CallHandler[Either[ErrorWrapper, RetrieveCharitableGivingRequest]] = {
+      (mockRetrieveCharitableGivingRequestDataParser.parseRequest(_: RetrieveCharitableGivingRawData)).expects(data)
     }
   }
 

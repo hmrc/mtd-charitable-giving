@@ -16,39 +16,8 @@
 
 package v2.models.errors
 
-import play.api.libs.json._
-import v2.models.errors.DesErrorCode.DesErrorCode
-
 sealed trait DesError
 
-case class SingleError(error: MtdError) extends DesError
-case class MultipleErrors(errors: Seq[MtdError]) extends DesError
-case class GenericError(error: MtdError) extends DesError
-
-object DesErrorCode extends Enumeration {
-  type DesErrorCode = Value
-
-  //400
-  val INVALID_NINO, INVALID_TYPE, INVALID_TAXYEAR, INVALID_PAYLOAD = Value
-
-  //403
-  val NOT_FOUND_INCOME_SOURCE, MISSING_CHARITIES_NAME_GIFT_AID, MISSING_GIFT_AID_AMOUNT,
-  MISSING_CHARITIES_NAME_INVESTMENT, MISSING_INVESTMENT_AMOUNT = Value
-
-  //5xx
-  val SERVER_ERROR,
-  SERVICE_UNAVAILABLE: DesErrorCode = Value
-
-  implicit val desErrorReads: Reads[DesErrorCode] = Reads.enumNameReads(DesErrorCode)
-}
-
-object ErrorCode {
-  val reads: Reads[Option[DesErrorCode]] = (__ \ "code").readNullable[DesErrorCode]
-
-  def unapply(arg: Option[JsValue]): Option[DesErrorCode] = {
-    arg match {
-      case Some(json) => reads.reads(json).fold(_ => None, valid => valid)
-      case _ => None
-    }
-  }
-}
+case class SingleError(error: Error) extends DesError
+case class MultipleErrors(errors: Seq[Error]) extends DesError
+case class OutboundError(error: Error) extends DesError

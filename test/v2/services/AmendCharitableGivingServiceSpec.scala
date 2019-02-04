@@ -18,10 +18,10 @@ package v2.services
 
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.connectors.MockDesConnector
+import v2.models.domain.{CharitableGiving, GiftAidPayments, Gifts}
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear}
-import v2.models.{CharitableGiving, GiftAidPayments, Gifts}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -59,7 +59,7 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
       "the DesConnector returns multiple errors" in new Test {
 
         val response = DesResponse(correlationId,
-          MultipleErrors(Seq(MtdError("INVALID_NINO", "doesn't matter"), MtdError("INVALID_TAXYEAR", "doesn't matter"))))
+          MultipleErrors(Seq(Error("INVALID_NINO", "doesn't matter"), Error("INVALID_TAXYEAR", "doesn't matter"))))
 
         val expected = ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
 
@@ -73,7 +73,7 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
     "return a single error" when {
       "the DesConnector returns multiple errors and one maps to a DownstreamError" in new Test {
         val response = DesResponse(correlationId,
-          MultipleErrors(Seq(MtdError("INVALID_NINO", "doesn't matter"), MtdError("INVALID_TYPE", "doesn't matter"))))
+          MultipleErrors(Seq(Error("INVALID_NINO", "doesn't matter"), Error("INVALID_TYPE", "doesn't matter"))))
 
         val expected = ErrorWrapper(Some(correlationId), DownstreamError, None)
 
@@ -85,7 +85,7 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
     }
 
     "the DesConnector returns a GenericError" in new Test {
-      val response = DesResponse(correlationId, GenericError(DownstreamError))
+      val response = DesResponse(correlationId, OutboundError(DownstreamError))
 
       val expected = ErrorWrapper(Some(correlationId), DownstreamError, None)
 
@@ -95,7 +95,7 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
       result shouldBe Left(expected)
     }
 
-    val errorMap: Map[String, MtdError] = Map(
+    val errorMap: Map[String, Error] = Map(
       "INVALID_NINO" -> NinoFormatError,
       "INVALID_TYPE" -> DownstreamError,
       "INVALID_TAXYEAR" -> TaxYearFormatError,
@@ -114,7 +114,7 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
 
       s"the DesConnector returns a single $error error" in new Test {
 
-        val response = DesResponse(correlationId, SingleError(MtdError(error, "doesn't matter")))
+        val response = DesResponse(correlationId, SingleError(Error(error, "doesn't matter")))
 
         val expected = ErrorWrapper(Some(correlationId), errorMap(error), None)
 
