@@ -116,8 +116,6 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
         result shouldBe List()
 
       }
-
-
     }
 
     "return a single error" when {
@@ -509,7 +507,35 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
         result.head shouldBe NonUKInvestmentsNamesNotSpecifiedRuleError
       }
 
+      "gifts or gift aid are not provided" in new Test {
+        val mutatedData = charitableGivingModel.copy(gifts = None, giftAidPayments = None)
 
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val result = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe GiftAidAndGiftsEmptyRuleError
+      }
+
+      "gifts has been provided without values" in new Test {
+        val mutatedData = charitableGivingModel.copy(gifts = Some(Gifts(None,None,None,None)), giftAidPayments = None)
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val result = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe GiftAidAndGiftsEmptyRuleError
+      }
+
+      "giftAidPayments has been provided without values" in new Test {
+        val mutatedData = charitableGivingModel.copy(gifts = Some(Gifts(None,None,None,None)), giftAidPayments = None)
+
+        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val result = validator.validate(inputData)
+
+        result.size shouldBe 1
+        result.head shouldBe GiftAidAndGiftsEmptyRuleError
+      }
     }
 
     "return multiple errors" when {
