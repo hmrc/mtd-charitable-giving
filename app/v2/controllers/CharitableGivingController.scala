@@ -78,6 +78,7 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
       case BadRequestError
            | NinoFormatError
            | TaxYearFormatError
+           | EmptyOrNonMatchingBodyRuleError
            | GiftAidAndGiftsEmptyRuleError
            | GiftAidSpecifiedYearFormatError
            | GiftAidOneOffSpecifiedYearFormatError

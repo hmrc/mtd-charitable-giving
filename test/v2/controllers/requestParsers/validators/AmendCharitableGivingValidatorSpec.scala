@@ -523,6 +523,8 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
         val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
         val result = validator.validate(inputData)
 
+        println(s"\n$result\n")
+
         result.size shouldBe 1
         result.head shouldBe GiftAidAndGiftsEmptyRuleError
       }
