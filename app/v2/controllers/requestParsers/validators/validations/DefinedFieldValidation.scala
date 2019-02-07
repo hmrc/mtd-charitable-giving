@@ -20,10 +20,10 @@ import v2.models.errors.{GiftAidAndGiftsEmptyRuleError, MtdError}
 
 object DefinedFieldValidation {
 
-  def validate(fields: Option[_]*): List[MtdError] = {
+  def validate(error: MtdError, fields: Option[_]*): List[MtdError] = {
 
     if (!fields.exists(_.isDefined)) {
-      List(GiftAidAndGiftsEmptyRuleError)
+      List(error)
     } else {
       NoValidationErrors
     }

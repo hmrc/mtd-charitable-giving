@@ -35,6 +35,8 @@ object GiftsInvestmentsAmountFormatError extends MtdError("FORMAT_GIFTS_INVESTME
 object GiftsNonUKInvestmentsNamesFormatError extends MtdError("FORMAT_GIFTS_NONUK_INVESTMENTS_NAMES", "The non-UK investments charity names list is invalid")
 
 //Rule Errors
+object EmptyOrNonMatchingBodyRuleError extends
+  MtdError("RULE_EMPTY_BODY_SUBMITTED", "An empty or non-matching body was submitted")
 object GiftAidAndGiftsEmptyRuleError extends
   MtdError("RULE_EMPTY_GIFTS_OR_GIFT_AID", "A non-empty gift aid or gifts object must be supplied")
 object NonUKNamesNotSpecifiedRuleError extends

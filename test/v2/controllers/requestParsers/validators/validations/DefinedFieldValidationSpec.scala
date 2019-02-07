@@ -28,14 +28,15 @@ class DefinedFieldValidationSpec extends UnitSpec with JsonErrorValidators {
       "top level optional fields exist" in {
 
         val validModel = charitableGivingModel
-        val validationResult = DefinedFieldValidation.validate(validModel.gifts, validModel.giftAidPayments)
+        val validationResult = DefinedFieldValidation.validate(GiftAidAndGiftsEmptyRuleError, validModel.gifts, validModel.giftAidPayments)
         validationResult shouldBe List()
       }
     }
 
     "return an error" in {
       val invalidModel = CharitableGiving(None, None)
-      DefinedFieldValidation.validate(invalidModel.gifts, invalidModel.giftAidPayments) shouldBe List(GiftAidAndGiftsEmptyRuleError)
+      DefinedFieldValidation.validate(
+        GiftAidAndGiftsEmptyRuleError, invalidModel.gifts, invalidModel.giftAidPayments) shouldBe List(GiftAidAndGiftsEmptyRuleError)
     }
   }
 }

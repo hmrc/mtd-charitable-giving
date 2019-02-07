@@ -42,7 +42,8 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
   // Extra validation to stop these invalid requests heading to DES, and to make functionality consistent in Sandbox
   private def emptyBodyValidation: AmendCharitableGivingRequestData => List[List[MtdError]] = (data: AmendCharitableGivingRequestData) => {
     val amendCharitableGiving = data.body.json.as[CharitableGiving]
-    val topLevelFieldsValidation = List(DefinedFieldValidation.validate(amendCharitableGiving.gifts, amendCharitableGiving.giftAidPayments))
+    val topLevelFieldsValidation =
+      List(DefinedFieldValidation.validate(EmptyOrNonMatchingBodyRuleError, amendCharitableGiving.gifts, amendCharitableGiving.giftAidPayments))
 
     topLevelFieldsValidation match {
       case list@ _ :: _ => list
@@ -75,6 +76,7 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
 
       List(
         DefinedFieldValidation.validate(
+          GiftAidAndGiftsEmptyRuleError,
           gifts.investmentsNonUKCharities,
           gifts.investmentsNonUKCharityNames,
           gifts.landAndBuildings,
@@ -104,6 +106,7 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRequ
 
       List(
         DefinedFieldValidation.validate(
+          GiftAidAndGiftsEmptyRuleError,
           giftAidPayments.specifiedYear,
           giftAidPayments.oneOffSpecifiedYear,
           giftAidPayments.specifiedYearTreatedAsPreviousYear,

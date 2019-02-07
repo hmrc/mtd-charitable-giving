@@ -514,7 +514,7 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
         val result = validator.validate(inputData)
 
         result.size shouldBe 1
-        result.head shouldBe GiftAidAndGiftsEmptyRuleError
+        result.head shouldBe EmptyOrNonMatchingBodyRuleError
       }
 
       "gifts has been provided without values" in new Test {
