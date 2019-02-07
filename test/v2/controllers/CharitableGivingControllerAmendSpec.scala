@@ -82,6 +82,8 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
         BadRequestError,
         NinoFormatError,
         TaxYearFormatError,
+        EmptyOrNonMatchingBodyRuleError,
+        GiftAidAndGiftsEmptyRuleError,
         GiftAidSpecifiedYearFormatError,
         GiftAidOneOffSpecifiedYearFormatError,
         GiftAidSpecifiedYearPreviousFormatError,
