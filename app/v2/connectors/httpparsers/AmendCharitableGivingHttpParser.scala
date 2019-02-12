@@ -20,8 +20,9 @@ import play.api.Logger
 import play.api.http.Status._
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
+import v2.connectors.AmendCharitableGivingConnectorOutcome
 import v2.models.errors._
-import v2.models.outcomes.{AmendCharitableGivingConnectorOutcome, DesResponse}
+import v2.models.outcomes.DesResponse
 
 object AmendCharitableGivingHttpParser extends HttpParser {
 
@@ -45,15 +46,15 @@ object AmendCharitableGivingHttpParser extends HttpParser {
           s"Success response received from DES with correlationId: $correlationId when calling $url")
           parseResponse(correlationId, response)
         case BAD_REQUEST | FORBIDDEN => Left(DesResponse(correlationId, parseErrors(response)))
-        case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(DesResponse(correlationId, GenericError(DownstreamError)))
-        case _ => Left(DesResponse(correlationId, GenericError(DownstreamError)))
+        case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
+        case _ => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
       }
     }
 
     private def parseResponse(correlationId: String, response: HttpResponse): AmendCharitableGivingConnectorOutcome =
       response.validateJson[String](jsonReads) match {
         case Some(ref) => Right(DesResponse(correlationId, ref))
-        case None => Left(DesResponse(correlationId, GenericError(DownstreamError)))
+        case None => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
       }
   }
 }

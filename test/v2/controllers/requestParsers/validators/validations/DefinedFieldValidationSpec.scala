@@ -17,10 +17,10 @@
 package v2.controllers.requestParsers.validators.validations
 
 import support.UnitSpec
+import v2.fixtures.Fixtures.CharitableGivingFixture._
+import v2.models.domain.CharitableGiving
 import v2.models.errors.GiftAidAndGiftsEmptyRuleError
 import v2.models.utils.JsonErrorValidators
-import v2.models.{CharitableGiving, GiftAidPayments, Gifts}
-import v2.fixtures.Fixtures.CharitableGivingFixture._
 class DefinedFieldValidationSpec extends UnitSpec with JsonErrorValidators {
 
   "validate" should {

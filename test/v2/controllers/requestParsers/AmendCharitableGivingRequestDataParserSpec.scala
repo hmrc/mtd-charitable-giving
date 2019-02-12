@@ -22,7 +22,7 @@ import uk.gov.hmrc.domain.Nino
 import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.mocks.validators.MockAmendCharitableGivingValidator
 import v2.models.errors.{BadRequestError, ErrorWrapper, NinoFormatError, TaxYearFormatError}
-import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRequestData, DesTaxYear}
+import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRawData, DesTaxYear}
 
 class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
 
@@ -42,7 +42,7 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
       "valid request data is supplied" in new Test {
 
         val amendCharitableGivingRequestData =
-          AmendCharitableGivingRequestData(validNino, validTaxYear, validJsonBody)
+          AmendCharitableGivingRawData(validNino, validTaxYear, validJsonBody)
 
         val amendCharitableGivingRequest =
           AmendCharitableGivingRequest(Nino(validNino), DesTaxYear(validTaxYear), CharitableGivingFixture.charitableGivingModel)
@@ -61,7 +61,7 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
 
       "a single validation error occurs" in new Test {
         val amendCharitableGivingRequestData =
-          AmendCharitableGivingRequestData(invalidNino, validTaxYear, validJsonBody)
+          AmendCharitableGivingRawData(invalidNino, validTaxYear, validJsonBody)
 
         val expectedResponse =
           ErrorWrapper(None, NinoFormatError, None)
@@ -76,7 +76,7 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
 
       "multiple validation errors occur" in new Test {
         val amendCharitableGivingRequestData =
-          AmendCharitableGivingRequestData(validNino, invalidDate, validJsonBody)
+          AmendCharitableGivingRawData(validNino, invalidDate, validJsonBody)
 
         val multipleErrorWrapper =
           ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))

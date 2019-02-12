@@ -17,7 +17,7 @@
 package v2.fixtures
 
 import play.api.libs.json.{JsValue, Json}
-import v2.models.{CharitableGiving, GiftAidPayments, Gifts}
+import v2.models.domain.{CharitableGiving, GiftAidPayments, Gifts}
 
 object Fixtures {
 

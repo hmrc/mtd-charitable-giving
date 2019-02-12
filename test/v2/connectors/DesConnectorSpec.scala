@@ -19,10 +19,10 @@ package v2.connectors
 import uk.gov.hmrc.domain.Nino
 import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.mocks.{MockAppConfig, MockHttpClient}
+import v2.models.domain.{CharitableGiving, GiftAidPayments, Gifts}
 import v2.models.errors.{MultipleErrors, NinoFormatError, SingleError, TaxYearFormatError}
-import v2.models.outcomes.{AmendCharitableGivingConnectorOutcome, DesResponse, RetrieveCharitableGivingConnectorOutcome}
+import v2.models.outcomes.DesResponse
 import v2.models.requestData.{AmendCharitableGivingRequest, DesTaxYear, RetrieveCharitableGivingRequest}
-import v2.models.{CharitableGiving, GiftAidPayments, Gifts}
 
 import scala.concurrent.Future
 

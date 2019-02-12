@@ -18,10 +18,11 @@ package v2.connectors.httpparsers
 
 import play.api.http.Status._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
+import v2.connectors.RetrieveCharitableGivingConnectorOutcome
 import v2.connectors.httpparsers.AmendCharitableGivingHttpParser.logger
-import v2.models.CharitableGiving
-import v2.models.errors.{DownstreamError, GenericError}
-import v2.models.outcomes.{DesResponse, RetrieveCharitableGivingConnectorOutcome}
+import v2.models.domain.CharitableGiving
+import v2.models.errors.{DownstreamError, OutboundError}
+import v2.models.outcomes.DesResponse
 
 object RetrieveCharitableGivingHttpParser extends HttpParser {
 
@@ -39,8 +40,8 @@ object RetrieveCharitableGivingHttpParser extends HttpParser {
       response.status match {
         case OK => parseResponse(response)
         case BAD_REQUEST | NOT_FOUND => Left(DesResponse(correlationId, parseErrors(response)))
-        case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(DesResponse(correlationId, GenericError(DownstreamError)))
-        case _ => Left(DesResponse(correlationId, GenericError(DownstreamError)))
+        case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
+        case _ => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
       }
     }
   }
@@ -48,6 +49,6 @@ object RetrieveCharitableGivingHttpParser extends HttpParser {
   private def parseResponse(response: HttpResponse): RetrieveCharitableGivingConnectorOutcome =
     response.validateJson[CharitableGiving](CharitableGiving.desReads) match {
       case Some(charitableGiving) => Right(DesResponse(retrieveCorrelationId(response), charitableGiving))
-      case None => Left(DesResponse(retrieveCorrelationId(response), GenericError(DownstreamError)))
+      case None => Left(DesResponse(retrieveCorrelationId(response), OutboundError(DownstreamError)))
     }
 }

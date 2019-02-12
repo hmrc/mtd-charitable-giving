@@ -18,15 +18,15 @@ package v2.mocks.validators
 
 import org.scalamock.scalatest.MockFactory
 import v2.controllers.requestParsers.validators.RetrieveCharitableGivingValidator
-import v2.models.requestData.RetrieveCharitableGivingRequestData
+import v2.models.requestData.RetrieveCharitableGivingRawData
 
 class MockRetrieveCharitableGivingValidator extends MockFactory {
 
   val mockRetrieveCharitableGivingValidator = mock[RetrieveCharitableGivingValidator]
 
   object MockRetrieveCharitableGivingValidator {
-    def validate(data: RetrieveCharitableGivingRequestData) = {
-      (mockRetrieveCharitableGivingValidator.validate(_: RetrieveCharitableGivingRequestData))
+    def validate(data: RetrieveCharitableGivingRawData) = {
+      (mockRetrieveCharitableGivingValidator.validate(_: RetrieveCharitableGivingRawData))
         .expects(data)
     }
   }

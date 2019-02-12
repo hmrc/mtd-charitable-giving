@@ -23,9 +23,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.mocks.requestParsers.{MockAmendCharitableGivingRequestDataParser, MockRetrieveCharitableGivingRequestDataParser}
 import v2.mocks.services.{MockAmendCharitableGivingService, MockEnrolmentsAuthService, MockMtdIdLookupService}
+import v2.models.domain.{CharitableGiving, GiftAidPayments, Gifts}
 import v2.models.errors._
-import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRequestData, DesTaxYear}
-import v2.models.{CharitableGiving, GiftAidPayments, Gifts}
+import v2.models.requestData.{AmendCharitableGivingRawData, AmendCharitableGivingRequest, DesTaxYear}
 
 import scala.concurrent.Future
 
@@ -63,7 +63,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
       "the request received is valid" in new Test() {
 
         MockAmendCharitableGivingRequestDataParser.parseRequest(
-          AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
+          AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
           .returns(Right(amendCharitableGivingRequest))
 
         MockCharitableGivingService.amend(amendCharitableGivingRequest)
@@ -79,7 +79,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
       "the request received failed the validation" in new Test() {
 
         MockAmendCharitableGivingRequestDataParser.parseRequest(
-          AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
+          AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
           .returns(Left(ErrorWrapper(None, NinoFormatError, None)))
 
         val result: Future[Result] = target.amend(nino, taxYear)(fakePostRequest(CharitableGivingFixture.mtdFormatJson))
@@ -141,11 +141,11 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
 
     "return a valid error response" when {
       "multiple errors exist" in new Test() {
-        val amendCharitableGivingRequestData = AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson))
+        val amendCharitableGivingRequestData = AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson))
         val multipleErrorResponse = ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
 
         MockAmendCharitableGivingRequestDataParser.parseRequest(
-          AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
+          AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
           .returns(Left(multipleErrorResponse))
 
         val response: Future[Result] = target.amend(nino, taxYear)(fakePostRequest[JsValue](CharitableGivingFixture.mtdFormatJson))
@@ -158,13 +158,13 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
 
   }
 
-  def errorsFromParserTester(error: MtdError, expectedStatus: Int): Unit = {
+  def errorsFromParserTester(error: Error, expectedStatus: Int): Unit = {
     s"a ${error.code} error is returned from the parser" in new Test {
 
-      val amendCharitableGivingRequestData = AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson))
+      val amendCharitableGivingRequestData = AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson))
 
       MockAmendCharitableGivingRequestDataParser.parseRequest(
-        AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
+        AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
         .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
 
       val response: Future[Result] = target.amend(nino, taxYear)(fakePostRequest[JsValue](CharitableGivingFixture.mtdFormatJson))
@@ -175,13 +175,13 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
     }
   }
 
-  def errorsFromServiceTester(error: MtdError, expectedStatus: Int): Unit = {
+  def errorsFromServiceTester(error: Error, expectedStatus: Int): Unit = {
     s"a ${error.code} error is returned from the service" in new Test {
 
-      val amendCharitableGivingRequestData = AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson))
+      val amendCharitableGivingRequestData = AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson))
 
       MockAmendCharitableGivingRequestDataParser.parseRequest(
-        AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
+        AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
         .returns(Right(amendCharitableGivingRequest))
 
       MockCharitableGivingService.amend(amendCharitableGivingRequest)

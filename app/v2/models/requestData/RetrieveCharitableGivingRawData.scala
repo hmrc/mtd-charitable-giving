@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-package v2.controllers.requestParsers.validators.validations
+package v2.models.requestData
 
-import uk.gov.hmrc.domain.Nino
-import v2.models.errors.{Error, NinoFormatError}
-
-object NinoValidation {
-
-  def validate(nino: String): List[Error] = {
-    if (!Nino.isValid(nino)) List(NinoFormatError) else NoValidationErrors
-  }
-
-}
+case class RetrieveCharitableGivingRawData(nino: String, taxYear: String) extends InputData

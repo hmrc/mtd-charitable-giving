@@ -23,9 +23,9 @@ import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, AnyContentAsJson}
 import v2.controllers.requestParsers.{AmendCharitableGivingRequestDataParser, RetrieveCharitableGivingRequestDataParser}
-import v2.models.CharitableGiving
+import v2.models.domain.CharitableGiving
 import v2.models.errors._
-import v2.models.requestData.{AmendCharitableGivingRequestData, RetrieveCharitableGivingRequestData}
+import v2.models.requestData.{AmendCharitableGivingRawData, RetrieveCharitableGivingRawData}
 import v2.services.{CharitableGivingService, EnrolmentsAuthService, MtdIdLookupService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -43,7 +43,7 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
 
   def amend(nino: String, taxYear: String): Action[JsValue] = authorisedAction(nino).async(parse.json) { implicit request =>
 
-    amendCharitableGivingRequestDataParser.parseRequest(AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(request.body))) match {
+    amendCharitableGivingRequestDataParser.parseRequest(AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(request.body))) match {
 
       case Right(amendCharitableGivingRequest) => charitableGivingService.amend(amendCharitableGivingRequest).map {
         case Right(correlationId) =>
@@ -59,7 +59,7 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
 
   def retrieve(nino: String, taxYear: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
 
-    retrieveCharitableGivingRequestDataParser.parseRequest(RetrieveCharitableGivingRequestData(nino, taxYear)) match {
+    retrieveCharitableGivingRequestDataParser.parseRequest(RetrieveCharitableGivingRawData(nino, taxYear)) match {
       case Right(retrieveCharitableGivingRequest) =>
         charitableGivingService.retrieve(retrieveCharitableGivingRequest).map {
           case Right(desResponse) =>

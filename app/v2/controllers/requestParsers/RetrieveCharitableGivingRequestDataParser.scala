@@ -20,11 +20,11 @@ import javax.inject.Inject
 import uk.gov.hmrc.domain.Nino
 import v2.controllers.requestParsers.validators.RetrieveCharitableGivingValidator
 import v2.models.errors.{BadRequestError, ErrorWrapper}
-import v2.models.requestData.{DesTaxYear, RetrieveCharitableGivingRequest, RetrieveCharitableGivingRequestData}
+import v2.models.requestData.{DesTaxYear, RetrieveCharitableGivingRequest, RetrieveCharitableGivingRawData}
 
 class RetrieveCharitableGivingRequestDataParser @Inject()(validator: RetrieveCharitableGivingValidator) {
 
-  def parseRequest(data: RetrieveCharitableGivingRequestData): Either[ErrorWrapper, RetrieveCharitableGivingRequest] = {
+  def parseRequest(data: RetrieveCharitableGivingRawData): Either[ErrorWrapper, RetrieveCharitableGivingRequest] = {
     validator.validate(data) match {
       case List() => Right(RetrieveCharitableGivingRequest(Nino(data.nino), DesTaxYear(data.taxYear)))
       case error :: Nil => Left(ErrorWrapper(None, error, None))
