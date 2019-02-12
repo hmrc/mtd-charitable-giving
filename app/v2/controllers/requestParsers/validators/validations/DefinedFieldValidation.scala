@@ -16,7 +16,7 @@
 
 package v2.controllers.requestParsers.validators.validations
 
-import v2.models.errors.{GiftAidAndGiftsEmptyRuleError, MtdError}
+import v2.models.errors.MtdError
 
 object DefinedFieldValidation {
 

@@ -24,6 +24,7 @@ class DesErrorSpec extends UnitSpec {
 
   val desErrorCode: DesErrorCode = DesErrorCode.INVALID_NINO
   val validErrorJson: JsValue = Json.parse(s""" { "code" : "INVALID_NINO", "reason": "does not matter" } """)
+  val invalidErrorJson: JsValue = Json.parse(s""" { "code" : "INVALID_TEST", "reason": "does not matter" } """)
 
   "reads" should {
 
@@ -33,6 +34,9 @@ class DesErrorSpec extends UnitSpec {
       }
     }
     "return nothing" when {
+      "the invalid json is returned" in {
+        ErrorCode.unapply(Some(invalidErrorJson)) shouldBe None
+      }
       "JSON that does not match an error is returned" in {
         ErrorCode.unapply(Some(Json.parse(s"""{ "foo": "bar" }"""))) shouldBe None
       }
