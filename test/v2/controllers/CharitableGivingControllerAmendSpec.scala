@@ -75,6 +75,18 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
       }
     }
 
+    "return single error response with status 400" when {
+      "the request received failed the validation" in new Test() {
+
+        MockAmendCharitableGivingRequestDataParser.parseRequest(
+          AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
+          .returns(Left(ErrorWrapper(None, NinoFormatError, None)))
+
+        val result: Future[Result] = target.amend(nino, taxYear)(fakePostRequest(CharitableGivingFixture.mtdFormatJson))
+        status(result) shouldBe BAD_REQUEST
+        header("X-CorrelationId", result) nonEmpty
+      }
+    }
 
     "return a 400 Bad Request with a single error" when {
 

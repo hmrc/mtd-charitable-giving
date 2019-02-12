@@ -36,7 +36,7 @@ object GiftsNonUKInvestmentsNamesFormatError extends MtdError("FORMAT_GIFTS_NONU
 
 //Rule Errors
 object EmptyOrNonMatchingBodyRuleError extends
-  MtdError("RULE_EMPTY_BODY_SUBMITTED", "An empty or non-matching body was submitted")
+  MtdError("RULE_INCORRECT_OR_EMPTY_BODY_SUBMITTED", "An empty or non-matching body was submitted")
 object GiftAidAndGiftsEmptyRuleError extends
   MtdError("RULE_EMPTY_GIFTS_OR_GIFT_AID", "A non-empty gift aid or gifts object must be supplied")
 object NonUKNamesNotSpecifiedRuleError extends

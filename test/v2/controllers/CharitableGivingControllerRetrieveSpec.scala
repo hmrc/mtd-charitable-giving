@@ -17,7 +17,7 @@
 package v2.controllers
 
 import play.api.libs.json.Json
-import play.api.mvc.Result
+import play.api.mvc.{AnyContentAsJson, Result}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures.CharitableGivingFixture
@@ -74,6 +74,19 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
         contentAsJson(result) shouldBe CharitableGivingFixture.mtdFormatJson
         header("X-CorrelationId", result) shouldBe Some(correlationId)
 
+      }
+    }
+
+    "return single error response with status 400" when {
+      "the request received failed the validation" in new Test() {
+
+        MockRetrieveCharitableGivingRequestDataParser.parseRequest(
+          RetrieveCharitableGivingRequestData(nino, taxYear))
+          .returns(Left(ErrorWrapper(None, NinoFormatError, None)))
+
+        val result: Future[Result] = controller.retrieve(nino, taxYear)(fakeGetRequest)
+        status(result) shouldBe BAD_REQUEST
+        header("X-CorrelationId", result) nonEmpty
       }
     }
 
