@@ -79,7 +79,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
       "the request received failed the validation" in new Test() {
 
         MockAmendCharitableGivingRequestDataParser.parseRequest(
-          AmendCharitableGivingRequestData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
+          AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
           .returns(Left(ErrorWrapper(None, NinoFormatError, None)))
 
         val result: Future[Result] = target.amend(nino, taxYear)(fakePostRequest(CharitableGivingFixture.mtdFormatJson))

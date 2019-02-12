@@ -81,7 +81,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
       "the request received failed the validation" in new Test() {
 
         MockRetrieveCharitableGivingRequestDataParser.parseRequest(
-          RetrieveCharitableGivingRequestData(nino, taxYear))
+          RetrieveCharitableGivingRawData(nino, taxYear))
           .returns(Left(ErrorWrapper(None, NinoFormatError, None)))
 
         val result: Future[Result] = controller.retrieve(nino, taxYear)(fakeGetRequest)

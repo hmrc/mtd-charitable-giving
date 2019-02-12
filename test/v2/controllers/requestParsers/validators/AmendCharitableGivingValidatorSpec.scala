@@ -510,7 +510,7 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "gifts or gift aid are not provided" in new Test {
         val mutatedData = charitableGivingModel.copy(gifts = None, giftAidPayments = None)
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
         val result = validator.validate(inputData)
 
         result.size shouldBe 1
@@ -520,7 +520,7 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "gifts has been provided without values" in new Test {
         val mutatedData = charitableGivingModel.copy(gifts = Some(Gifts(None,None,None,None)), giftAidPayments = None)
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
         val result = validator.validate(inputData)
 
         println(s"\n$result\n")
@@ -532,7 +532,7 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
       "giftAidPayments has been provided without values" in new Test {
         val mutatedData = charitableGivingModel.copy(gifts = Some(Gifts(None,None,None,None)), giftAidPayments = None)
 
-        val inputData = AmendCharitableGivingRequestData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
+        val inputData = AmendCharitableGivingRawData(validNino, validTaxYear, AnyContentAsJson(createJson(mutatedData)))
         val result = validator.validate(inputData)
 
         result.size shouldBe 1
