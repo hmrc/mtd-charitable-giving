@@ -272,9 +272,9 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
 
       }
 
-      "the supplied tax year is before 2017" in new Test {
+      "the supplied tax year is before 2018" in new Test {
 
-        val invalidTaxYear = "2015-16"
+        val invalidTaxYear = "2016-17"
         val inputData = AmendCharitableGivingRawData(validNino, invalidTaxYear, AnyContentAsJson(createJson(charitableGivingModel)))
 
         val result: Seq[Error] = validator.validate(inputData)
