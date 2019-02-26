@@ -48,5 +48,5 @@ class AppConfigImpl @Inject()(environment: Environment,
 
 trait FixedConfig {
   // Minimum tax year for MTD
-  val minimumTaxYear = 2017
+  val minimumTaxYear = 2018
 }
