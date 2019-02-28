@@ -22,20 +22,28 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.mocks.requestParsers.{MockAmendCharitableGivingRequestDataParser, MockRetrieveCharitableGivingRequestDataParser}
-import v2.mocks.services.{MockAmendCharitableGivingService, MockEnrolmentsAuthService, MockMtdIdLookupService}
+import v2.mocks.services.{MockAmendCharitableGivingService, MockAuditService, MockEnrolmentsAuthService, MockMtdIdLookupService}
+import v2.models.audit.{AuditError, AuditEvent, AuditResponse, CharitableGivingAuditDetail}
 import v2.models.domain.{CharitableGiving, GiftAidPayments, Gifts}
 import v2.models.errors._
 import v2.models.requestData.{AmendCharitableGivingRawData, AmendCharitableGivingRequest, DesTaxYear}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
+  private val giftAidPayments = GiftAidPayments(
+    Some(10000.50), Some(1000.00), Some(300.00), Some(400.00), Some(2000.00), Some(Seq("International Charity A", "International Charity B"))
+  )
+  private val gifts = Gifts(Some(700.00), Some(600.99), Some(300.00), Some(Seq("International Charity C", "International Charity D")))
+  private val charitableGiving = CharitableGiving(Some(giftAidPayments), Some(gifts))
 
   trait Test extends MockEnrolmentsAuthService
     with MockMtdIdLookupService
     with MockAmendCharitableGivingService
     with MockAmendCharitableGivingRequestDataParser
-    with MockRetrieveCharitableGivingRequestDataParser {
+    with MockRetrieveCharitableGivingRequestDataParser
+    with MockAuditService {
 
     val hc = HeaderCarrier()
 
@@ -45,6 +53,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
       charitableGivingService = mockAmendCharitableGivingService,
       amendCharitableGivingRequestDataParser = mockAmendCharitableGivingRequestDataParser,
       retrieveCharitableGivingRequestDataParser = mockRetrieveCharitableGivingRequestDataParser,
+      auditService = mockAuditService,
       cc = cc
 
     )
@@ -73,6 +82,12 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
         val result: Future[Result] = target.amend(nino, taxYear)(fakePostRequest(CharitableGivingFixture.mtdFormatJson))
         status(result) shouldBe NO_CONTENT
         header("X-CorrelationId", result) shouldBe Some(correlationId)
+
+        val detail = CharitableGivingAuditDetail("Organisation", None, nino, Some(charitableGiving), "X-123", None)
+        val event: AuditEvent[CharitableGivingAuditDetail] = AuditEvent[CharitableGivingAuditDetail]("amendCharitableGivingTaxRelief",
+          "update-charitable-giving-annual-summary", detail)
+        MockedAuditService.verifyAuditEvent(event).once
+
       }
     }
 
@@ -85,7 +100,13 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
 
         val result: Future[Result] = target.amend(nino, taxYear)(fakePostRequest(CharitableGivingFixture.mtdFormatJson))
         status(result) shouldBe BAD_REQUEST
-        header("X-CorrelationId", result) nonEmpty
+        header("X-CorrelationId", result).nonEmpty shouldBe true
+
+        val detail = CharitableGivingAuditDetail("Organisation", None, nino, None, "X-123",
+          Some(AuditResponse(BAD_REQUEST, Seq(AuditError(NinoFormatError.code)))))
+        val event: AuditEvent[CharitableGivingAuditDetail] = AuditEvent[CharitableGivingAuditDetail]("amendCharitableGivingTaxRelief",
+          "update-charitable-giving-annual-summary", detail)
+        MockedAuditService.verifyAuditEvent(event).once
       }
     }
 
@@ -173,6 +194,12 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
       status(response) shouldBe expectedStatus
       contentAsJson(response) shouldBe Json.toJson(error)
       header("X-CorrelationId", response) shouldBe Some(correlationId)
+
+      val detail = CharitableGivingAuditDetail("Organisation", None, nino, None, "X-123",
+        Some(AuditResponse(expectedStatus, Seq(AuditError(error.code)))))
+      val event: AuditEvent[CharitableGivingAuditDetail] = AuditEvent[CharitableGivingAuditDetail]("amendCharitableGivingTaxRelief",
+        "update-charitable-giving-annual-summary", detail)
+      MockedAuditService.verifyAuditEvent(event).once
     }
   }
 
@@ -193,6 +220,12 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
       status(response) shouldBe expectedStatus
       contentAsJson(response) shouldBe Json.toJson(error)
       header("X-CorrelationId", response) shouldBe Some(correlationId)
+
+      val detail = CharitableGivingAuditDetail("Organisation", None, nino, None, "X-123",
+        Some(AuditResponse(expectedStatus, Seq(AuditError(error.code)))))
+      val event: AuditEvent[CharitableGivingAuditDetail] = AuditEvent[CharitableGivingAuditDetail]("amendCharitableGivingTaxRelief",
+        "update-charitable-giving-annual-summary", detail)
+      MockedAuditService.verifyAuditEvent(event).once
     }
   }
 

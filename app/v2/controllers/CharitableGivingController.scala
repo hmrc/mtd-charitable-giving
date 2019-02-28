@@ -22,14 +22,18 @@ import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, AnyContentAsJson, ControllerComponents}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import v2.controllers.requestParsers.{AmendCharitableGivingRequestDataParser, RetrieveCharitableGivingRequestDataParser}
-import v2.models.domain.CharitableGiving
+import v2.models.audit.{AuditError, AuditEvent, AuditResponse, CharitableGivingAuditDetail}
+import v2.models.auth.UserDetails
+import v2.models.domain.{CharitableGiving, GiftAidPayments, Gifts}
 import v2.models.errors._
 import v2.models.requestData.{AmendCharitableGivingRawData, RetrieveCharitableGivingRawData}
-import v2.services.{CharitableGivingService, EnrolmentsAuthService, MtdIdLookupService}
+import v2.services.{AuditService, CharitableGivingService, EnrolmentsAuthService, MtdIdLookupService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class CharitableGivingController @Inject()(val authService: EnrolmentsAuthService,
@@ -37,6 +41,7 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
                                            charitableGivingService: CharitableGivingService,
                                            amendCharitableGivingRequestDataParser: AmendCharitableGivingRequestDataParser,
                                            retrieveCharitableGivingRequestDataParser: RetrieveCharitableGivingRequestDataParser,
+                                           auditService: AuditService,
                                            cc: ControllerComponents
                                           ) extends AuthorisedController(cc) {
 
@@ -48,13 +53,21 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
 
       case Right(amendCharitableGivingRequest) => charitableGivingService.amend(amendCharitableGivingRequest).map {
         case Right(correlationId) =>
+          auditSubmission(createAuditDetails(nino, NO_CONTENT, Some(amendCharitableGivingRequest.model),
+            correlationId, request.userDetails))
           logger.info(s"[CharitableGivingController][amend] - Success response received with correlationId: $correlationId")
           NoContent.withHeaders("X-CorrelationId" -> correlationId)
-        case Left(errorWrapper) => processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
+        case Left(errorWrapper) =>
+          val correlationId = getCorrelationId(errorWrapper)
+          val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
+          auditSubmission(createAuditDetails(nino, result.header.status, None, correlationId, request.userDetails, Some(errorWrapper)))
+          result
       }
-      case Left(errorWrapper) => Future.successful {
-        processError(errorWrapper).withHeaders("X-CorrelationId" -> getCorrelationId(errorWrapper))
-      }
+      case Left(errorWrapper) =>
+        val correlationId = getCorrelationId(errorWrapper)
+        val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
+        auditSubmission(createAuditDetails(nino, result.header.status, None, correlationId, request.userDetails, Some(errorWrapper)))
+        Future.successful(result)
     }
   }
 
@@ -113,5 +126,27 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
           s"Validation error: ${Json.toJson(errorWrapper)} with correlationId: $correlationId")
         correlationId
     }
+  }
+
+  private def createAuditDetails(nino: String,
+                                 statusCode: Int,
+                                 request: Option[CharitableGiving] = None,
+                                 correlationId: String,
+                                 userDetails: UserDetails,
+                                 errorWrapper: Option[ErrorWrapper] = None
+                                ): CharitableGivingAuditDetail = {
+    val auditResponse = errorWrapper.map {
+      wrapper =>
+        AuditResponse(statusCode, wrapper.allErrors.map(error => AuditError(error.code)))
+    }
+
+    CharitableGivingAuditDetail(userDetails.userType, userDetails.agentReferenceNumber, nino, request, correlationId, auditResponse)
+  }
+
+  private def auditSubmission(details: CharitableGivingAuditDetail)
+                             (implicit hc: HeaderCarrier,
+                              ec: ExecutionContext): Future[AuditResult] = {
+    val event = AuditEvent("amendCharitableGivingTaxRelief", "update-charitable-giving-annual-summary", details)
+    auditService.auditEvent(event)
   }
 }

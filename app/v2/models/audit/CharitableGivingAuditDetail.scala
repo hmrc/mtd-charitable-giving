@@ -17,23 +17,17 @@
 package v2.models.audit
 
 import play.api.libs.json.{Json, OWrites}
-import v2.models.domain.{GiftAidPayments, Gifts}
+import v2.models.domain.CharitableGiving
 
 case class CharitableGivingAuditDetail(
                                         userType: String,
-                                        agentReferenceNumber: String,
+                                        agentReferenceNumber: Option[String],
                                         nino: String,
-                                        request: Option[CharitableGivingAuditRequest],
+                                        request: Option[CharitableGiving],
                                         `X-CorrelationId`: String,
                                         response: Option[AuditResponse] = None
                                       )
 
 object CharitableGivingAuditDetail {
   implicit val writes: OWrites[CharitableGivingAuditDetail] = Json.writes[CharitableGivingAuditDetail]
-}
-
-case class CharitableGivingAuditRequest(giftAidPayments: Option[GiftAidPayments], gifts: Option[Gifts])
-
-object CharitableGivingAuditRequest {
-  implicit val writes: OWrites[CharitableGivingAuditRequest] = Json.writes[CharitableGivingAuditRequest]
 }
