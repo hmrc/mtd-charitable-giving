@@ -45,7 +45,8 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
       lookupService = mockMtdIdLookupService,
       charitableGivingService = mockRetrieveCharitableGivingService,
       amendCharitableGivingRequestDataParser = mockAmendCharitableGivingRequestDataParser,
-      retrieveCharitableGivingRequestDataParser = mockRetrieveCharitableGivingRequestDataParser
+      retrieveCharitableGivingRequestDataParser = mockRetrieveCharitableGivingRequestDataParser,
+      cc = cc
     )
 
     MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))

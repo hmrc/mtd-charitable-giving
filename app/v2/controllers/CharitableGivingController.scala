@@ -21,7 +21,7 @@ import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContent, AnyContentAsJson}
+import play.api.mvc.{Action, AnyContent, AnyContentAsJson, ControllerComponents}
 import v2.controllers.requestParsers.{AmendCharitableGivingRequestDataParser, RetrieveCharitableGivingRequestDataParser}
 import v2.models.domain.CharitableGiving
 import v2.models.errors._
@@ -36,8 +36,9 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
                                            val lookupService: MtdIdLookupService,
                                            charitableGivingService: CharitableGivingService,
                                            amendCharitableGivingRequestDataParser: AmendCharitableGivingRequestDataParser,
-                                           retrieveCharitableGivingRequestDataParser: RetrieveCharitableGivingRequestDataParser
-                                          ) extends AuthorisedController {
+                                           retrieveCharitableGivingRequestDataParser: RetrieveCharitableGivingRequestDataParser,
+                                           cc: ControllerComponents
+                                          ) extends AuthorisedController(cc) {
 
   val logger: Logger = Logger(this.getClass)
 

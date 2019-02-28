@@ -44,7 +44,8 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
       lookupService = mockMtdIdLookupService,
       charitableGivingService = mockAmendCharitableGivingService,
       amendCharitableGivingRequestDataParser = mockAmendCharitableGivingRequestDataParser,
-      retrieveCharitableGivingRequestDataParser = mockRetrieveCharitableGivingRequestDataParser
+      retrieveCharitableGivingRequestDataParser = mockRetrieveCharitableGivingRequestDataParser,
+      cc = cc
 
     )
 
