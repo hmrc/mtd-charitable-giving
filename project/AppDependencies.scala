@@ -22,9 +22,9 @@ object AppDependencies {
 
   val compile = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-play-25" % "4.9.0",
+    "uk.gov.hmrc" %% "bootstrap-play-26" % "0.36.0",
     "uk.gov.hmrc" %% "domain" % "5.3.0",
-    "org.typelevel" %% "cats-core" % "1.5.0"
+    "org.typelevel" %% "cats-core" % "1.6.0"
   )
 
   def test(scope: String = "test, it"): Seq[sbt.ModuleID] = Seq(
@@ -34,8 +34,29 @@ object AppDependencies {
 
     "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
 
-    "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % scope,
+    "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % scope,
 
-    "com.github.tomakehurst" % "wiremock" % "2.20.0" % scope
+    "com.github.tomakehurst" % "wiremock" % "2.21.0" % scope
   )
+
+  // Fixes a transitive dependency clash between wiremock and scalatestplus-play
+  val overrides: Set[ModuleID] = {
+    val jettyFromWiremockVersion = "9.2.24.v20180105"
+    Set(
+      "org.eclipse.jetty"           % "jetty-client"       % jettyFromWiremockVersion,
+      "org.eclipse.jetty"           % "jetty-continuation" % jettyFromWiremockVersion,
+      "org.eclipse.jetty"           % "jetty-http"         % jettyFromWiremockVersion,
+      "org.eclipse.jetty"           % "jetty-io"           % jettyFromWiremockVersion,
+      "org.eclipse.jetty"           % "jetty-security"     % jettyFromWiremockVersion,
+      "org.eclipse.jetty"           % "jetty-server"       % jettyFromWiremockVersion,
+      "org.eclipse.jetty"           % "jetty-servlet"      % jettyFromWiremockVersion,
+      "org.eclipse.jetty"           % "jetty-servlets"     % jettyFromWiremockVersion,
+      "org.eclipse.jetty"           % "jetty-util"         % jettyFromWiremockVersion,
+      "org.eclipse.jetty"           % "jetty-webapp"       % jettyFromWiremockVersion,
+      "org.eclipse.jetty"           % "jetty-xml"          % jettyFromWiremockVersion,
+      "org.eclipse.jetty.websocket" % "websocket-api"      % jettyFromWiremockVersion,
+      "org.eclipse.jetty.websocket" % "websocket-client"   % jettyFromWiremockVersion,
+      "org.eclipse.jetty.websocket" % "websocket-common"   % jettyFromWiremockVersion
+    )
+  }
 }

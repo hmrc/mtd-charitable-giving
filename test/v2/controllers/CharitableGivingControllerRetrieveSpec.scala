@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.fixtures.Fixtures.CharitableGivingFixture.charitableGivingModel
 import v2.mocks.requestParsers.{MockAmendCharitableGivingRequestDataParser, MockRetrieveCharitableGivingRequestDataParser}
-import v2.mocks.services.{MockEnrolmentsAuthService, MockMtdIdLookupService, MockRetrieveCharitableGivingService}
+import v2.mocks.services.{MockAuditService, MockEnrolmentsAuthService, MockMtdIdLookupService, MockRetrieveCharitableGivingService}
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData._
@@ -37,7 +37,8 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
     with MockMtdIdLookupService
     with MockRetrieveCharitableGivingService
     with MockRetrieveCharitableGivingRequestDataParser
-    with MockAmendCharitableGivingRequestDataParser {
+    with MockAmendCharitableGivingRequestDataParser
+    with MockAuditService {
     val hc = HeaderCarrier()
 
     val controller = new CharitableGivingController(
@@ -45,7 +46,9 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
       lookupService = mockMtdIdLookupService,
       charitableGivingService = mockRetrieveCharitableGivingService,
       amendCharitableGivingRequestDataParser = mockAmendCharitableGivingRequestDataParser,
-      retrieveCharitableGivingRequestDataParser = mockRetrieveCharitableGivingRequestDataParser
+      retrieveCharitableGivingRequestDataParser = mockRetrieveCharitableGivingRequestDataParser,
+      auditService = mockAuditService,
+      cc = cc
     )
 
     MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
@@ -86,7 +89,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
 
         val result: Future[Result] = controller.retrieve(nino, taxYear)(fakeGetRequest)
         status(result) shouldBe BAD_REQUEST
-        header("X-CorrelationId", result) nonEmpty
+        header("X-CorrelationId", result).nonEmpty shouldBe true
       }
     }
 
