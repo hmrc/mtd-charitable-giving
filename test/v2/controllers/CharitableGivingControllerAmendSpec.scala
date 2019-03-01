@@ -175,6 +175,12 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
         status(response) shouldBe BAD_REQUEST
         contentAsJson(response) shouldBe Json.toJson(multipleErrorResponse)
         header("X-CorrelationId", response) shouldBe Some(correlationId)
+
+        val detail = CharitableGivingAuditDetail("Organisation", None, nino, taxYear, None, "X-123",
+          Some(AuditResponse(BAD_REQUEST, Seq(AuditError(NinoFormatError.code), AuditError(TaxYearFormatError.code)))))
+        val event: AuditEvent[CharitableGivingAuditDetail] = AuditEvent[CharitableGivingAuditDetail]("amendCharitableGivingTaxRelief",
+          "update-charitable-giving-annual-summary", detail)
+        MockedAuditService.verifyAuditEvent(event).once
       }
     }
 
