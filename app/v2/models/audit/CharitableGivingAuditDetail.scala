@@ -23,6 +23,7 @@ case class CharitableGivingAuditDetail(
                                         userType: String,
                                         agentReferenceNumber: Option[String],
                                         nino: String,
+                                        taxYear: String,
                                         request: Option[CharitableGiving],
                                         `X-CorrelationId`: String,
                                         response: Option[AuditResponse] = None

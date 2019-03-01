@@ -25,6 +25,7 @@ class CharitableGivingAuditDetailSpec extends UnitSpec {
   private val userType = "Organisation"
   private val agentReferenceNumber = Some("012345678")
   private val nino = "AA123456A"
+  private val taxYear = "2017"
   private val giftAidPayments = GiftAidPayments(
     Some(10000.50), Some(1000.00), Some(300.00), Some(400.00), Some(2000.00), Some(Seq("International Charity A", "International Charity B"))
   )
@@ -40,6 +41,7 @@ class CharitableGivingAuditDetailSpec extends UnitSpec {
              |  "userType": "Organisation",
              |  "agentReferenceNumber": "012345678",
              |  "nino": "AA123456A",
+             |  "taxYear": "2017",
              |  "request": {
              |    "giftAidPayments": ${Json.toJson(giftAidPayments)},
              |    "gifts": ${Json.toJson(gifts)}
@@ -51,7 +53,7 @@ class CharitableGivingAuditDetailSpec extends UnitSpec {
 
         val request = CharitableGiving(Some(giftAidPayments), Some(gifts))
 
-        val model = CharitableGivingAuditDetail(userType, agentReferenceNumber, nino, Some(request), `X-CorrelationId`, Some(response))
+        val model = CharitableGivingAuditDetail(userType, agentReferenceNumber, nino, taxYear, Some(request), `X-CorrelationId`, Some(response))
 
         Json.toJson(model) shouldBe json
       }
@@ -64,11 +66,12 @@ class CharitableGivingAuditDetailSpec extends UnitSpec {
              |{
              |  "userType": "Organisation",
              |  "nino": "AA123456A",
+             |  "taxYear": "2017",
              |  "X-CorrelationId": "X-123"
              |}
            """.stripMargin)
 
-        val model = CharitableGivingAuditDetail(userType, None, nino, None, `X-CorrelationId`, None)
+        val model = CharitableGivingAuditDetail(userType, None, nino, taxYear, None, `X-CorrelationId`, None)
 
         Json.toJson(model) shouldBe json
       }

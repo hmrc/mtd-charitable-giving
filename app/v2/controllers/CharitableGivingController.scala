@@ -53,20 +53,20 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
 
       case Right(amendCharitableGivingRequest) => charitableGivingService.amend(amendCharitableGivingRequest).map {
         case Right(correlationId) =>
-          auditSubmission(createAuditDetails(nino, NO_CONTENT, Some(amendCharitableGivingRequest.model),
+          auditSubmission(createAuditDetails(nino, taxYear, NO_CONTENT, Some(amendCharitableGivingRequest.model),
             correlationId, request.userDetails))
           logger.info(s"[CharitableGivingController][amend] - Success response received with correlationId: $correlationId")
           NoContent.withHeaders("X-CorrelationId" -> correlationId)
         case Left(errorWrapper) =>
           val correlationId = getCorrelationId(errorWrapper)
           val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
-          auditSubmission(createAuditDetails(nino, result.header.status, None, correlationId, request.userDetails, Some(errorWrapper)))
+          auditSubmission(createAuditDetails(nino, taxYear, result.header.status, None, correlationId, request.userDetails, Some(errorWrapper)))
           result
       }
       case Left(errorWrapper) =>
         val correlationId = getCorrelationId(errorWrapper)
         val result = processError(errorWrapper).withHeaders("X-CorrelationId" -> correlationId)
-        auditSubmission(createAuditDetails(nino, result.header.status, None, correlationId, request.userDetails, Some(errorWrapper)))
+        auditSubmission(createAuditDetails(nino, taxYear, result.header.status, None, correlationId, request.userDetails, Some(errorWrapper)))
         Future.successful(result)
     }
   }
@@ -129,6 +129,7 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
   }
 
   private def createAuditDetails(nino: String,
+                                 taxYear: String,
                                  statusCode: Int,
                                  request: Option[CharitableGiving] = None,
                                  correlationId: String,
@@ -140,7 +141,7 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
         AuditResponse(statusCode, wrapper.allErrors.map(error => AuditError(error.code)))
     }
 
-    CharitableGivingAuditDetail(userDetails.userType, userDetails.agentReferenceNumber, nino, request, correlationId, auditResponse)
+    CharitableGivingAuditDetail(userDetails.userType, userDetails.agentReferenceNumber, nino, taxYear, request, correlationId, auditResponse)
   }
 
   private def auditSubmission(details: CharitableGivingAuditDetail)
