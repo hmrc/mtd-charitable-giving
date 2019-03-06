@@ -46,16 +46,16 @@ class DesConnectorSpec extends ConnectorSpec {
 
         val expectedRef = "000000000001013"
         val nino = "AA123456A"
-        val taxYear = "2017-18"
+        val desTaxYear = DesTaxYear("2018")
 
         val expectedDesResponse = DesResponse("X-123", expectedRef)
 
         MockedHttpClient.post[CharitableGiving, AmendCharitableGivingConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}",
+          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear",
           CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None))))
           .returns(Future.successful(Right(expectedDesResponse)))
 
-        val result = await(connector.amend(AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
+        val result = await(connector.amend(AmendCharitableGivingRequest(Nino(nino), desTaxYear,
           CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None))))))
 
         result shouldBe Right(expectedDesResponse)
@@ -67,15 +67,15 @@ class DesConnectorSpec extends ConnectorSpec {
 
         val expectedDesResponse = DesResponse("X-123", SingleError(TaxYearFormatError))
         val nino = "AA123456A"
-        val taxYear = "1111-12"
+        val desTaxYear = DesTaxYear("1234")
         val charitableGiving = CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None)))
 
         MockedHttpClient.post[CharitableGiving, AmendCharitableGivingConnectorOutcome](
-          s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}",
+          s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear",
           charitableGiving)
           .returns(Future.successful(Left(expectedDesResponse)))
 
-        val result = await(connector.amend(AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
+        val result = await(connector.amend(AmendCharitableGivingRequest(Nino(nino), desTaxYear,
           charitableGiving)))
 
         result shouldBe Left(expectedDesResponse)
@@ -87,15 +87,15 @@ class DesConnectorSpec extends ConnectorSpec {
 
         val expectedDesResponse = DesResponse("X-123", MultipleErrors(Seq(TaxYearFormatError, NinoFormatError)))
         val nino = "AA123456A"
-        val taxYear = "1111-12"
+        val desTaxYear = DesTaxYear("1234")
         val charitableGiving = CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None)))
 
         MockedHttpClient.post[CharitableGiving, AmendCharitableGivingConnectorOutcome](
-          s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}",
+          s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear",
           charitableGiving)
           .returns(Future.successful(Left(expectedDesResponse)))
 
-        val result = await(connector.amend(AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
+        val result = await(connector.amend(AmendCharitableGivingRequest(Nino(nino), desTaxYear,
           charitableGiving)))
 
         result shouldBe Left(expectedDesResponse)
@@ -109,14 +109,14 @@ class DesConnectorSpec extends ConnectorSpec {
     "return a valid charitable giving json" when {
       "a valid request is supplied" in new Test() {
         val nino = "AA123456A"
-        val taxYear = "2017-18"
+        val desTaxYear = DesTaxYear("2018")
         val httpParsedDesResponse = DesResponse("X-123", CharitableGivingFixture.charitableGivingModel)
 
         MockedHttpClient.get[RetrieveCharitableGivingConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}")
+          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear")
           .returns(Future.successful(Right(httpParsedDesResponse)))
 
-        val result = await(connector.retrieve(RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))))
+        val result = await(connector.retrieve(RetrieveCharitableGivingRequest(Nino(nino), desTaxYear)))
         result shouldBe Right(httpParsedDesResponse)
       }
     }
@@ -126,13 +126,13 @@ class DesConnectorSpec extends ConnectorSpec {
 
         val expectedDesResponse = DesResponse("X-123", SingleError(TaxYearFormatError))
         val nino = "AA123456A"
-        val taxYear = "1111-12"
+        val desTaxYear = DesTaxYear("1234")
 
         MockedHttpClient.get[RetrieveCharitableGivingConnectorOutcome](
-          s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}")
+          s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear")
           .returns(Future.successful(Left(expectedDesResponse)))
 
-        val result = await(connector.retrieve(RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))))
+        val result = await(connector.retrieve(RetrieveCharitableGivingRequest(Nino(nino), desTaxYear)))
 
         result shouldBe Left(expectedDesResponse)
       }
@@ -143,13 +143,13 @@ class DesConnectorSpec extends ConnectorSpec {
 
         val expectedDesResponse = DesResponse("X-123", MultipleErrors(Seq(TaxYearFormatError, NinoFormatError)))
         val nino = "AA123456A"
-        val taxYear = "1111-12"
+        val desTaxYear = DesTaxYear("1234")
 
         MockedHttpClient.get[RetrieveCharitableGivingConnectorOutcome](
-          s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/${DesTaxYear(taxYear).toDesTaxYear}")
+          s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear")
           .returns(Future.successful(Left(expectedDesResponse)))
 
-        val result = await(connector.retrieve(RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))))
+        val result = await(connector.retrieve(RetrieveCharitableGivingRequest(Nino(nino), desTaxYear)))
 
         result shouldBe Left(expectedDesResponse)
       }

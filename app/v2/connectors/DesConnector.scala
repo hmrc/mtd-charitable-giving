@@ -44,9 +44,9 @@ class DesConnector @Inject()(http: HttpClient,
     import CharitableGiving.writes
 
     val nino = amendCharitableGivingRequest.nino.nino
-    val taxYear = amendCharitableGivingRequest.desTaxYear.toDesTaxYear
+    val desTaxYear = amendCharitableGivingRequest.desTaxYear
 
-    val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/income-source/charity/annual/$taxYear"
+    val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear"
 
     http.POST[CharitableGiving, AmendCharitableGivingConnectorOutcome](url, amendCharitableGivingRequest.model)(writes, amendHttpReads,
       desHeaderCarrier, implicitly)
@@ -56,10 +56,10 @@ class DesConnector @Inject()(http: HttpClient,
               (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveCharitableGivingConnectorOutcome] = {
 
     val nino = retrieveCharitableGivingRequest.nino.nino
-    val taxYear = retrieveCharitableGivingRequest.taxYear.toDesTaxYear
+    val desTaxYear = retrieveCharitableGivingRequest.desTaxYear
     import v2.connectors.httpparsers.RetrieveCharitableGivingHttpParser.retrieveHttpReads
 
-    val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/income-source/charity/annual/${taxYear}"
+    val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear"
 
     http.GET[RetrieveCharitableGivingConnectorOutcome](url)(retrieveHttpReads, desHeaderCarrier, implicitly)
   }

@@ -36,9 +36,9 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
   val correlationId = "X-123"
   val expectedRef = "000000000001013"
   val nino = "AA123456A"
-  val taxYear = "2017-18"
+  val desTaxYear = "2018"
   val expectedDesResponse = DesResponse(correlationId, expectedRef)
-  val input = AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
+  val input = AmendCharitableGivingRequest(Nino(nino), DesTaxYear(desTaxYear),
     CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None))))
 
   "calling amend" should {

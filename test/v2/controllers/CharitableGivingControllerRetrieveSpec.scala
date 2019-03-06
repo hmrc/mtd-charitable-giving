@@ -17,7 +17,7 @@
 package v2.controllers
 
 import play.api.libs.json.Json
-import play.api.mvc.{AnyContentAsJson, Result}
+import play.api.mvc.Result
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures.CharitableGivingFixture
@@ -58,7 +58,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
   val nino = "AA123456A"
   val taxYear = "2017-18"
   val correlationId = "X-123"
-  val retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))
+  val retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear.fromMtd(taxYear))
   val errorWrapper: ErrorWrapper = ErrorWrapper(None, Error("abc", "abc"), None)
 
   "retrieve" should {
@@ -154,7 +154,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
     s"a ${error.code} error is returned from the service" in new Test {
 
       val retrieveCharitableGivingRequestData = RetrieveCharitableGivingRawData(nino, taxYear)
-      val retrieveCharitableGivingRequest = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))
+      val retrieveCharitableGivingRequest = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear.fromMtd(taxYear))
 
       MockRetrieveCharitableGivingRequestDataParser.parseRequest(retrieveCharitableGivingRequestData)
         .returns(Right(retrieveCharitableGivingRequest))

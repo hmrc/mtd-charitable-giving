@@ -18,4 +18,4 @@ package v2.models.requestData
 
 import uk.gov.hmrc.domain.Nino
 
-case class RetrieveCharitableGivingRequest(nino: Nino, taxYear: DesTaxYear)
+case class RetrieveCharitableGivingRequest(nino: Nino, desTaxYear: DesTaxYear)
