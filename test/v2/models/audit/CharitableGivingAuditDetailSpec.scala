@@ -53,7 +53,8 @@ class CharitableGivingAuditDetailSpec extends UnitSpec {
 
         val request = CharitableGiving(Some(giftAidPayments), Some(gifts))
 
-        val model = CharitableGivingAuditDetail(userType, agentReferenceNumber, nino, taxYear, Some(request), `X-CorrelationId`, Some(response))
+        val model = CharitableGivingAuditDetail(userType, agentReferenceNumber, nino, taxYear,
+          CharitableGiving.writes.writes(request), `X-CorrelationId`, Some(response))
 
         Json.toJson(model) shouldBe json
       }
@@ -67,11 +68,18 @@ class CharitableGivingAuditDetailSpec extends UnitSpec {
              |  "userType": "Organisation",
              |  "nino": "AA123456A",
              |  "taxYear": "2017",
+             |  "request": {
+             |    "giftAidPayments": ${Json.toJson(giftAidPayments)},
+             |    "gifts": ${Json.toJson(gifts)}
+             |  },
              |  "X-CorrelationId": "X-123"
              |}
            """.stripMargin)
 
-        val model = CharitableGivingAuditDetail(userType, None, nino, taxYear, None, `X-CorrelationId`, None)
+        val request = CharitableGiving(Some(giftAidPayments), Some(gifts))
+
+        val model = CharitableGivingAuditDetail(userType, None, nino, taxYear,
+          CharitableGiving.writes.writes(request), `X-CorrelationId`, None)
 
         Json.toJson(model) shouldBe json
       }
