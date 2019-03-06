@@ -16,15 +16,14 @@
 
 package v2.models.audit
 
-import play.api.libs.json.{Json, OWrites}
-import v2.models.domain.CharitableGiving
+import play.api.libs.json.{JsValue, Json, OWrites}
 
 case class CharitableGivingAuditDetail(
                                         userType: String,
                                         agentReferenceNumber: Option[String],
                                         nino: String,
                                         taxYear: String,
-                                        request: Option[CharitableGiving],
+                                        request: JsValue,
                                         `X-CorrelationId`: String,
                                         response: Option[AuditResponse] = None
                                       )
