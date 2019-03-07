@@ -29,6 +29,7 @@ class RetrieveCharitableGivingRawDataParserSpec extends UnitSpec {
   }
 
   val validTaxYear = "2017-18"
+  val desTaxYear = "2018"
   val invalidTaxYear = "2016-18"
   val invalidNino = "foobar"
   val validNino = "AA123456A"
@@ -37,7 +38,7 @@ class RetrieveCharitableGivingRawDataParserSpec extends UnitSpec {
     "return a valid retrieve request" when {
       "a valid request data is supplied" in new Test() {
         val inputData = RetrieveCharitableGivingRawData(validNino, validTaxYear)
-        val expectedResult = RetrieveCharitableGivingRequest(Nino(validNino), DesTaxYear(validTaxYear))
+        val expectedResult = RetrieveCharitableGivingRequest(Nino(validNino), DesTaxYear(desTaxYear))
         MockRetrieveCharitableGivingValidator.validate(inputData).returns(List())
 
         val result = parser.parseRequest(inputData)

@@ -29,7 +29,7 @@ class AmendCharitableGivingRequestDataParser @Inject()(validator: AmendCharitabl
     validator.validate(data) match {
       case List() =>
         //Validation passed.  Request data is ok to transform.
-        Right(AmendCharitableGivingRequest(Nino(data.nino), DesTaxYear(data.taxYear), data.body.json.as[CharitableGiving]))
+        Right(AmendCharitableGivingRequest(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear), data.body.json.as[CharitableGiving]))
       case err :: Nil => Left(ErrorWrapper(None, err, None))
       case errs => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
     }

@@ -65,7 +65,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
   val nino = "AA123456A"
   val taxYear = "2017-18"
   val correlationId = "X-123"
-  val amendCharitableGivingRequest: AmendCharitableGivingRequest = AmendCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear),
+  val amendCharitableGivingRequest: AmendCharitableGivingRequest = AmendCharitableGivingRequest(Nino(nino), DesTaxYear.fromMtd(taxYear),
     CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None))))
 
   "amend" should {

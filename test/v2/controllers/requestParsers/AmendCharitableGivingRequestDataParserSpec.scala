@@ -28,6 +28,7 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
 
   val validNino = "AA123456A"
   val validTaxYear = "2017-18"
+  val desTaxYear = "2018"
   val validJsonBody = AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)
   val correlationId = "X-123"
 
@@ -45,7 +46,7 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
           AmendCharitableGivingRawData(validNino, validTaxYear, validJsonBody)
 
         val amendCharitableGivingRequest =
-          AmendCharitableGivingRequest(Nino(validNino), DesTaxYear(validTaxYear), CharitableGivingFixture.charitableGivingModel)
+          AmendCharitableGivingRequest(Nino(validNino), DesTaxYear(desTaxYear), CharitableGivingFixture.charitableGivingModel)
 
         MockedAmendCharitableGivingValidator.validate(amendCharitableGivingRequestData)
           .returns(List())

@@ -35,9 +35,9 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
 
   val correlationId = "X-123"
   val nino = "AA123456A"
-  val taxYear = "2017-18"
+  val desTaxYear = "2018"
   val expectedDesResponse = DesResponse(correlationId, charitableGivingModel)
-  val input = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(taxYear))
+  val input = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear(desTaxYear))
   val output = DesResponse(correlationId, charitableGivingModel)
 
   "calling retrieve" should {
