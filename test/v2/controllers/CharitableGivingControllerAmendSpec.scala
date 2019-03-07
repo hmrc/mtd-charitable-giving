@@ -16,6 +16,8 @@
 
 package v2.controllers
 
+import org.scalatest.OneInstancePerTest
+import play.api.http.Status
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AnyContentAsJson, Result}
 import uk.gov.hmrc.domain.Nino
@@ -31,19 +33,21 @@ import v2.models.requestData.{AmendCharitableGivingRawData, AmendCharitableGivin
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
+class CharitableGivingControllerAmendSpec extends ControllerBaseSpec
+  with MockEnrolmentsAuthService
+  with MockMtdIdLookupService
+  with MockAmendCharitableGivingService
+  with MockAmendCharitableGivingRequestDataParser
+  with MockRetrieveCharitableGivingRequestDataParser
+  with MockAuditService
+  with OneInstancePerTest {
   private val giftAidPayments = GiftAidPayments(
     Some(10000.50), Some(1000.00), Some(300.00), Some(400.00), Some(2000.00), Some(Seq("International Charity A", "International Charity B"))
   )
   private val gifts = Gifts(Some(700.00), Some(600.99), Some(300.00), Some(Seq("International Charity C", "International Charity D")))
   private val charitableGiving = CharitableGiving(Some(giftAidPayments), Some(gifts))
 
-  trait Test extends MockEnrolmentsAuthService
-    with MockMtdIdLookupService
-    with MockAmendCharitableGivingService
-    with MockAmendCharitableGivingRequestDataParser
-    with MockRetrieveCharitableGivingRequestDataParser
-    with MockAuditService {
+  trait Test {
 
     val hc = HeaderCarrier()
 
@@ -83,7 +87,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
         status(result) shouldBe NO_CONTENT
         header("X-CorrelationId", result) shouldBe Some(correlationId)
 
-        val detail = CharitableGivingAuditDetail("Organisation", None, nino, taxYear, CharitableGiving.writes.writes(charitableGiving), "X-123", None)
+        val detail = CharitableGivingAuditDetail("Individual", None, nino, taxYear, CharitableGivingFixture.mtdFormatJson, "X-123", None)
         val event: AuditEvent[CharitableGivingAuditDetail] = AuditEvent[CharitableGivingAuditDetail]("amendCharitableGivingTaxRelief",
           "update-charitable-giving-annual-summary", detail)
         MockedAuditService.verifyAuditEvent(event).once
@@ -102,11 +106,12 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
         status(result) shouldBe BAD_REQUEST
         header("X-CorrelationId", result).nonEmpty shouldBe true
 
-        val detail = CharitableGivingAuditDetail("Organisation", None, nino, taxYear, CharitableGiving.writes.writes(charitableGiving), "X-123",
+        val detail = CharitableGivingAuditDetail("Individual", None, nino, taxYear, CharitableGivingFixture.mtdFormatJson, "X-123",
           Some(AuditResponse(BAD_REQUEST, Seq(AuditError(NinoFormatError.code)))))
         val event: AuditEvent[CharitableGivingAuditDetail] = AuditEvent[CharitableGivingAuditDetail]("amendCharitableGivingTaxRelief",
           "update-charitable-giving-annual-summary", detail)
-        MockedAuditService.verifyAuditEvent(event).once
+
+        MockedAuditService.verifyAuditEvent(event.copy(detail = detail.copy(`X-CorrelationId` = header("X-CorrelationId", result).get))).once
       }
     }
 
@@ -176,7 +181,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
         contentAsJson(response) shouldBe Json.toJson(multipleErrorResponse)
         header("X-CorrelationId", response) shouldBe Some(correlationId)
 
-        val detail = CharitableGivingAuditDetail("Organisation", None, nino, taxYear, CharitableGiving.writes.writes(charitableGiving), "X-123",
+        val detail = CharitableGivingAuditDetail("Individual", None, nino, taxYear, CharitableGivingFixture.mtdFormatJson, "X-123",
           Some(AuditResponse(BAD_REQUEST, Seq(AuditError(NinoFormatError.code), AuditError(TaxYearFormatError.code)))))
         val event: AuditEvent[CharitableGivingAuditDetail] = AuditEvent[CharitableGivingAuditDetail]("amendCharitableGivingTaxRelief",
           "update-charitable-giving-annual-summary", detail)
@@ -201,7 +206,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
       contentAsJson(response) shouldBe Json.toJson(error)
       header("X-CorrelationId", response) shouldBe Some(correlationId)
 
-      val detail = CharitableGivingAuditDetail("Organisation", None, nino, taxYear, CharitableGiving.writes.writes(charitableGiving), "X-123",
+      val detail = CharitableGivingAuditDetail("Individual", None, nino, taxYear, CharitableGivingFixture.mtdFormatJson, "X-123",
         Some(AuditResponse(expectedStatus, Seq(AuditError(error.code)))))
       val event: AuditEvent[CharitableGivingAuditDetail] = AuditEvent[CharitableGivingAuditDetail]("amendCharitableGivingTaxRelief",
         "update-charitable-giving-annual-summary", detail)
@@ -227,7 +232,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec {
       contentAsJson(response) shouldBe Json.toJson(error)
       header("X-CorrelationId", response) shouldBe Some(correlationId)
 
-      val detail = CharitableGivingAuditDetail("Organisation", None, nino, taxYear, CharitableGiving.writes.writes(charitableGiving), "X-123",
+      val detail = CharitableGivingAuditDetail("Individual", None, nino, taxYear, CharitableGivingFixture.mtdFormatJson, "X-123",
         Some(AuditResponse(expectedStatus, Seq(AuditError(error.code)))))
       val event: AuditEvent[CharitableGivingAuditDetail] = AuditEvent[CharitableGivingAuditDetail]("amendCharitableGivingTaxRelief",
         "update-charitable-giving-annual-summary", detail)
