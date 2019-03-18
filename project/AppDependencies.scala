@@ -22,21 +22,18 @@ object AppDependencies {
 
   val compile = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-play-26" % "0.36.0",
-    "uk.gov.hmrc" %% "domain" % "5.3.0",
-    "org.typelevel" %% "cats-core" % "1.6.0"
+    "uk.gov.hmrc"   %% "bootstrap-play-26" % "0.36.0",
+    "uk.gov.hmrc"   %% "domain"            % "5.3.0",
+    "org.typelevel" %% "cats-core"         % "1.6.0"
   )
 
   def test(scope: String = "test, it"): Seq[sbt.ModuleID] = Seq(
-    "org.scalatest" %% "scalatest" % "3.0.5" % scope,
-    "org.scalamock" %% "scalamock" % "4.1.0" % scope,
-    "org.pegdown" % "pegdown" % "1.6.0" % scope,
-
-    "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-
-    "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % scope,
-
-    "com.github.tomakehurst" % "wiremock" % "2.21.0" % scope
+    "org.scalatest"          %% "scalatest"          % "3.0.5"             % scope,
+    "org.scalamock"          %% "scalamock"          % "4.1.0"             % scope,
+    "org.pegdown"            % "pegdown"             % "1.6.0"             % scope,
+    "com.typesafe.play"      %% "play-test"          % PlayVersion.current % scope,
+    "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2"             % scope,
+    "com.github.tomakehurst" % "wiremock"            % "2.21.0"            % scope
   )
 
   // Fixes a transitive dependency clash between wiremock and scalatestplus-play
@@ -59,4 +56,5 @@ object AppDependencies {
       "org.eclipse.jetty.websocket" % "websocket-common"   % jettyFromWiremockVersion
     )
   }
+
 }

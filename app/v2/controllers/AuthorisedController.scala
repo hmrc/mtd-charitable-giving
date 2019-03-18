@@ -24,12 +24,12 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import v2.models.auth.UserDetails
 import v2.models.errors._
-import v2.services.{EnrolmentsAuthService, MtdIdLookupService}
+import v2.services.{ EnrolmentsAuthService, MtdIdLookupService }
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
-abstract class AuthorisedController (cc: ControllerComponents) extends BackendController(cc) {
+abstract class AuthorisedController(cc: ControllerComponents) extends BackendController(cc) {
 
   val authService: EnrolmentsAuthService
   val lookupService: MtdIdLookupService
@@ -42,18 +42,17 @@ abstract class AuthorisedController (cc: ControllerComponents) extends BackendCo
 
     override protected def executionContext: ExecutionContext = cc.executionContext
 
-    def predicate(mtdId: String): Predicate = Enrolment("HMRC-MTD-IT")
-      .withIdentifier("MTDITID", mtdId)
-      .withDelegatedAuthRule("mtd-it-auth")
+    def predicate(mtdId: String): Predicate =
+      Enrolment("HMRC-MTD-IT")
+        .withIdentifier("MTDITID", mtdId)
+        .withDelegatedAuthRule("mtd-it-auth")
 
-    def invokeBlockWithAuthCheck[A](mtdId: String,
-                                    request: Request[A],
-                                    block: UserRequest[A] => Future[Result])
-                                   (implicit headerCarrier: HeaderCarrier): Future[Result] = {
+    def invokeBlockWithAuthCheck[A](mtdId: String, request: Request[A], block: UserRequest[A] => Future[Result])(
+        implicit headerCarrier: HeaderCarrier): Future[Result] = {
       authService.authorised(predicate(mtdId)).flatMap[Result] {
-        case Right(userDetails) => block(UserRequest(userDetails.copy(mtdId = mtdId), request))
+        case Right(userDetails)      => block(UserRequest(userDetails.copy(mtdId = mtdId), request))
         case Left(UnauthorisedError) => Future.successful(Forbidden(Json.toJson(UnauthorisedError)))
-        case Left(_) => Future.successful(InternalServerError(Json.toJson(DownstreamError)))
+        case Left(_)                 => Future.successful(InternalServerError(Json.toJson(DownstreamError)))
       }
     }
 
@@ -62,10 +61,10 @@ abstract class AuthorisedController (cc: ControllerComponents) extends BackendCo
       implicit val headerCarrier: HeaderCarrier = hc(request)
 
       lookupService.lookup(nino).flatMap[Result] {
-        case Right(mtdId) => invokeBlockWithAuthCheck(mtdId, request, block)
-        case Left(NinoFormatError) => Future.successful(BadRequest(Json.toJson(NinoFormatError)))
+        case Right(mtdId)            => invokeBlockWithAuthCheck(mtdId, request, block)
+        case Left(NinoFormatError)   => Future.successful(BadRequest(Json.toJson(NinoFormatError)))
         case Left(UnauthorisedError) => Future.successful(Forbidden(Json.toJson(UnauthorisedError)))
-        case Left(_) => Future.successful(InternalServerError(Json.toJson(DownstreamError)))
+        case Left(_)                 => Future.successful(InternalServerError(Json.toJson(DownstreamError)))
       }
     }
   }

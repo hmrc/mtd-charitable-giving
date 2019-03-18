@@ -21,7 +21,6 @@ import v2.models.requestData.InputData
 
 trait Validator[A <: InputData] {
 
-
   type ValidationLevel[T] = T => List[Error]
 
   def validate(data: A): List[Error]
@@ -30,10 +29,12 @@ trait Validator[A <: InputData] {
 
     validationSet match {
       case Nil => List()
-      case thisLevel :: remainingLevels => thisLevel(data).flatten match {
-        case x if x.isEmpty => run(remainingLevels, data)
-        case x if x.nonEmpty => x
-      }
+      case thisLevel :: remainingLevels =>
+        thisLevel(data).flatten match {
+          case x if x.isEmpty  => run(remainingLevels, data)
+          case x if x.nonEmpty => x
+        }
     }
   }
+
 }

@@ -20,18 +20,16 @@ import javax.inject.Inject
 import uk.gov.hmrc.domain.Nino
 import v2.controllers.requestParsers.validators.AmendCharitableGivingValidator
 import v2.models.domain.CharitableGiving
-import v2.models.errors.{BadRequestError, ErrorWrapper}
-import v2.models.requestData.{AmendCharitableGivingRawData, AmendCharitableGivingRequest, DesTaxYear}
+import v2.models.errors.{ BadRequestError, ErrorWrapper }
+import v2.models.requestData.{ AmendCharitableGivingRawData, AmendCharitableGivingRequest, DesTaxYear }
 
 class AmendCharitableGivingRequestDataParser @Inject()(validator: AmendCharitableGivingValidator) {
 
   def parseRequest(data: AmendCharitableGivingRawData): Either[ErrorWrapper, AmendCharitableGivingRequest] = {
     validator.validate(data) match {
-      case List() =>
-        //Validation passed.  Request data is ok to transform.
-        Right(AmendCharitableGivingRequest(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear), data.body.json.as[CharitableGiving]))
+      case List()     => Right(AmendCharitableGivingRequest(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear), data.body.json.as[CharitableGiving]))
       case err :: Nil => Left(ErrorWrapper(None, err, None))
-      case errs => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
+      case errs       => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
     }
   }
 }

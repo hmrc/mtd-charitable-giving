@@ -16,46 +16,46 @@
 
 package v2.connectors
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{ Inject, Singleton }
 import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import v2.config.AppConfig
 import v2.models.domain.CharitableGiving
-import v2.models.requestData.{AmendCharitableGivingRequest, RetrieveCharitableGivingRequest}
+import v2.models.requestData.{ AmendCharitableGivingRequest, RetrieveCharitableGivingRequest }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
-class DesConnector @Inject()(http: HttpClient,
-                             appConfig: AppConfig) {
+class DesConnector @Inject()(http: HttpClient, appConfig: AppConfig) {
 
   val logger = Logger(this.getClass)
 
-  private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier): HeaderCarrier = hc
-    .copy(authorization = Some(Authorization(s"Bearer ${appConfig.desToken}")))
-    .withExtraHeaders("Environment" -> appConfig.desEnv)
+  private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier): HeaderCarrier =
+    hc.copy(authorization = Some(Authorization(s"Bearer ${appConfig.desToken}")))
+      .withExtraHeaders("Environment" -> appConfig.desEnv)
 
-  def amend(amendCharitableGivingRequest: AmendCharitableGivingRequest)
-           (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AmendCharitableGivingConnectorOutcome] = {
+  def amend(amendCharitableGivingRequest: AmendCharitableGivingRequest)(implicit hc: HeaderCarrier,
+                                                                        ec: ExecutionContext): Future[AmendCharitableGivingConnectorOutcome] = {
 
     import v2.connectors.httpparsers.AmendCharitableGivingHttpParser.amendHttpReads
     import CharitableGiving.writes
 
-    val nino = amendCharitableGivingRequest.nino.nino
+    val nino       = amendCharitableGivingRequest.nino.nino
     val desTaxYear = amendCharitableGivingRequest.desTaxYear
 
     val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear"
 
-    http.POST[CharitableGiving, AmendCharitableGivingConnectorOutcome](url, amendCharitableGivingRequest.model)(writes, amendHttpReads,
-      desHeaderCarrier, implicitly)
+    http.POST[CharitableGiving, AmendCharitableGivingConnectorOutcome]
+    (url, amendCharitableGivingRequest.model)(writes, amendHttpReads, desHeaderCarrier, implicitly)
   }
 
-  def retrieve(retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest)
-              (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveCharitableGivingConnectorOutcome] = {
+  def retrieve(retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest)(
+      implicit hc: HeaderCarrier,
+      ec: ExecutionContext): Future[RetrieveCharitableGivingConnectorOutcome] = {
 
-    val nino = retrieveCharitableGivingRequest.nino.nino
+    val nino       = retrieveCharitableGivingRequest.nino.nino
     val desTaxYear = retrieveCharitableGivingRequest.desTaxYear
     import v2.connectors.httpparsers.RetrieveCharitableGivingHttpParser.retrieveHttpReads
 

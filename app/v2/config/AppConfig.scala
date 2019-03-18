@@ -16,8 +16,7 @@
 
 package v2.config
 
-import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import javax.inject.{ Inject, Singleton }
 
 trait AppConfig {
   def desBaseUrl: String
@@ -33,9 +32,9 @@ trait AppConfig {
 class AppConfigImpl @Inject()(config: ServicesConfig) extends AppConfig with FixedConfig {
 
   val mtdIdBaseUrl: String = config.baseUrl("mtd-id-lookup")
-  val desBaseUrl: String = config.baseUrl("des")
-  val desEnv: String = config.getString("microservice.services.des.env")
-  val desToken: String = config.getString("microservice.services.des.token")
+  val desBaseUrl: String   = config.baseUrl("des")
+  val desEnv: String       = config.getString("microservice.services.des.env")
+  val desToken: String     = config.getString("microservice.services.des.token")
 
 }
 

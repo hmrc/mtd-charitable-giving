@@ -46,18 +46,19 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRawD
     val topLevelFieldsValidation =
       List(DefinedFieldValidation.validate(EmptyOrNonMatchingBodyRuleError, amendCharitableGiving.gifts, amendCharitableGiving.giftAidPayments))
 
-    val giftsNonEmptyValidation =
-      amendCharitableGiving.gifts.fold(List.empty[Error]) { gifts =>
-        DefinedFieldValidation.validate(
-          GiftAidAndGiftsEmptyRuleError,
-          gifts.investmentsNonUKCharities,
-          gifts.investmentsNonUKCharityNames,
-          gifts.landAndBuildings,
-          gifts.sharesOrSecurities
-        )
+    val giftsNonEmptyValidation = amendCharitableGiving.gifts.fold(List.empty[Error]) { gifts =>
 
-      }
+      DefinedFieldValidation.validate(
+        GiftAidAndGiftsEmptyRuleError,
+        gifts.investmentsNonUKCharities,
+        gifts.investmentsNonUKCharityNames,
+        gifts.landAndBuildings,
+        gifts.sharesOrSecurities
+      )
+    }
+
     val giftAidPaymentsnonEmptyValidation = amendCharitableGiving.giftAidPayments.fold(List.empty[Error]) { giftAidPayments =>
+
       DefinedFieldValidation.validate(
         GiftAidAndGiftsEmptyRuleError,
         giftAidPayments.specifiedYear,
@@ -70,11 +71,10 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRawD
     }
 
     topLevelFieldsValidation match {
-      case list@List(_ :: _) => list
-      case _ => List(giftsNonEmptyValidation ++ giftAidPaymentsnonEmptyValidation)
+      case list @ List(_ :: _) => list
+      case _                   => List(giftsNonEmptyValidation ++ giftAidPaymentsnonEmptyValidation)
     }
   }
-
 
   private def bvrRuleValidation: AmendCharitableGivingRawData => List[List[Error]] = (data: AmendCharitableGivingRawData) => {
 
@@ -85,7 +85,8 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRawD
       val gifts = amendCharitableGiving.gifts.get
 
       lazy val nonUKInvestmentsNamesNotSpecifiedRuleErrorCheck =
-        gifts.investmentsNonUKCharities.exists(_ > 0 && (gifts.investmentsNonUKCharityNames.isEmpty || gifts.investmentsNonUKCharityNames.get.isEmpty))
+        gifts.investmentsNonUKCharities.exists(
+          _ > 0 && (gifts.investmentsNonUKCharityNames.isEmpty || gifts.investmentsNonUKCharityNames.get.isEmpty))
       lazy val investmentsNamesSuppliedButIncorrectAmountCheck =
         gifts.investmentsNonUKCharityNames.exists(_.nonEmpty && gifts.investmentsNonUKCharities.forall(_ == 0))
 

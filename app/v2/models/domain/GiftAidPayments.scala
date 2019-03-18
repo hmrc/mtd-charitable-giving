@@ -24,8 +24,7 @@ case class GiftAidPayments(specifiedYear: Option[BigDecimal],
                            specifiedYearTreatedAsPreviousYear: Option[BigDecimal],
                            followingYearTreatedAsSpecifiedYear: Option[BigDecimal],
                            nonUKCharities: Option[BigDecimal],
-                           nonUKCharityNames: Option[Seq[String]]
-                          )
+                           nonUKCharityNames: Option[Seq[String]])
 
 object GiftAidPayments {
   implicit val reads: Reads[GiftAidPayments] = Json.reads[GiftAidPayments]
@@ -37,7 +36,7 @@ object GiftAidPayments {
       (JsPath \ "nextYearTreatedAsCurrentYear").writeNullable[BigDecimal] and
       (JsPath \ "nonUkCharities").writeNullable[BigDecimal] and
       (JsPath \ "nonUkCharitiesCharityNames").writeNullable[Seq[String]]
-    ) (unlift(GiftAidPayments.unapply))
+  )(unlift(GiftAidPayments.unapply))
 
   val desReads: Reads[GiftAidPayments] = (
     (JsPath \ "currentYear").readNullable[BigDecimal] and
@@ -46,7 +45,7 @@ object GiftAidPayments {
       (JsPath \ "nextYearTreatedAsCurrentYear").readNullable[BigDecimal] and
       (JsPath \ "nonUkCharities").readNullable[BigDecimal] and
       (JsPath \ "nonUkCharitiesCharityNames").readNullable[Seq[String]]
-    ) (GiftAidPayments.apply _)
+  )(GiftAidPayments.apply _)
 
   val desToMtdWrites: Writes[GiftAidPayments] = Json.writes[GiftAidPayments]
 

@@ -21,11 +21,12 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.HttpResponse
 import v2.models.errors._
 
-import scala.util.{Success, Try}
+import scala.util.{ Success, Try }
 
 trait HttpParser {
 
   implicit class KnownJsonResponse(response: HttpResponse) {
+
     def validateJson[T](implicit reads: Reads[T]): Option[T] = {
       Try(response.json) match {
         case Success(json: JsValue) => parseResult(json)
@@ -35,8 +36,7 @@ trait HttpParser {
       }
     }
 
-    def parseResult[T](json: JsValue)
-                      (implicit reads: Reads[T]): Option[T] = json.validate[T] match {
+    def parseResult[T](json: JsValue)(implicit reads: Reads[T]): Option[T] = json.validate[T] match {
 
       case JsSuccess(value, _) => Some(value)
       case JsError(error) =>
@@ -47,11 +47,10 @@ trait HttpParser {
 
   def retrieveCorrelationId(response: HttpResponse): String = response.header("CorrelationId").getOrElse("")
 
-
   private val multipleErrorReads: Reads[Seq[Error]] = (__ \ "failures").read[Seq[Error]]
 
   def parseErrors(response: HttpResponse): DesError = {
-    val singleError = response.validateJson[Error].map(SingleError)
+    val singleError         = response.validateJson[Error].map(SingleError)
     lazy val multipleErrors = response.validateJson(multipleErrorReads).map(MultipleErrors)
     lazy val unableToParseJsonError = {
       Logger.warn(s"unable to parse errors from response: ${response.body}")

@@ -32,14 +32,14 @@ object Gifts {
       (JsPath \ "sharesOrSecurities").writeNullable[BigDecimal] and
       (JsPath \ "investmentsNonUkCharities").writeNullable[BigDecimal] and
       (JsPath \ "investmentsNonUkCharitiesCharityNames").writeNullable[Seq[String]]
-    ) (unlift(Gifts.unapply))
+  )(unlift(Gifts.unapply))
 
   val desReads: Reads[Gifts] = (
     (JsPath \ "landAndBuildings").readNullable[BigDecimal] and
       (JsPath \ "sharesOrSecurities").readNullable[BigDecimal] and
       (JsPath \ "investmentsNonUkCharities").readNullable[BigDecimal] and
       (JsPath \ "investmentsNonUkCharitiesCharityNames").readNullable[Seq[String]]
-    ) (Gifts.apply _)
+  )(Gifts.apply _)
 
   val desToMtdWrites: Writes[Gifts] = Json.writes[Gifts]
 }

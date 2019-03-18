@@ -19,7 +19,7 @@ package v2.connectors.httpparsers
 import play.api.Logger
 import play.api.http.Status._
 import play.api.libs.json._
-import uk.gov.hmrc.http.{HttpReads, HttpResponse}
+import uk.gov.hmrc.http.{ HttpReads, HttpResponse }
 import v2.connectors.AmendCharitableGivingConnectorOutcome
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
@@ -28,7 +28,6 @@ object AmendCharitableGivingHttpParser extends HttpParser {
 
   val logger = Logger(AmendCharitableGivingHttpParser.getClass)
 
-
   private val jsonReads: Reads[String] = (__ \ "transactionReference").read[String]
 
   implicit val amendHttpReads: HttpReads[AmendCharitableGivingConnectorOutcome] = new HttpReads[AmendCharitableGivingConnectorOutcome] {
@@ -36,25 +35,28 @@ object AmendCharitableGivingHttpParser extends HttpParser {
 
       val correlationId = retrieveCorrelationId(response)
       if (response.status != OK) {
-        logger.info("[AmendCharitableGivingHttpParser][read] - " +
-          s"Error response received from DES with status: ${response.status} and body\n" +
-          s"${response.body} and correlationId: $correlationId when calling $url")
+        logger.info(
+          "[AmendCharitableGivingHttpParser][read] - " +
+            s"Error response received from DES with status: ${response.status} and body\n" +
+            s"${response.body} and correlationId: $correlationId when calling $url")
       }
 
       response.status match {
-        case OK => logger.info("[AmendCharitableGivingHttpParser][read] - " +
-          s"Success response received from DES with correlationId: $correlationId when calling $url")
+        case OK =>
+          logger.info(
+            "[AmendCharitableGivingHttpParser][read] - " +
+              s"Success response received from DES with correlationId: $correlationId when calling $url")
           parseResponse(correlationId, response)
-        case BAD_REQUEST | FORBIDDEN => Left(DesResponse(correlationId, parseErrors(response)))
+        case BAD_REQUEST | FORBIDDEN                     => Left(DesResponse(correlationId, parseErrors(response)))
         case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
-        case _ => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
+        case _                                           => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
       }
     }
 
     private def parseResponse(correlationId: String, response: HttpResponse): AmendCharitableGivingConnectorOutcome =
       response.validateJson[String](jsonReads) match {
         case Some(ref) => Right(DesResponse(correlationId, ref))
-        case None => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
+        case None      => Left(DesResponse(correlationId, OutboundError(DownstreamError)))
       }
   }
 }

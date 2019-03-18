@@ -26,5 +26,5 @@ object Error {
   implicit val reads: Reads[Error] = (
     (__ \ "code").read[String] and
       (__ \ "reason").read[String]
-    ) (Error.apply _)
+  )(Error.apply _)
 }

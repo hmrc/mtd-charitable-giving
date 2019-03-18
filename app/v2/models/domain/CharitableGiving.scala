@@ -19,7 +19,7 @@ package v2.models.domain
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-case class CharitableGiving(giftAidPayments: Option[GiftAidPayments], gifts:Option[Gifts])
+case class CharitableGiving(giftAidPayments: Option[GiftAidPayments], gifts: Option[Gifts])
 
 object CharitableGiving {
 
@@ -30,10 +30,10 @@ object CharitableGiving {
   val desReads: Reads[CharitableGiving] = (
     (__ \ "giftAidPayments").readNullable[GiftAidPayments](GiftAidPayments.desReads) and
       (__ \ "gifts").readNullable[Gifts](Gifts.desReads)
-    ) (CharitableGiving.apply _)
+  )(CharitableGiving.apply _)
 
   val desToMtdWrites: Writes[CharitableGiving] = (
     (__ \ "giftAidPayments").writeNullable[GiftAidPayments](GiftAidPayments.desToMtdWrites) and
       (__ \ "gifts").writeNullable[Gifts](Gifts.desToMtdWrites)
-    ) (unlift(CharitableGiving.unapply))
+  )(unlift(CharitableGiving.unapply))
 }

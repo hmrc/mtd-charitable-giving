@@ -16,17 +16,15 @@
 
 package v2.models.audit
 
-import play.api.libs.json.{JsValue, Json, OWrites}
+import play.api.libs.json.{ JsValue, Json, OWrites }
 
-case class CharitableGivingAuditDetail(
-                                        userType: String,
-                                        agentReferenceNumber: Option[String],
-                                        nino: String,
-                                        taxYear: String,
-                                        request: JsValue,
-                                        `X-CorrelationId`: String,
-                                        response: Option[AuditResponse] = None
-                                      )
+case class CharitableGivingAuditDetail(userType: String,
+                                       agentReferenceNumber: Option[String],
+                                       nino: String,
+                                       taxYear: String,
+                                       request: JsValue,
+                                       `X-CorrelationId`: String,
+                                       response: Option[AuditResponse] = None)
 
 object CharitableGivingAuditDetail {
   implicit val writes: OWrites[CharitableGivingAuditDetail] = Json.writes[CharitableGivingAuditDetail]
