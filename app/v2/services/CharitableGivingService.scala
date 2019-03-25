@@ -39,7 +39,7 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
         val mtdErrors = errors.map(error => desErrorToMtdError(error.code))
         if (mtdErrors.contains(DownstreamError)) {
           logger.info(s"[CharitableGivingService] [amend] [CorrelationId - $correlationId]" +
-            s" - downstream returned INVALID_IDTYPE or NOT_FOUND_INCOME_SOURCE. Revert to ISE")
+            s" - downstream returned INVALID_IDTYPE or NOT_FOUND_PERIOD. Revert to ISE")
           Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
         } else {
           Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
@@ -59,7 +59,7 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
         val mtdErrors = errors.map(error => desErrorToMtdError(error.code))
         if (mtdErrors.contains(DownstreamError)) {
           logger.info(s"[CharitableGivingService] [retrieve] [CorrelationId - $correlationId]" +
-            s" - downstream returned INVALID_IDTYPE, NOT_FOUND_INCOME_SOURCE or INVALID_INCOME_SOURCE. Revert to ISE")
+            s" - downstream returned INVALID_IDTYPE, NOT_FOUND_PERIOD or INVALID_INCOME_SOURCE. Revert to ISE")
           Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
         } else {
           Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
@@ -76,8 +76,8 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
     "INVALID_TAXYEAR" -> TaxYearFormatError,
     "INVALID_PAYLOAD" -> BadRequestError,
     "INVALID_INCOME_SOURCE" -> DownstreamError,
-    "NOT_FOUND_PERIOD" -> NotFoundError,
-    "NOT_FOUND_INCOME_SOURCE" -> DownstreamError,
+    "NOT_FOUND_PERIOD" -> DownstreamError,
+    "NOT_FOUND_INCOME_SOURCE" -> NotFoundError,
     "MISSING_CHARITIES_NAME_GIFT_AID" -> NonUKNamesNotSpecifiedRuleError,
     "MISSING_GIFT_AID_AMOUNT" -> NonUKAmountNotSpecifiedRuleError,
     "MISSING_CHARITIES_NAME_INVESTMENT" -> NonUKInvestmentsNamesNotSpecifiedRuleError,

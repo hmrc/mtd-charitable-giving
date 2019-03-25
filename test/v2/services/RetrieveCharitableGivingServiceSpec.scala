@@ -55,7 +55,7 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
     "the desConnector returns multiple errors" in new Test {
 
       val response = DesResponse(correlationId, MultipleErrors(Seq(
-        Error("NOT_FOUND_PERIOD", "Doesn't matter"),
+        Error("NOT_FOUND_INCOME_SOURCE", "Doesn't matter"),
         Error("INVALID_TAXYEAR", "Doesn't matter"))))
       val expected = ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NotFoundError, TaxYearFormatError)))
 
@@ -94,8 +94,8 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
     "INVALID_NINO" -> NinoFormatError,
     "INVALID_TAXYEAR" -> TaxYearFormatError,
     "INVALID_INCOME_SOURCE" -> DownstreamError,
-    "NOT_FOUND_PERIOD" -> NotFoundError,
-    "NOT_FOUND_INCOME_SOURCE" -> DownstreamError,
+    "NOT_FOUND_PERIOD" -> DownstreamError,
+    "NOT_FOUND_INCOME_SOURCE" -> NotFoundError,
     "SERVER_ERROR" -> DownstreamError,
     "SERVICE_UNAVAILABLE" -> DownstreamError
   )
