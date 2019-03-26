@@ -95,7 +95,7 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRawD
         AmountValidation.validate(gifts.investmentsNonUKCharities, GiftsInvestmentsAmountFormatError),
         PredicateValidation.validate(nonUKInvestmentsNamesNotSpecifiedRuleErrorCheck, NonUKInvestmentsNamesNotSpecifiedRuleError),
         PredicateValidation.validate(investmentsNamesSuppliedButIncorrectAmountCheck, NonUKInvestmentAmountNotSpecifiedRuleError),
-        ArrayElementsRegexValidation.validate(gifts.investmentsNonUKCharityNames, "^[^|]{1,75}$", GiftsNonUKInvestmentsNamesFormatError)
+        ArrayElementsRegexValidation.validate(gifts.investmentsNonUKCharityNames, "^[A-Za-z0-9 &'\\(\\)\\*,\\-\\./@£]{1,75}$", GiftsNonUKInvestmentsNamesFormatError)
       )
     } else {
       NoValidationErrors
@@ -117,7 +117,7 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRawD
         AmountValidation.validate(giftAidPayments.nonUKCharities, GiftAidNonUKCharityAmountFormatError),
         PredicateValidation.validate(nonUKNamesNotSpecifiedRuleErrorCheck, NonUKNamesNotSpecifiedRuleError),
         PredicateValidation.validate(namesSuppliedButIncorrectAmountCheck, NonUKAmountNotSpecifiedRuleError),
-        ArrayElementsRegexValidation.validate(giftAidPayments.nonUKCharityNames, "^[^|]{1,75}$", GiftAidNonUKNamesFormatError)
+        ArrayElementsRegexValidation.validate(giftAidPayments.nonUKCharityNames, "^[A-Za-z0-9 &'\\(\\)\\*,\\-\\./@£]{1,75}$", GiftAidNonUKNamesFormatError)
       )
     } else {
       NoValidationErrors
