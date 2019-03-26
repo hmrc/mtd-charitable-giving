@@ -191,7 +191,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec
 
   }
 
-  def errorsFromParserTester(error: Error, expectedStatus: Int): Unit = {
+  def errorsFromParserTester(error: MtdError, expectedStatus: Int): Unit = {
     s"a ${error.code} error is returned from the parser" in new Test {
 
       val amendCharitableGivingRequestData = AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson))
@@ -214,7 +214,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec
     }
   }
 
-  def errorsFromServiceTester(error: Error, expectedStatus: Int): Unit = {
+  def errorsFromServiceTester(error: MtdError, expectedStatus: Int): Unit = {
     s"a ${error.code} error is returned from the service" in new Test {
 
       val amendCharitableGivingRequestData = AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson))

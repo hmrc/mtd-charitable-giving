@@ -70,7 +70,7 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
     }
   }
 
-  private def desErrorToMtdError: Map[String, Error] = Map(
+  private def desErrorToMtdError: Map[String, MtdError] = Map(
     "INVALID_NINO" -> NinoFormatError,
     "INVALID_TYPE" -> DownstreamError,
     "INVALID_TAXYEAR" -> TaxYearFormatError,

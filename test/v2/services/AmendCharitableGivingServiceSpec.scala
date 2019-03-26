@@ -59,7 +59,7 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
       "the DesConnector returns multiple errors" in new Test {
 
         val response = DesResponse(correlationId,
-          MultipleErrors(Seq(Error("INVALID_NINO", "doesn't matter"), Error("INVALID_TAXYEAR", "doesn't matter"))))
+          MultipleErrors(Seq(MtdError("INVALID_NINO", "doesn't matter"), MtdError("INVALID_TAXYEAR", "doesn't matter"))))
 
         val expected = ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
 
@@ -73,7 +73,7 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
     "return a single error" when {
       "the DesConnector returns multiple errors and one maps to a DownstreamError" in new Test {
         val response = DesResponse(correlationId,
-          MultipleErrors(Seq(Error("INVALID_NINO", "doesn't matter"), Error("INVALID_TYPE", "doesn't matter"))))
+          MultipleErrors(Seq(MtdError("INVALID_NINO", "doesn't matter"), MtdError("INVALID_TYPE", "doesn't matter"))))
 
         val expected = ErrorWrapper(Some(correlationId), DownstreamError, None)
 
@@ -95,7 +95,7 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
       result shouldBe Left(expected)
     }
 
-    val errorMap: Map[String, Error] = Map(
+    val errorMap: Map[String, MtdError] = Map(
       "INVALID_NINO" -> NinoFormatError,
       "INVALID_TYPE" -> DownstreamError,
       "INVALID_TAXYEAR" -> TaxYearFormatError,
@@ -114,7 +114,7 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
 
       s"the DesConnector returns a single $error error" in new Test {
 
-        val response = DesResponse(correlationId, SingleError(Error(error, "doesn't matter")))
+        val response = DesResponse(correlationId, SingleError(MtdError(error, "doesn't matter")))
 
         val expected = ErrorWrapper(Some(correlationId), errorMap(error), None)
 

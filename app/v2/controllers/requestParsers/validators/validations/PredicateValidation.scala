@@ -16,13 +16,13 @@
 
 package v2.controllers.requestParsers.validators.validations
 
-import v2.models.errors.Error
+import v2.models.errors.MtdError
 
 object PredicateValidation {
 
-  def validate(predicateResult: Boolean, errorToReturn: Error): List[Error] = {
+  def validate(predicateResult: Boolean, errorToReturn: MtdError): List[MtdError] = {
 
-    if (predicateResult) List(errorToReturn) else NoValidationErrors
+    if (predicateResult) List(errorToReturn) else noValidationErrors
 
   }
 
