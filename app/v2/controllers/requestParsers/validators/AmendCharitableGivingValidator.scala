@@ -25,14 +25,14 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRawD
 
   private val validationSet = List(parameterFormatValidation, requestRuleValidation, emptyBodyAndFieldValidation, bvrRuleValidation)
 
-  private def parameterFormatValidation: AmendCharitableGivingRawData => List[List[MtdError]] = (data: AmendCharitableGivingRawData) => {
+  private def parameterFormatValidation: AmendCharitableGivingRawData => List[List[Error]] = (data: AmendCharitableGivingRawData) => {
     List(
       NinoValidation.validate(data.nino),
       TaxYearValidation.validate(data.taxYear)
     )
   }
 
-  private def requestRuleValidation: AmendCharitableGivingRawData => List[List[MtdError]] = (data: AmendCharitableGivingRawData) => {
+  private def requestRuleValidation: AmendCharitableGivingRawData => List[List[Error]] = (data: AmendCharitableGivingRawData) => {
     List(
       JsonFormatValidation.validate[CharitableGiving](data.body),
       MtdTaxYearValidation.validate(data.taxYear, TaxYearNotSpecifiedRuleError)
@@ -40,14 +40,14 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRawD
   }
 
   // Extra validation to stop these invalid requests heading to DES, and to make functionality consistent in Sandbox
-  private def emptyBodyAndFieldValidation: AmendCharitableGivingRawData => List[List[MtdError]] = (data: AmendCharitableGivingRawData) => {
+  private def emptyBodyAndFieldValidation: AmendCharitableGivingRawData => List[List[Error]] = (data: AmendCharitableGivingRawData) => {
     val amendCharitableGiving = data.body.json.as[CharitableGiving]
 
     val topLevelFieldsValidation =
       List(DefinedFieldValidation.validate(EmptyOrNonMatchingBodyRuleError, amendCharitableGiving.gifts, amendCharitableGiving.giftAidPayments))
 
     val giftsNonEmptyValidation =
-      amendCharitableGiving.gifts.fold(List.empty[MtdError]) { gifts =>
+      amendCharitableGiving.gifts.fold(List.empty[Error]) { gifts =>
         DefinedFieldValidation.validate(
           GiftAidAndGiftsEmptyRuleError,
           gifts.investmentsNonUKCharities,
@@ -57,7 +57,7 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRawD
         )
 
       }
-    val giftAidPaymentsnonEmptyValidation = amendCharitableGiving.giftAidPayments.fold(List.empty[MtdError]) { giftAidPayments =>
+    val giftAidPaymentsnonEmptyValidation = amendCharitableGiving.giftAidPayments.fold(List.empty[Error]) { giftAidPayments =>
       DefinedFieldValidation.validate(
         GiftAidAndGiftsEmptyRuleError,
         giftAidPayments.specifiedYear,
@@ -76,7 +76,7 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRawD
   }
 
 
-  private def bvrRuleValidation: AmendCharitableGivingRawData => List[List[MtdError]] = (data: AmendCharitableGivingRawData) => {
+  private def bvrRuleValidation: AmendCharitableGivingRawData => List[List[Error]] = (data: AmendCharitableGivingRawData) => {
 
     val amendCharitableGiving = data.body.json.as[CharitableGiving]
 
@@ -98,7 +98,7 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRawD
         ArrayElementsRegexValidation.validate(gifts.investmentsNonUKCharityNames, "^[A-Za-z0-9 &'\\(\\)\\*,\\-\\./@£]{1,75}$", GiftsNonUKInvestmentsNamesFormatError)
       )
     } else {
-      noValidationErrors
+      NoValidationErrors
     }
 
     val giftsValidations = if (amendCharitableGiving.giftAidPayments.nonEmpty) {
@@ -120,13 +120,13 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRawD
         ArrayElementsRegexValidation.validate(giftAidPayments.nonUKCharityNames, "^[A-Za-z0-9 &'\\(\\)\\*,\\-\\./@£]{1,75}$", GiftAidNonUKNamesFormatError)
       )
     } else {
-      noValidationErrors
+      NoValidationErrors
     }
 
     giftAidPaymentsValidations ++ giftsValidations
   }
 
-  override def validate(data: AmendCharitableGivingRawData): List[MtdError] = {
+  override def validate(data: AmendCharitableGivingRawData): List[Error] = {
     run(validationSet, data).distinct
   }
 

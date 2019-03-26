@@ -17,12 +17,12 @@
 package v2
 
 import v2.models.domain.CharitableGiving
-import v2.models.errors.{DesError, MtdError}
+import v2.models.errors.{DesError, Error}
 import v2.models.outcomes.DesResponse
 
 package object connectors {
 
-  type MtdIdLookupOutcome = Either[MtdError, String]
+  type MtdIdLookupOutcome = Either[Error, String]
 
   type AmendCharitableGivingConnectorOutcome = Either[DesResponse[DesError], DesResponse[String]]
   type RetrieveCharitableGivingConnectorOutcome = Either[DesResponse[DesError], DesResponse[CharitableGiving]]

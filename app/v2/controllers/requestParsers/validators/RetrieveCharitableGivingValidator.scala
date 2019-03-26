@@ -17,14 +17,14 @@
 package v2.controllers.requestParsers.validators
 
 import v2.controllers.requestParsers.validators.validations.{MtdTaxYearValidation, NinoValidation, TaxYearValidation}
-import v2.models.errors.{MtdError, TaxYearNotSpecifiedRuleError}
+import v2.models.errors.{Error, TaxYearNotSpecifiedRuleError}
 import v2.models.requestData.RetrieveCharitableGivingRawData
 
 class RetrieveCharitableGivingValidator extends Validator[RetrieveCharitableGivingRawData] {
 
   private val validationSet = List(levelOneValidations, levelTwoValidations)
 
-  private def levelOneValidations: RetrieveCharitableGivingRawData => List[List[MtdError]] =
+  private def levelOneValidations: RetrieveCharitableGivingRawData => List[List[Error]] =
     (data: RetrieveCharitableGivingRawData) => {
       List(
         NinoValidation.validate(data.nino),
@@ -32,14 +32,14 @@ class RetrieveCharitableGivingValidator extends Validator[RetrieveCharitableGivi
       )
     }
 
-  private def levelTwoValidations: RetrieveCharitableGivingRawData => List[List[MtdError]] =
+  private def levelTwoValidations: RetrieveCharitableGivingRawData => List[List[Error]] =
     (data: RetrieveCharitableGivingRawData) => {
       List(
         MtdTaxYearValidation.validate(data.taxYear, TaxYearNotSpecifiedRuleError)
       )
     }
 
-  override def validate(data: RetrieveCharitableGivingRawData): List[MtdError] = {
+  override def validate(data: RetrieveCharitableGivingRawData): List[Error] = {
     run(validationSet, data).distinct
   }
 
