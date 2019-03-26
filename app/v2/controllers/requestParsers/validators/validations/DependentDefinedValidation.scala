@@ -16,15 +16,15 @@
 
 package v2.controllers.requestParsers.validators.validations
 
-import v2.models.errors.MtdError
+import v2.models.errors.Error
 
 object DependentDefinedValidation {
 
-  def validate[A, B](firstValue: Option[A], secondValue: Option[B], error: MtdError): List[MtdError] = {
+  def validate[A, B](firstValue: Option[A], secondValue: Option[B], error: Error): List[Error] = {
 
     (firstValue.isDefined, secondValue.isDefined) match {
       case (true, false) => List(error)
-      case (true, true) | (false, false) | (false, true) => noValidationErrors
+      case (true, true) | (false, false) | (false, true) => NoValidationErrors
     }
 
   }

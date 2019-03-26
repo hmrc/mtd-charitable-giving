@@ -55,8 +55,8 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
     "the desConnector returns multiple errors" in new Test {
 
       val response = DesResponse(correlationId, MultipleErrors(Seq(
-        MtdError("NOT_FOUND_INCOME_SOURCE", "Doesn't matter"),
-        MtdError("INVALID_TAXYEAR", "Doesn't matter"))))
+        Error("NOT_FOUND_INCOME_SOURCE", "Doesn't matter"),
+        Error("INVALID_TAXYEAR", "Doesn't matter"))))
       val expected = ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NotFoundError, TaxYearFormatError)))
 
       MockedDesConnector.retrieve(input).returns(Future.successful(Left(response)))
@@ -69,8 +69,8 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
     "the desConnector returns multiple errors and one maps to a DownstreamError" in new Test {
 
       val response = DesResponse(correlationId, MultipleErrors(Seq(
-        MtdError("NOT_FOUND_PERIOD", "Doesn't matter"),
-        MtdError("INVALID_INCOME_SOURCE", "Doesn't matter"))))
+        Error("NOT_FOUND_PERIOD", "Doesn't matter"),
+        Error("INVALID_INCOME_SOURCE", "Doesn't matter"))))
       val expected = ErrorWrapper(Some(correlationId), DownstreamError, None)
 
       MockedDesConnector.retrieve(input).returns(Future.successful(Left(response)))
@@ -89,7 +89,7 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
 
   }
 
-  val errorMap: Map[String, MtdError] = Map(
+  val errorMap: Map[String, Error] = Map(
     "INVALID_TYPE" -> DownstreamError,
     "INVALID_NINO" -> NinoFormatError,
     "INVALID_TAXYEAR" -> TaxYearFormatError,
@@ -103,7 +103,7 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
 
   for (error <- errorMap.keys) {
     s"the DesConnector returns a single $error error" in new Test {
-      val response = DesResponse(correlationId, SingleError(MtdError(error, "doesn't matter")))
+      val response = DesResponse(correlationId, SingleError(Error(error, "doesn't matter")))
       val expected = ErrorWrapper(Some(correlationId), errorMap(error), None)
 
       MockedDesConnector.retrieve(input).returns(Future.successful(Left(response)))
