@@ -18,12 +18,12 @@ package v2
 
 import v2.models.auth.UserDetails
 import v2.models.domain.CharitableGiving
-import v2.models.errors.{Error, ErrorWrapper}
+import v2.models.errors.{MtdError, ErrorWrapper}
 import v2.models.outcomes.DesResponse
 
 package object services {
 
-  type AuthOutcome = Either[Error, UserDetails]
+  type AuthOutcome = Either[MtdError, UserDetails]
 
   type AmendCharitableGivingOutcome = Either[ErrorWrapper, String]
   type RetrieveCharitableGivingOutcome = Either[ErrorWrapper, DesResponse[CharitableGiving]]

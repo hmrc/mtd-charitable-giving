@@ -16,14 +16,14 @@
 
 package v2.controllers.requestParsers.validators.validations
 
-import v2.models.errors.Error
+import v2.models.errors.MtdError
 
 object ArrayElementsRegexValidation {
 
-  def validate(arr: Option[Seq[String]], regex: String, errorToReturn: Error): List[Error] = {
+  def validate(arr: Option[Seq[String]], regex: String, errorToReturn: MtdError): List[MtdError] = {
 
     if (arr.forall(_.forall(_.matches(regex)))) {
-      NoValidationErrors
+      noValidationErrors
     } else {
       List(errorToReturn)
     }

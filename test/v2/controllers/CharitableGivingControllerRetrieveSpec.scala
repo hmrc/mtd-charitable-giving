@@ -59,7 +59,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
   val taxYear = "2017-18"
   val correlationId = "X-123"
   val retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear.fromMtd(taxYear))
-  val errorWrapper: ErrorWrapper = ErrorWrapper(None, Error("abc", "abc"), None)
+  val errorWrapper: ErrorWrapper = ErrorWrapper(None, MtdError("abc", "abc"), None)
 
   "retrieve" should {
     "return a successful response with header X-CorrelationId and body" when {
@@ -134,7 +134,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
 
   }
 
-  def errorsFromParserTester(error: Error, expectedStatus: Int): Unit = {
+  def errorsFromParserTester(error: MtdError, expectedStatus: Int): Unit = {
     s"a ${error.code} error is returned from the parser" in new Test {
 
       val retrieveCharitableGivingRequestData = RetrieveCharitableGivingRawData(nino, taxYear)
@@ -150,7 +150,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
     }
   }
 
-  def errorsFromServiceTester(error: Error, expectedStatus: Int): Unit = {
+  def errorsFromServiceTester(error: MtdError, expectedStatus: Int): Unit = {
     s"a ${error.code} error is returned from the service" in new Test {
 
       val retrieveCharitableGivingRequestData = RetrieveCharitableGivingRawData(nino, taxYear)
