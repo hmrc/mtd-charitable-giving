@@ -36,7 +36,7 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
 
     connector.amend(amendCharitableGivingRequest).map {
       case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
-        val mtdErrors = errors.map(error => desErrorToMtdError(error.code))
+        val mtdErrors = errors.map(error => desErrorToMtdErrorAmend(error.code))
         if (mtdErrors.contains(DownstreamError)) {
           logger.info(s"[CharitableGivingService] [amend] [CorrelationId - $correlationId]" +
             s" - downstream returned INVALID_IDTYPE or NOT_FOUND_PERIOD. Revert to ISE")
@@ -44,7 +44,7 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
         } else {
           Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
         }
-      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdError(error.code), None))
+      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdErrorAmend(error.code), None))
       case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
       case Right(desResponse) => Right(desResponse.correlationId)
     }
@@ -56,7 +56,7 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
 
     connector.retrieve(retrieveCharitableGivingRequest).map {
       case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
-        val mtdErrors = errors.map(error => desErrorToMtdError(error.code))
+        val mtdErrors = errors.map(error => desErrorToMtdErrorRetrieve(error.code))
         if (mtdErrors.contains(DownstreamError)) {
           logger.info(s"[CharitableGivingService] [retrieve] [CorrelationId - $correlationId]" +
             s" - downstream returned INVALID_IDTYPE, NOT_FOUND_PERIOD or INVALID_INCOME_SOURCE. Revert to ISE")
@@ -65,19 +65,29 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
           Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
         }
       case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
-      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdError(error.code), None))
+      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdErrorRetrieve(error.code), None))
       case Right(desResponse) => Right(DesResponse(desResponse.correlationId, desResponse.responseData))
     }
   }
 
-  private def desErrorToMtdError: Map[String, Error] = Map(
+  private def desErrorToMtdErrorRetrieve: Map[String, Error] = Map(
+    "INVALID_NINO" -> NinoFormatError,
+    "INVALID_TYPE" -> DownstreamError,
+    "INVALID_TAXYEAR" -> TaxYearFormatError,
+    "INVALID_INCOME_SOURCE" -> DownstreamError,
+    "NOT_FOUND_PERIOD" -> NotFoundError,
+    "NOT_FOUND_INCOME_SOURCE" -> NotFoundError,
+    "SERVER_ERROR" -> DownstreamError,
+    "SERVICE_UNAVAILABLE" -> DownstreamError
+  )
+
+  private def desErrorToMtdErrorAmend: Map[String, Error] = Map(
     "INVALID_NINO" -> NinoFormatError,
     "INVALID_TYPE" -> DownstreamError,
     "INVALID_TAXYEAR" -> TaxYearFormatError,
     "INVALID_PAYLOAD" -> BadRequestError,
-    "INVALID_INCOME_SOURCE" -> DownstreamError,
-    "NOT_FOUND_PERIOD" -> DownstreamError,
-    "NOT_FOUND_INCOME_SOURCE" -> NotFoundError,
+    "INVALID_ACCOUNTING_PERIOD" -> TaxYearNotSpecifiedRuleError,
+    "NOT_FOUND_INCOME_SOURCE" -> DownstreamError,
     "MISSING_CHARITIES_NAME_GIFT_AID" -> NonUKNamesNotSpecifiedRuleError,
     "MISSING_GIFT_AID_AMOUNT" -> NonUKAmountNotSpecifiedRuleError,
     "MISSING_CHARITIES_NAME_INVESTMENT" -> NonUKInvestmentsNamesNotSpecifiedRuleError,
@@ -85,5 +95,4 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
     "SERVER_ERROR" -> DownstreamError,
     "SERVICE_UNAVAILABLE" -> DownstreamError
   )
-
 }
