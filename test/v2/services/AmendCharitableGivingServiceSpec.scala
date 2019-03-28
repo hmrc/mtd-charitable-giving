@@ -100,7 +100,7 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
       "INVALID_TYPE" -> DownstreamError,
       "INVALID_TAXYEAR" -> TaxYearFormatError,
       "INVALID_PAYLOAD" -> BadRequestError,
-      "NOT_FOUND_PERIOD" -> DownstreamError,
+      "INVALID_ACCOUNTING_PERIOD" -> TaxYearNotSpecifiedRuleError,
       "MISSING_CHARITIES_NAME_GIFT_AID" -> NonUKNamesNotSpecifiedRuleError,
       "MISSING_GIFT_AID_AMOUNT" -> NonUKAmountNotSpecifiedRuleError,
       "MISSING_CHARITIES_NAME_INVESTMENT" -> NonUKInvestmentsNamesNotSpecifiedRuleError,

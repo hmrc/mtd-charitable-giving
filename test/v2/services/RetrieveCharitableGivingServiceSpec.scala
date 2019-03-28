@@ -94,7 +94,7 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
     "INVALID_NINO" -> NinoFormatError,
     "INVALID_TAXYEAR" -> TaxYearFormatError,
     "INVALID_INCOME_SOURCE" -> DownstreamError,
-    "NOT_FOUND_PERIOD" -> DownstreamError,
+    "NOT_FOUND_PERIOD" -> NotFoundError,
     "NOT_FOUND_INCOME_SOURCE" -> NotFoundError,
     "SERVER_ERROR" -> DownstreamError,
     "SERVICE_UNAVAILABLE" -> DownstreamError
