@@ -16,4 +16,4 @@
 
 package v2.models.requestData
 
-case class RetrieveCharitableGivingRawData(nino: String, taxYear: String) extends InputData
+case class RetrieveCharitableGivingRawData(nino: String, taxYear: String) extends RawData
