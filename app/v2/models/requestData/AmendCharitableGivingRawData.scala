@@ -18,4 +18,4 @@ package v2.models.requestData
 
 import play.api.mvc.AnyContentAsJson
 
-case class AmendCharitableGivingRawData(nino: String, taxYear: String, body: AnyContentAsJson) extends InputData
+case class AmendCharitableGivingRawData(nino: String, taxYear: String, body: AnyContentAsJson) extends RawData
