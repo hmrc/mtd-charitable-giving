@@ -60,7 +60,3 @@ object ServiceUnavailableError extends Error("SERVICE_UNAVAILABLE", "Internal se
 
 //Authorisation Errors
 object UnauthorisedError extends Error("CLIENT_OR_AGENT_NOT_AUTHORISED", "The client and/or agent is not authorised.")
-
-// JSON Errors
-//case class JsonMissingFieldError(codefieldPath: String) extends Error("MISSING_REQUIRED_FIELD", message = s"$fieldPath is missing from request")
-//case class JsonMissingFieldError(override val code: String, override val message: String) extends Error(code, message)
