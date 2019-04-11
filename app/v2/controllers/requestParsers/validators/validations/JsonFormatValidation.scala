@@ -16,19 +16,48 @@
 
 package v2.controllers.requestParsers.validators.validations
 
+import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc.AnyContentAsJson
 import v2.models.errors.{BadRequestError, Error}
 
 object JsonFormatValidation {
 
+  val logger: Logger = Logger(this.getClass)
+
   def validate[A](data: AnyContentAsJson)(implicit reads: Reads[A]): List[Error] = {
 
     data.json.validate[A] match {
       case JsSuccess(_, _) => NoValidationErrors
-      case _ => List(BadRequestError)
+      case JsError(errors) => convertJsErrors(errors)
     }
 
+  }
+
+  private def convertJsErrors(errors: Seq[(JsPath, Seq[JsonValidationError])]): List[Error] = {
+    errors.toList.flatMap { data =>
+      val (path, jsonValidationErrors) = data
+      jsonValidationErrors.flatMap(error => mapSingleJsError(error, convertErrorPath(path)))
+    }
+  }
+
+  private def mapSingleJsError(jsonError: JsonValidationError, path: String): List[Error] = {
+    jsonError.messages.map {
+      case "error.path.missing" => Error("JSON_FIELD_MISSING", s"'$path' is missing")
+      case "error.expected.jsstring" => Error("JSON_STRING_EXPECTED", s"'$path' should be a valid JSON string")
+      case "error.expected.numberformatexception" => Error("JSON_NUMBER_EXPECTED", s"'$path' should be a valid JSON number")
+      case "error.expected.jsboolean" => Error("JSON_BOOLEAN_EXPECTED", s"'$path' should be a valid JSON boolean")
+      case "error.expected.jsobject" => Error("JSON_OBJECT_EXPECTED", s"'$path' should be a valid JSON object")
+      case "error.expected.jsarray" => Error("JSON_ARRAY_EXPECTED", s"'$path' should be a valid JSON array")
+      case unmatched => {
+        logger.warn(s"[JsonFormatValidation][mapSingleJsError] - Received '$unmatched' error type and was unable to map")
+        BadRequestError
+      }
+    }
+  }.toList
+
+  private def convertErrorPath(path: JsPath): String = {
+    path.toString().replaceFirst("/", "")
   }
 
 }

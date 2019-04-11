@@ -27,4 +27,5 @@ object Error {
     (__ \ "code").read[String] and
       (__ \ "reason").read[String]
     ) (Error.apply _)
+
 }
