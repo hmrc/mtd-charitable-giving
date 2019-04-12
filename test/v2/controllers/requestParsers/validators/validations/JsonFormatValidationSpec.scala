@@ -28,6 +28,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
                      fullName: String,
                      totalWorth: BigDecimal,
                      namesOfChildren: List[String],
+                     noOfChildren: Int,
                      employed: Boolean,
                      favouriteBook: Book,
                      topSecretPassword: Option[String]
@@ -53,6 +54,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
             |        "Barthur",
             |        "Narthur"
             |    ],
+            |    "noOfChildren" : 4,
             |    "employed": true,
             |    "favouriteBook": {
             |        "title": "A Thousand Splendid Suns",
@@ -81,6 +83,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
             |        "Barthur",
             |        "Narthur"
             |    ],
+            |    "noOfChildren" : 4,
             |    "employed": true,
             |    "favouriteBook": {
             |        "title": "A Thousand Splendid Suns",
@@ -94,13 +97,43 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
         validationResult.isEmpty shouldBe true
 
       }
+
+      "a valid JSON object with quoted decimal values" in {
+
+        val json =
+          """
+            |{
+            |    "fullName": "Timothy James Barnes",
+            |    "totalWorth": "1234567.88",
+            |    "namesOfChildren": [
+            |        "Arthur",
+            |        "Jarthur",
+            |        "Barthur",
+            |        "Narthur"
+            |    ],
+            |    "noOfChildren" : 4,
+            |    "employed": true,
+            |    "favouriteBook": {
+            |        "title": "A Thousand Splendid Suns",
+            |        "author": "Khaled Hosseini"
+            |    },
+            |    "topSecretPassword": "foobarfoobar123"
+            |}
+          """.stripMargin
+        val jsonInput = AnyContentAsJson(Json.parse(json))
+
+        val validationResult = JsonFormatValidation.validate[Person](jsonInput)
+        validationResult.isEmpty shouldBe true
+
+      }
+
     }
 
     "return an error" when {
 
       "a required field is missing" in {
 
-        val expectedError = Error("JSON_FIELD_MISSING", "'totalWorth' is missing")
+        val expectedError = Error("JSON_FIELD_MISSING", "/totalWorth is missing")
 
         val json =
           """
@@ -112,6 +145,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
             |        "Barthur",
             |        "Narthur"
             |    ],
+            |    "noOfChildren" : 4,
             |    "employed": true,
             |    "favouriteBook": {
             |        "title": "A Thousand Splendid Suns",
@@ -130,7 +164,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
       "a string type is required but another type is provided" in {
 
-        val expectedError = Error("JSON_STRING_EXPECTED", "'fullName' should be a valid JSON string")
+        val expectedError = Error("JSON_STRING_EXPECTED", "/fullName should be a valid JSON string")
 
         val json =
           """
@@ -143,6 +177,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
             |        "Barthur",
             |        "Narthur"
             |    ],
+            |    "noOfChildren" : 4,
             |    "employed": true,
             |    "favouriteBook": {
             |        "title": "A Thousand Splendid Suns",
@@ -161,7 +196,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
       "a number type is required but another type is provided" in {
 
-        val expectedError = Error("JSON_NUMBER_EXPECTED", "'totalWorth' should be a valid JSON number")
+        val expectedError = Error("JSON_NUMBER_EXPECTED", "/totalWorth should be a valid JSON number")
 
         val json =
           """
@@ -174,6 +209,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
             |        "Barthur",
             |        "Narthur"
             |    ],
+            |    "noOfChildren" : 4,
             |    "employed": true,
             |    "favouriteBook": {
             |        "title": "A Thousand Splendid Suns",
@@ -192,7 +228,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
       "a boolean type is required but another type is provided" in {
 
-        val expectedError = Error("JSON_BOOLEAN_EXPECTED", "'employed' should be a valid JSON boolean")
+        val expectedError = Error("JSON_BOOLEAN_EXPECTED", "/employed should be a valid JSON boolean")
 
         val json =
           """
@@ -205,7 +241,40 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
             |        "Barthur",
             |        "Narthur"
             |    ],
+            |    "noOfChildren" : 4,
             |    "employed": "Yes Sir",
+            |    "favouriteBook": {
+            |        "title": "A Thousand Splendid Suns",
+            |        "author": "Khaled Hosseini"
+            |    },
+            |    "topSecretPassword": "foobarfoobar123"
+            |}
+          """.stripMargin
+        val jsonInput = AnyContentAsJson(Json.parse(json))
+
+        val validationResult = JsonFormatValidation.validate[Person](jsonInput)
+        validationResult.size shouldBe 1
+        validationResult.head shouldBe expectedError
+
+      }
+
+      "an integer type is required but another type is provided" in {
+
+        val expectedError = Error("JSON_INTEGER_EXPECTED", "/noOfChildren should be a valid integer")
+
+        val json =
+          """
+            |{
+            |    "fullName": "Timothy James Barnes",
+            |    "totalWorth": 1234567.88,
+            |    "namesOfChildren": [
+            |        "Arthur",
+            |        "Jarthur",
+            |        "Barthur",
+            |        "Narthur"
+            |    ],
+            |    "noOfChildren" : 7.7,
+            |    "employed": true,
             |    "favouriteBook": {
             |        "title": "A Thousand Splendid Suns",
             |        "author": "Khaled Hosseini"
@@ -223,7 +292,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
       "an object is required but another type is provided" in {
 
-        val expectedError = Error("JSON_OBJECT_EXPECTED", "'favouriteBook' should be a valid JSON object")
+        val expectedError = Error("JSON_OBJECT_EXPECTED", "/favouriteBook should be a valid JSON object")
 
         val json =
           """
@@ -236,6 +305,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
             |        "Barthur",
             |        "Narthur"
             |    ],
+            |    "noOfChildren" : 4,
             |    "employed": true,
             |    "favouriteBook": "Kite Runner",
             |    "topSecretPassword": "foobarfoobar123"
@@ -249,8 +319,40 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
       }
 
+      "a decimal value is required but another type is provided" in {
+
+        val expectedError = Error("JSON_NUMBER_EXPECTED", "/totalWorth should be a valid JSON number")
+
+        val json =
+          """
+            |{
+            |    "fullName": "Timothy James Barnes",
+            |    "totalWorth": { "net": 2500 },
+            |    "namesOfChildren": [
+            |        "Arthur",
+            |        "Jarthur",
+            |        "Barthur",
+            |        "Narthur"
+            |    ],
+            |    "noOfChildren" : 4,
+            |    "employed": true,
+            |    "favouriteBook": {
+            |        "title": "A Thousand Splendid Suns",
+            |        "author": "Khaled Hosseini"
+            |    },
+            |    "topSecretPassword": "foobarfoobar123"
+            |}
+          """.stripMargin
+        val jsonInput = AnyContentAsJson(Json.parse(json))
+
+        val validationResult = JsonFormatValidation.validate[Person](jsonInput)
+        validationResult.size shouldBe 1
+        validationResult.head shouldBe expectedError
+
+      }
+
       "an array is required but another type is provided" in {
-        val expectedError = Error("JSON_ARRAY_EXPECTED", "'namesOfChildren' should be a valid JSON array")
+        val expectedError = Error("JSON_ARRAY_EXPECTED", "/namesOfChildren should be a valid JSON array")
 
         val json =
           """
@@ -258,6 +360,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
             |    "fullName": "Timothy James Barnes",
             |    "totalWorth": 1234567.88,
             |    "namesOfChildren": "Timmy and Tommy",
+            |    "noOfChildren" : 2,
             |    "employed": true,
             |    "favouriteBook": {
             |        "title": "A Thousand Splendid Suns",
@@ -275,7 +378,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
       }
 
       "an error occurs below the first level of the json data" in {
-        val expectedError = Error("JSON_FIELD_MISSING", "'favouriteBook/title' is missing")
+        val expectedError = Error("JSON_FIELD_MISSING", "/favouriteBook/title is missing")
 
         val json =
           """
@@ -288,6 +391,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
             |        "Barthur",
             |        "Narthur"
             |    ],
+            |    "noOfChildren" : 4,
             |    "employed": true,
             |    "favouriteBook": {
             |        "author": "Khaled Hosseini"
@@ -308,9 +412,9 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
       "invalid types are provided in an array" in {
 
-        val expectedErrorOne = Error("JSON_STRING_EXPECTED", "'namesOfChildren(0)' should be a valid JSON string")
-        val expectedErrorTwo = Error("JSON_STRING_EXPECTED", "'namesOfChildren(1)' should be a valid JSON string")
-        val expectedErrorThree = Error("JSON_STRING_EXPECTED", "'namesOfChildren(2)' should be a valid JSON string")
+        val expectedErrorOne = Error("JSON_STRING_EXPECTED", "/namesOfChildren(0) should be a valid JSON string")
+        val expectedErrorTwo = Error("JSON_STRING_EXPECTED", "/namesOfChildren(1) should be a valid JSON string")
+        val expectedErrorThree = Error("JSON_STRING_EXPECTED", "/namesOfChildren(2) should be a valid JSON string")
 
         val json =
           """
@@ -318,6 +422,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
             |    "fullName": "Timothy James Barnes",
             |    "totalWorth": 1234567.88,
             |    "namesOfChildren": [ 1, 2, 3 ],
+            |    "noOfChildren" : 3,
             |    "employed": true,
             |    "favouriteBook": {
             |        "title": "A Thousand Splendid Suns",
@@ -338,8 +443,8 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
       "multiple incorrect types are provided" in {
 
-        val expectedErrorOne = Error("JSON_STRING_EXPECTED", "'fullName' should be a valid JSON string")
-        val expectedErrorTwo = Error("JSON_NUMBER_EXPECTED", "'totalWorth' should be a valid JSON number")
+        val expectedErrorOne = Error("JSON_STRING_EXPECTED", "/fullName should be a valid JSON string")
+        val expectedErrorTwo = Error("JSON_NUMBER_EXPECTED", "/totalWorth should be a valid JSON number")
 
         val json =
           """
@@ -352,6 +457,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
             |        "Barthur",
             |        "Narthur"
             |    ],
+            |    "noOfChildren" : 4,
             |    "employed": true,
             |    "favouriteBook": {
             |        "title": "A Thousand Splendid Suns",

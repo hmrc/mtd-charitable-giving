@@ -37,27 +37,25 @@ object JsonFormatValidation {
   private def convertJsErrors(errors: Seq[(JsPath, Seq[JsonValidationError])]): List[Error] = {
     errors.toList.flatMap { data =>
       val (path, jsonValidationErrors) = data
-      jsonValidationErrors.flatMap(error => mapSingleJsError(error, convertErrorPath(path)))
+      jsonValidationErrors.flatMap(error => mapSingleJsError(error, path))
     }
   }
 
-  private def mapSingleJsError(jsonError: JsonValidationError, path: String): List[Error] = {
+  private def mapSingleJsError(jsonError: JsonValidationError, path: JsPath): List[Error] = {
+    println(s"Testng: ${jsonError} ${path}")
     jsonError.messages.map {
-      case "error.path.missing" => Error("JSON_FIELD_MISSING", s"'$path' is missing")
-      case "error.expected.jsstring" => Error("JSON_STRING_EXPECTED", s"'$path' should be a valid JSON string")
-      case "error.expected.numberformatexception" => Error("JSON_NUMBER_EXPECTED", s"'$path' should be a valid JSON number")
-      case "error.expected.jsboolean" => Error("JSON_BOOLEAN_EXPECTED", s"'$path' should be a valid JSON boolean")
-      case "error.expected.jsobject" => Error("JSON_OBJECT_EXPECTED", s"'$path' should be a valid JSON object")
-      case "error.expected.jsarray" => Error("JSON_ARRAY_EXPECTED", s"'$path' should be a valid JSON array")
+      case "error.path.missing" => Error("JSON_FIELD_MISSING", s"$path is missing")
+      case "error.expected.jsstring" => Error("JSON_STRING_EXPECTED", s"$path should be a valid JSON string")
+      case "error.expected.numberformatexception" | "error.expected.jsnumberorjsstring" => Error("JSON_NUMBER_EXPECTED", s"$path should be a valid JSON number")
+      case "error.expected.int" => Error("JSON_INTEGER_EXPECTED", s"$path should be a valid integer")
+      case "error.expected.jsboolean" => Error("JSON_BOOLEAN_EXPECTED", s"$path should be a valid JSON boolean")
+      case "error.expected.jsobject" => Error("JSON_OBJECT_EXPECTED", s"$path should be a valid JSON object")
+      case "error.expected.jsarray" => Error("JSON_ARRAY_EXPECTED", s"$path should be a valid JSON array")
       case unmatched => {
         logger.warn(s"[JsonFormatValidation][mapSingleJsError] - Received '$unmatched' error type and was unable to map")
         BadRequestError
       }
     }
   }.toList
-
-  private def convertErrorPath(path: JsPath): String = {
-    path.toString().replaceFirst("/", "")
-  }
 
 }

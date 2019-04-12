@@ -27,9 +27,8 @@ class AmendCharitableGivingRequestDataParser @Inject()(validator: AmendCharitabl
 
   def parseRequest(data: AmendCharitableGivingRawData): Either[ErrorWrapper, AmendCharitableGivingRequest] = {
     validator.validate(data) match {
-      case List() =>
-        //Validation passed.  Request data is ok to transform.
-        Right(AmendCharitableGivingRequest(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear), data.body.json.as[CharitableGiving]))
+      case Nil => Right(AmendCharitableGivingRequest(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear), data.body.json.as[CharitableGiving]))
+      case err :: Nil if err.code.startsWith("JSON") => Left(ErrorWrapper(None, BadRequestError, Some(List(err))))
       case err :: Nil => Left(ErrorWrapper(None, err, None))
       case errs => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
     }
