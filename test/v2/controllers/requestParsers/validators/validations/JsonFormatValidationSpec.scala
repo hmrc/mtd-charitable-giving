@@ -40,7 +40,9 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
   implicit val personReads: Reads[Person] = Json.reads[Person]
 
   "validate" should {
+
     "return no errors" when {
+
       "a valid JSON object with all the necessary fields is supplied" in {
 
         val json =
@@ -133,7 +135,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
       "a required field is missing" in {
 
-        val expectedError = Error("JSON_FIELD_MISSING", "/totalWorth is missing")
+        val expectedError = Error(JsonFormatValidation.JSON_FIELD_MISSING, "/totalWorth is missing")
 
         val json =
           """
@@ -164,7 +166,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
       "a string type is required but another type is provided" in {
 
-        val expectedError = Error("JSON_STRING_EXPECTED", "/fullName should be a valid JSON string")
+        val expectedError = Error(JsonFormatValidation.JSON_STRING_EXPECTED, "/fullName should be a valid JSON string")
 
         val json =
           """
@@ -196,7 +198,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
       "a number type is required but another type is provided" in {
 
-        val expectedError = Error("JSON_NUMBER_EXPECTED", "/totalWorth should be a valid JSON number")
+        val expectedError = Error(JsonFormatValidation.JSON_NUMBER_EXPECTED, "/totalWorth should be a valid JSON number")
 
         val json =
           """
@@ -228,7 +230,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
       "a boolean type is required but another type is provided" in {
 
-        val expectedError = Error("JSON_BOOLEAN_EXPECTED", "/employed should be a valid JSON boolean")
+        val expectedError = Error(JsonFormatValidation.JSON_BOOLEAN_EXPECTED, "/employed should be a valid JSON boolean")
 
         val json =
           """
@@ -260,7 +262,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
       "an integer type is required but another type is provided" in {
 
-        val expectedError = Error("JSON_INTEGER_EXPECTED", "/noOfChildren should be a valid integer")
+        val expectedError = Error(JsonFormatValidation.JSON_INTEGER_EXPECTED, "/noOfChildren should be a valid integer")
 
         val json =
           """
@@ -292,7 +294,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
       "an object is required but another type is provided" in {
 
-        val expectedError = Error("JSON_OBJECT_EXPECTED", "/favouriteBook should be a valid JSON object")
+        val expectedError = Error(JsonFormatValidation.JSON_OBJECT_EXPECTED, "/favouriteBook should be a valid JSON object")
 
         val json =
           """
@@ -321,7 +323,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
       "a decimal value is required but another type is provided" in {
 
-        val expectedError = Error("JSON_NUMBER_EXPECTED", "/totalWorth should be a valid JSON number")
+        val expectedError = Error(JsonFormatValidation.JSON_NUMBER_EXPECTED, "/totalWorth should be a valid JSON number")
 
         val json =
           """
@@ -352,7 +354,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
       }
 
       "an array is required but another type is provided" in {
-        val expectedError = Error("JSON_ARRAY_EXPECTED", "/namesOfChildren should be a valid JSON array")
+        val expectedError = Error(JsonFormatValidation.JSON_ARRAY_EXPECTED, "/namesOfChildren should be a valid JSON array")
 
         val json =
           """
@@ -378,7 +380,7 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
       }
 
       "an error occurs below the first level of the json data" in {
-        val expectedError = Error("JSON_FIELD_MISSING", "/favouriteBook/title is missing")
+        val expectedError = Error(JsonFormatValidation.JSON_FIELD_MISSING, "/favouriteBook/title is missing")
 
         val json =
           """
@@ -412,9 +414,9 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
       "invalid types are provided in an array" in {
 
-        val expectedErrorOne = Error("JSON_STRING_EXPECTED", "/namesOfChildren(0) should be a valid JSON string")
-        val expectedErrorTwo = Error("JSON_STRING_EXPECTED", "/namesOfChildren(1) should be a valid JSON string")
-        val expectedErrorThree = Error("JSON_STRING_EXPECTED", "/namesOfChildren(2) should be a valid JSON string")
+        val expectedErrorOne = Error(JsonFormatValidation.JSON_STRING_EXPECTED, "/namesOfChildren(0) should be a valid JSON string")
+        val expectedErrorTwo = Error(JsonFormatValidation.JSON_STRING_EXPECTED, "/namesOfChildren(1) should be a valid JSON string")
+        val expectedErrorThree = Error(JsonFormatValidation.JSON_STRING_EXPECTED, "/namesOfChildren(2) should be a valid JSON string")
 
         val json =
           """
@@ -443,8 +445,8 @@ class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
       "multiple incorrect types are provided" in {
 
-        val expectedErrorOne = Error("JSON_STRING_EXPECTED", "/fullName should be a valid JSON string")
-        val expectedErrorTwo = Error("JSON_NUMBER_EXPECTED", "/totalWorth should be a valid JSON number")
+        val expectedErrorOne = Error(JsonFormatValidation.JSON_STRING_EXPECTED, "/fullName should be a valid JSON string")
+        val expectedErrorTwo = Error(JsonFormatValidation.JSON_NUMBER_EXPECTED, "/totalWorth should be a valid JSON number")
 
         val json =
           """
