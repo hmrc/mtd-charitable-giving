@@ -26,7 +26,8 @@ class RetrieveCharitableGivingRequestDataParser @Inject()(validator: RetrieveCha
 
   def parseRequest(data: RetrieveCharitableGivingRawData): Either[ErrorWrapper, RetrieveCharitableGivingRequest] = {
     validator.validate(data) match {
-      case List() => Right(RetrieveCharitableGivingRequest(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear)))
+      case Nil => Right(RetrieveCharitableGivingRequest(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear)))
+      case err :: Nil if err.code.startsWith("JSON") => Left(ErrorWrapper(None, BadRequestError, Some(List(err))))
       case error :: Nil => Left(ErrorWrapper(None, error, None))
       case errors => Left(ErrorWrapper(None, BadRequestError, Some(errors)))
     }
