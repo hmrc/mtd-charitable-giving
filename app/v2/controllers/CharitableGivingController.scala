@@ -108,7 +108,8 @@ class CharitableGivingController @Inject()(val authService: EnrolmentsAuthServic
            | NonUKAmountNotSpecifiedRuleError
            | NonUKInvestmentsNamesNotSpecifiedRuleError
            | NonUKInvestmentAmountNotSpecifiedRuleError
-           | TaxYearNotSpecifiedRuleError => BadRequest(Json.toJson(errorWrapper))
+           | TaxYearNotSpecifiedRuleError
+           | RuleTaxYearRangeExceededError => BadRequest(Json.toJson(errorWrapper))
       case NotFoundError => NotFound(Json.toJson(errorWrapper))
       case DownstreamError => InternalServerError(Json.toJson(errorWrapper))
 

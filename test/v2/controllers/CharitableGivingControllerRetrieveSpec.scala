@@ -98,7 +98,8 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
       val badRequestErrorsFromParser = List(
         NinoFormatError,
         TaxYearFormatError,
-        TaxYearNotSpecifiedRuleError
+        TaxYearNotSpecifiedRuleError,
+        RuleTaxYearRangeExceededError
       )
 
       val badRequestErrorsFromService = List(
