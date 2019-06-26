@@ -34,5 +34,4 @@ trait MockAmendCharitableGivingService extends MockFactory{
         .expects(amendCharitableGivingRequest, *, *)
     }
   }
-
 }
