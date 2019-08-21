@@ -44,7 +44,7 @@ class AmendCharitableGivingController @Inject()(val authService: EnrolmentsAuthS
   extends AuthorisedController(cc) with BaseController with Logging {
 
   implicit val endpointLogContext: EndpointLogContext =
-    EndpointLogContext(controllerName = "AmendCharitableGivingController", endpointName = "sampleEndpoint")
+    EndpointLogContext(controllerName = "AmendCharitableGivingController", endpointName = "amend")
 
   def amend(nino: String, taxYear: String): Action[JsValue] =
     authorisedAction(nino).async(parse.json) { implicit request =>

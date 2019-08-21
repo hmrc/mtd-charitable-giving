@@ -40,7 +40,7 @@ class RetrieveCharitableGivingController @Inject()(val authService: EnrolmentsAu
   extends AuthorisedController(cc) with BaseController with Logging {
 
   implicit val endpointLogContext: EndpointLogContext =
-    EndpointLogContext(controllerName = "RetrieveCharitableGivingController", endpointName = "sampleEndpoint")
+    EndpointLogContext(controllerName = "RetrieveCharitableGivingController", endpointName = "retrieve")
 
   def retrieve(nino: String, taxYear: String): Action[AnyContent] = authorisedAction(nino).async {
     implicit request =>
