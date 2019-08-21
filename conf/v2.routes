@@ -2,6 +2,6 @@
 # These are the routes for charitable giving. The actions invoked by the clients are retrieve and amend,
 ##### 
 
-PUT        /ni/:nino/charitable-giving/:taxYear        v2.controllers.CharitableGivingController.amend(nino:String, taxYear:String)
+PUT        /ni/:nino/charitable-giving/:taxYear        v2.controllers.AmendCharitableGivingController.amend(nino:String, taxYear:String)
 
-GET        /ni/:nino/charitable-giving/:taxYear        v2.controllers.CharitableGivingController.retrieve(nino:String, taxYear:String)
+GET        /ni/:nino/charitable-giving/:taxYear        v2.controllers.RetrieveCharitableGivingController.retrieve(nino:String, taxYear:String)

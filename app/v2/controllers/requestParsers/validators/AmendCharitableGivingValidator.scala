@@ -35,7 +35,7 @@ class AmendCharitableGivingValidator extends Validator[AmendCharitableGivingRawD
   private def requestRuleValidation: AmendCharitableGivingRawData => List[List[Error]] = (data: AmendCharitableGivingRawData) => {
     List(
       JsonFormatValidation.validate[CharitableGiving](data.body),
-      MtdTaxYearValidation.validate(data.taxYear, TaxYearNotSpecifiedRuleError)
+      MtdTaxYearValidation.validate(data.taxYear, TaxYearNotSupportedRuleError)
     )
   }
 

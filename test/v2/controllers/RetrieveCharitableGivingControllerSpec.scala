@@ -16,51 +16,48 @@
 
 package v2.controllers
 
+import org.scalatest.OneInstancePerTest
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.fixtures.Fixtures.CharitableGivingFixture.charitableGivingModel
-import v2.mocks.requestParsers.{MockAmendCharitableGivingRequestDataParser, MockRetrieveCharitableGivingRequestDataParser}
+import v2.mocks.requestParsers.MockRetrieveCharitableGivingRequestDataParser
 import v2.mocks.services.{MockAuditService, MockEnrolmentsAuthService, MockMtdIdLookupService, MockRetrieveCharitableGivingService}
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
-import v2.models.requestData._
+import v2.models.requestData.{DesTaxYear, _}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
+class RetrieveCharitableGivingControllerSpec extends ControllerBaseSpec
+  with MockEnrolmentsAuthService
+  with MockMtdIdLookupService
+  with MockRetrieveCharitableGivingService
+  with MockRetrieveCharitableGivingRequestDataParser
+  with MockAuditService
+  with OneInstancePerTest {
 
-  trait Test extends
-    MockEnrolmentsAuthService
-    with MockMtdIdLookupService
-    with MockRetrieveCharitableGivingService
-    with MockRetrieveCharitableGivingRequestDataParser
-    with MockAmendCharitableGivingRequestDataParser
-    with MockAuditService {
-    val hc = HeaderCarrier()
 
-    val controller = new CharitableGivingController(
+  val nino = "AA123456A"
+  val taxYear = "2017-18"
+  val correlationId = "X-123"
+  val retrieveCharitableGivingRequest : RetrieveCharitableGivingRequest = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear.fromMtd(taxYear))
+
+  trait Test {
+
+    val target = new RetrieveCharitableGivingController(
       authService = mockEnrolmentsAuthService,
       lookupService = mockMtdIdLookupService,
-      charitableGivingService = mockRetrieveCharitableGivingService,
-      amendCharitableGivingRequestDataParser = mockAmendCharitableGivingRequestDataParser,
-      retrieveCharitableGivingRequestDataParser = mockRetrieveCharitableGivingRequestDataParser,
-      auditService = mockAuditService,
+      requestDataParser = mockRetrieveCharitableGivingRequestDataParser,
+      service = mockRetrieveCharitableGivingService,
       cc = cc
     )
 
     MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
     MockedEnrolmentsAuthService.authoriseUser()
   }
-
-  val nino = "AA123456A"
-  val taxYear = "2017-18"
-  val correlationId = "X-123"
-  val retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest = RetrieveCharitableGivingRequest(Nino(nino), DesTaxYear.fromMtd(taxYear))
-  val errorWrapper: ErrorWrapper = ErrorWrapper(None, Error("abc", "abc"), None)
 
   "retrieve" should {
     "return a successful response with header X-CorrelationId and body" when {
@@ -73,7 +70,8 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
         MockCharitableGivingService.retrieve(retrieveCharitableGivingRequest)
           .returns(Future.successful(Right(DesResponse(correlationId, charitableGivingModel))))
 
-        val result: Future[Result] = controller.retrieve(nino, taxYear)(fakeGetRequest)
+        val result: Future[Result] = target.retrieve(nino, taxYear)(fakeGetRequest)
+
         status(result) shouldBe OK
         contentAsJson(result) shouldBe CharitableGivingFixture.mtdFormatJson
         header("X-CorrelationId", result) shouldBe Some(correlationId)
@@ -88,7 +86,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
           RetrieveCharitableGivingRawData(nino, taxYear))
           .returns(Left(ErrorWrapper(None, NinoFormatError, None)))
 
-        val result: Future[Result] = controller.retrieve(nino, taxYear)(fakeGetRequest)
+        val result: Future[Result] = target.retrieve(nino, taxYear)(fakeGetRequest)
         status(result) shouldBe BAD_REQUEST
         header("X-CorrelationId", result).nonEmpty shouldBe true
       }
@@ -99,7 +97,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
       val badRequestErrorsFromParser = List(
         NinoFormatError,
         TaxYearFormatError,
-        TaxYearNotSpecifiedRuleError,
+        TaxYearNotSupportedRuleError,
         RuleTaxYearRangeExceededError
       )
 
@@ -131,9 +129,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
       )
 
       notFoundErrors.foreach(errorsFromServiceTester(_, NOT_FOUND))
-
     }
-
   }
 
   def errorsFromParserTester(error: Error, expectedStatus: Int): Unit = {
@@ -144,7 +140,8 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
       MockRetrieveCharitableGivingRequestDataParser.parseRequest(retrieveCharitableGivingRequestData)
         .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
 
-      val response: Future[Result] = controller.retrieve(nino, taxYear)(fakeGetRequest)
+      val response: Future[Result] = target.retrieve(nino, taxYear)(fakeGetRequest)
+
 
       status(response) shouldBe expectedStatus
       contentAsJson(response) shouldBe Json.toJson(error)
@@ -164,7 +161,7 @@ class CharitableGivingControllerRetrieveSpec extends ControllerBaseSpec {
       MockCharitableGivingService.retrieve(retrieveCharitableGivingRequest)
         .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
 
-      val response: Future[Result] = controller.retrieve(nino, taxYear)(fakeGetRequest)
+      val response: Future[Result] = target.retrieve(nino, taxYear)(fakeGetRequest)
 
       status(response) shouldBe expectedStatus
       contentAsJson(response) shouldBe Json.toJson(error)
