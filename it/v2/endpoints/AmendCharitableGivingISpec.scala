@@ -57,7 +57,6 @@ class AmendCharitableGivingISpec extends IntegrationBaseSpec {
           MtdIdLookupStub.ninoFound(nino)
           DesStub.amendSuccess(nino, DesTaxYear.fromMtd(taxYear))
         }
-
         val response: WSResponse = await(request().put(CharitableGivingFixture.mtdFormatJson))
         response.status shouldBe Status.NO_CONTENT
         response.header("Content-Type") shouldBe None
