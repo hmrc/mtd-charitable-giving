@@ -280,7 +280,7 @@ class AmendCharitableGivingValidatorSpec extends UnitSpec {
         val result: Seq[Error] = validator.validate(inputData)
 
         result.size shouldBe 1
-        result.head shouldBe TaxYearNotSpecifiedRuleError
+        result.head shouldBe TaxYearNotSupportedRuleError
       }
 
       "giftAidPayments.nonUKCharities is supplied with greater than 0 amount but giftAidPayments.nonUKCharityNames is not supplied " in new Test {

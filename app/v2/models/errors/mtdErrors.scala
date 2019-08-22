@@ -48,7 +48,7 @@ object NonUKInvestmentsNamesNotSpecifiedRuleError extends
     "Positive non-UK gift of investment amount supplied without non-UK gift of investment charity names")
 object NonUKInvestmentAmountNotSpecifiedRuleError extends
   Error("RULE_GIFTS_NONUK_INVESTMENTS_NAMES_WITHOUT_AMOUNT", "Non-UK gift of investment charity names supplied without an amount or the amount was zero")
-object TaxYearNotSpecifiedRuleError extends
+object TaxYearNotSupportedRuleError extends
   Error("RULE_TAX_YEAR_NOT_SUPPORTED", "Tax year not supported, because it precedes the earliest allowable tax year")
 object RuleTaxYearRangeExceededError extends
   Error("RULE_TAX_YEAR_RANGE_EXCEEDED", "Tax year range exceeded. A tax year range of one year is required.")

@@ -17,7 +17,7 @@
 package v2.controllers.requestParsers.validators
 
 import support.UnitSpec
-import v2.models.errors.{NinoFormatError, TaxYearFormatError, TaxYearNotSpecifiedRuleError}
+import v2.models.errors.{NinoFormatError, TaxYearFormatError, TaxYearNotSupportedRuleError}
 import v2.models.requestData.RetrieveCharitableGivingRawData
 
 class RetrieveCharitableGivingValidatorSpec extends UnitSpec {
@@ -57,7 +57,7 @@ class RetrieveCharitableGivingValidatorSpec extends UnitSpec {
         val inputData = RetrieveCharitableGivingRawData(validNino, "2014-15")
         val result = validator.validate(inputData)
         result.size shouldBe 1
-        result.head shouldBe TaxYearNotSpecifiedRuleError
+        result.head shouldBe TaxYearNotSupportedRuleError
       }
 
     }

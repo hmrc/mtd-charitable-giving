@@ -17,13 +17,12 @@
 package v2.controllers
 
 import org.scalatest.OneInstancePerTest
-import play.api.http.Status
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AnyContentAsJson, Result}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures.CharitableGivingFixture
-import v2.mocks.requestParsers.{MockAmendCharitableGivingRequestDataParser, MockRetrieveCharitableGivingRequestDataParser}
+import v2.mocks.requestParsers.MockAmendCharitableGivingRequestDataParser
 import v2.mocks.services.{MockAmendCharitableGivingService, MockAuditService, MockEnrolmentsAuthService, MockMtdIdLookupService}
 import v2.models.audit.{AuditError, AuditEvent, AuditResponse, CharitableGivingAuditDetail}
 import v2.models.domain.{CharitableGiving, GiftAidPayments, Gifts}
@@ -33,35 +32,26 @@ import v2.models.requestData.{AmendCharitableGivingRawData, AmendCharitableGivin
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CharitableGivingControllerAmendSpec extends ControllerBaseSpec
+class AmendCharitableGivingControllerSpec extends ControllerBaseSpec
   with MockEnrolmentsAuthService
   with MockMtdIdLookupService
   with MockAmendCharitableGivingService
   with MockAmendCharitableGivingRequestDataParser
-  with MockRetrieveCharitableGivingRequestDataParser
   with MockAuditService
   with OneInstancePerTest {
-  private val giftAidPayments = GiftAidPayments(
-    Some(10000.50), Some(1000.00), Some(300.00), Some(400.00), Some(2000.00), Some(Seq("International Charity A", "International Charity B"))
-  )
-  private val gifts = Gifts(Some(700.00), Some(600.99), Some(300.00), Some(Seq("International Charity C", "International Charity D")))
-  private val charitableGiving = CharitableGiving(Some(giftAidPayments), Some(gifts))
 
   trait Test {
 
     val hc = HeaderCarrier()
 
-    val target = new CharitableGivingController(
+    val target = new AmendCharitableGivingController(
       authService = mockEnrolmentsAuthService,
       lookupService = mockMtdIdLookupService,
       charitableGivingService = mockAmendCharitableGivingService,
-      amendCharitableGivingRequestDataParser = mockAmendCharitableGivingRequestDataParser,
-      retrieveCharitableGivingRequestDataParser = mockRetrieveCharitableGivingRequestDataParser,
+      requestDataParser = mockAmendCharitableGivingRequestDataParser,
       auditService = mockAuditService,
       cc = cc
-
     )
-
     MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
     MockedEnrolmentsAuthService.authoriseUser()
   }
@@ -93,6 +83,15 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec
         MockedAuditService.verifyAuditEvent(event).once
 
       }
+    }
+
+    "return a 404 Not Found Error with a single error" when {
+
+      val notFoundErrors = List(
+        NotFoundError
+      )
+
+      notFoundErrors.foreach(errorsFromServiceTester(_, NOT_FOUND))
     }
 
     "return single error response with status 400" when {
@@ -137,7 +136,7 @@ class CharitableGivingControllerAmendSpec extends ControllerBaseSpec
         NonUKAmountNotSpecifiedRuleError,
         NonUKInvestmentsNamesNotSpecifiedRuleError,
         NonUKInvestmentAmountNotSpecifiedRuleError,
-        TaxYearNotSpecifiedRuleError,
+        TaxYearNotSupportedRuleError,
         RuleTaxYearRangeExceededError
       )
 

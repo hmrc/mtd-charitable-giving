@@ -17,7 +17,7 @@
 package v2.controllers.requestParsers.validators
 
 import v2.controllers.requestParsers.validators.validations.{MtdTaxYearValidation, NinoValidation, TaxYearValidation}
-import v2.models.errors.{Error, TaxYearNotSpecifiedRuleError}
+import v2.models.errors.{Error, TaxYearNotSupportedRuleError}
 import v2.models.requestData.RetrieveCharitableGivingRawData
 
 class RetrieveCharitableGivingValidator extends Validator[RetrieveCharitableGivingRawData] {
@@ -35,7 +35,7 @@ class RetrieveCharitableGivingValidator extends Validator[RetrieveCharitableGivi
   private def levelTwoValidations: RetrieveCharitableGivingRawData => List[List[Error]] =
     (data: RetrieveCharitableGivingRawData) => {
       List(
-        MtdTaxYearValidation.validate(data.taxYear, TaxYearNotSpecifiedRuleError)
+        MtdTaxYearValidation.validate(data.taxYear, TaxYearNotSupportedRuleError)
       )
     }
 

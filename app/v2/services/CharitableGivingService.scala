@@ -86,7 +86,7 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
     "INVALID_TYPE" -> DownstreamError,
     "INVALID_TAXYEAR" -> TaxYearFormatError,
     "INVALID_PAYLOAD" -> BadRequestError,
-    "INVALID_ACCOUNTING_PERIOD" -> TaxYearNotSpecifiedRuleError,
+    "INVALID_ACCOUNTING_PERIOD" -> TaxYearNotSupportedRuleError,
     "NOT_FOUND_INCOME_SOURCE" -> DownstreamError,
     "MISSING_CHARITIES_NAME_GIFT_AID" -> NonUKNamesNotSpecifiedRuleError,
     "MISSING_GIFT_AID_AMOUNT" -> NonUKAmountNotSpecifiedRuleError,
