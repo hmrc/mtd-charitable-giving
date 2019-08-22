@@ -62,7 +62,6 @@ class AmendCharitableGivingController @Inject()(val authService: EnrolmentsAuthS
 
           NoContent
             .withApiHeaders(correlationId)
-            .as(MimeTypes.JSON)
         }
 
       result.leftMap { errorWrapper =>

@@ -27,7 +27,7 @@ import v2.models.errors._
 import v2.models.requestData.DesTaxYear
 import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
 
-class CharitableGivingISpec extends IntegrationBaseSpec {
+class AmendCharitableGivingISpec extends IntegrationBaseSpec {
 
   private trait Test {
 
@@ -60,6 +60,7 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
 
         val response: WSResponse = await(request().put(CharitableGivingFixture.mtdFormatJson))
         response.status shouldBe Status.NO_CONTENT
+        response.header("Content-Type") shouldBe None
       }
     }
 
@@ -115,7 +116,6 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
         response.status shouldBe Status.BAD_REQUEST
         response.json shouldBe Json.toJson(ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
       }
-
     }
 
     def amendErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
@@ -135,103 +135,6 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
         response.json shouldBe Json.toJson(expectedBody)
       }
     }
-
-  }
-
-  "Calling the retrieve charitable giving endpoint" should {
-
-    "return status 200 with valid body" when {
-
-      "any valid request is made" in new Test {
-        override val nino: String = "AA123456A"
-        override val taxYear: String = "2018-19"
-
-        override def setupStubs(): StubMapping = {
-          AuditStub.audit()
-          AuthStub.authorised()
-          MtdIdLookupStub.ninoFound(nino)
-          DesStub.retrieveSuccess(nino, DesTaxYear.fromMtd(taxYear))
-        }
-
-        val response: WSResponse = await(request().get())
-        response.status shouldBe Status.OK
-        response.json shouldBe CharitableGivingFixture.mtdFormatJson
-      }
-    }
-
-
-    "return 500 (Internal Server Error)" when {
-
-      retrieveErrorTest(Status.BAD_REQUEST, "INVALID_TYPE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
-      retrieveErrorTest(Status.BAD_REQUEST, "INVALID_INCOME_SOURCE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
-      retrieveErrorTest(Status.INTERNAL_SERVER_ERROR, "SERVER_ERROR", Status.INTERNAL_SERVER_ERROR, DownstreamError)
-      retrieveErrorTest(Status.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", Status.INTERNAL_SERVER_ERROR, DownstreamError)
-    }
-
-    "return 400 (Bad Request)" when {
-      retrieveErrorTest(Status.BAD_REQUEST, "INVALID_NINO", Status.BAD_REQUEST, NinoFormatError)
-      retrieveErrorTest(Status.BAD_REQUEST, "INVALID_TAXYEAR", Status.BAD_REQUEST, TaxYearFormatError)
-    }
-
-    "return 404 (Not Found)" when {
-      retrieveErrorTest(Status.NOT_FOUND, "NOT_FOUND_INCOME_SOURCE", Status.NOT_FOUND, NotFoundError)
-      retrieveErrorTest(Status.NOT_FOUND, "NOT_FOUND_PERIOD", Status.NOT_FOUND, NotFoundError)
-    }
-
-    "return a 400 (Bad Request) with multiple errors" when {
-
-      val multipleErrors: String =
-        s"""
-           |{
-           |	"failures" : [
-           |      {
-           |        "code": "INVALID_NINO",
-           |        "reason": "Does not matter."
-           |      },
-           |      {
-           |        "code": "INVALID_TAXYEAR",
-           |        "reason": "Does not matter."
-           |      }
-           |  ]
-           |}
-      """.stripMargin
-
-      s"des returns multiple errors" in new Test {
-        override val nino: String = "AA123456A"
-        override val taxYear: String = "2018-19"
-
-        override def setupStubs(): StubMapping = {
-          AuditStub.audit()
-          AuthStub.authorised()
-          MtdIdLookupStub.ninoFound(nino)
-          DesStub.retrieveError(nino, DesTaxYear.fromMtd(taxYear), BAD_REQUEST, multipleErrors)
-        }
-
-        val response: WSResponse = await(request().get)
-        response.status shouldBe Status.BAD_REQUEST
-        response.json shouldBe Json.toJson(ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError))))
-      }
-
-    }
-
-    def retrieveErrorTest(desStatus: Int, desCode: String, expectedStatus: Int, expectedBody: Error): Unit = {
-      s"des returns an $desCode error" in new Test {
-        override val nino: String = "AA123456A"
-        override val taxYear: String = "2018-19"
-
-        override def setupStubs(): StubMapping = {
-          AuditStub.audit()
-          AuthStub.authorised()
-          MtdIdLookupStub.ninoFound(nino)
-          DesStub.retrieveError(nino, DesTaxYear.fromMtd(taxYear), desStatus, errorBody(desCode))
-        }
-
-        val response: WSResponse = await(request().get)
-        response.status shouldBe expectedStatus
-        response.json shouldBe Json.toJson(expectedBody)
-      }
-    }
-
   }
 
   def errorBody(code: String): String =
@@ -241,5 +144,4 @@ class CharitableGivingISpec extends IntegrationBaseSpec {
        |        "reason": "Does not matter."
        |      }
       """.stripMargin
-
 }
