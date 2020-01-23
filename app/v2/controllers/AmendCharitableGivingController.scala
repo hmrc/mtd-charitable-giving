@@ -19,7 +19,6 @@ package v2.controllers
 import cats.data.EitherT
 import cats.implicits._
 import javax.inject.{Inject, Singleton}
-import play.api.http.MimeTypes
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContentAsJson, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -73,7 +72,7 @@ class AmendCharitableGivingController @Inject()(val authService: EnrolmentsAuthS
     }
 
   private def errorResult(errorWrapper: ErrorWrapper) = {
-    errorWrapper.error match {
+    (errorWrapper.error: @unchecked) match {
       case BadRequestError
            | NinoFormatError
            | TaxYearFormatError

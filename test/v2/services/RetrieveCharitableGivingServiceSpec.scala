@@ -23,7 +23,6 @@ import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData.{DesTaxYear, RetrieveCharitableGivingRequest}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class RetrieveCharitableGivingServiceSpec extends ServiceSpec {

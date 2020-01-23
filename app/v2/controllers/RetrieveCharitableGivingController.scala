@@ -20,7 +20,7 @@ import cats.data.EitherT
 import cats.implicits._
 import javax.inject.{Inject, Singleton}
 import play.api.http.MimeTypes
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import v2.controllers.requestParsers.RetrieveCharitableGivingRequestDataParser
 import v2.models.domain.CharitableGiving
@@ -66,7 +66,7 @@ class RetrieveCharitableGivingController @Inject()(val authService: EnrolmentsAu
     }
 
   private def errorResult(errorWrapper: ErrorWrapper) = {
-    errorWrapper.error match {
+    (errorWrapper.error: @unchecked) match {
       case  BadRequestError
             | NinoFormatError
             | TaxYearFormatError
