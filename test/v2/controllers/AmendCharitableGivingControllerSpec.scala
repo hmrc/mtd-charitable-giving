@@ -168,7 +168,6 @@ class AmendCharitableGivingControllerSpec extends ControllerBaseSpec
 
     "return a valid error response" when {
       "multiple errors exist" in new Test() {
-        val amendCharitableGivingRequestData = AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson))
         val multipleErrorResponse = ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
 
         MockAmendCharitableGivingRequestDataParser.parseRequest(
@@ -193,9 +192,6 @@ class AmendCharitableGivingControllerSpec extends ControllerBaseSpec
 
   def errorsFromParserTester(error: Error, expectedStatus: Int): Unit = {
     s"a ${error.code} error is returned from the parser" in new Test {
-
-      val amendCharitableGivingRequestData = AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson))
-
       MockAmendCharitableGivingRequestDataParser.parseRequest(
         AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
         .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
@@ -216,9 +212,6 @@ class AmendCharitableGivingControllerSpec extends ControllerBaseSpec
 
   def errorsFromServiceTester(error: Error, expectedStatus: Int): Unit = {
     s"a ${error.code} error is returned from the service" in new Test {
-
-      val amendCharitableGivingRequestData = AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson))
-
       MockAmendCharitableGivingRequestDataParser.parseRequest(
         AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
         .returns(Right(amendCharitableGivingRequest))
