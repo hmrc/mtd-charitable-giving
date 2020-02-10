@@ -16,7 +16,6 @@
 
 package v2.models.utils
 
-import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import support.UnitSpec
 

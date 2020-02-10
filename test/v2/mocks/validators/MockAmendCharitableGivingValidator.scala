@@ -20,7 +20,7 @@ import org.scalamock.handlers.CallHandler1
 import org.scalamock.scalatest.MockFactory
 import v2.controllers.requestParsers.validators.AmendCharitableGivingValidator
 import v2.models.errors.Error
-import v2.models.requestData.{AmendCharitableGivingRequest, AmendCharitableGivingRawData}
+import v2.models.requestData.AmendCharitableGivingRawData
 
 class MockAmendCharitableGivingValidator extends MockFactory {
 

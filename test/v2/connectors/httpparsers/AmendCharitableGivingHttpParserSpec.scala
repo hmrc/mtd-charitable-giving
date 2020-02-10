@@ -21,7 +21,6 @@ import play.api.test.Helpers._
 import support.UnitSpec
 import uk.gov.hmrc.http.HttpResponse
 import v2.models.errors._
-import v2.models.outcomes
 import v2.models.outcomes.DesResponse
 
 
