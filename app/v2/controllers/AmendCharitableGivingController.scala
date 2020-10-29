@@ -29,7 +29,7 @@ import v2.models.auth.UserDetails
 import v2.models.errors._
 import v2.models.requestData.AmendCharitableGivingRawData
 import v2.services.{AuditService, CharitableGivingService, EnrolmentsAuthService, MtdIdLookupService}
-import v2.utils.Logging
+import v2.utils.{IdGenerator, Logging}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,7 +39,8 @@ class AmendCharitableGivingController @Inject()(val authService: EnrolmentsAuthS
                                                 requestDataParser: AmendCharitableGivingRequestDataParser,
                                                 charitableGivingService: CharitableGivingService,
                                                 auditService: AuditService,
-                                                cc: ControllerComponents)(implicit ec: ExecutionContext)
+                                                cc: ControllerComponents,
+                                                val idGenerator: IdGenerator)(implicit ec: ExecutionContext)
   extends AuthorisedController(cc) with BaseController with Logging {
 
   implicit val endpointLogContext: EndpointLogContext =
@@ -47,6 +48,10 @@ class AmendCharitableGivingController @Inject()(val authService: EnrolmentsAuthS
 
   def amend(nino: String, taxYear: String): Action[JsValue] =
     authorisedAction(nino).async(parse.json) { implicit request =>
+
+      implicit val correlationId: String = idGenerator.generateCorrelationId
+      logger.info(s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] with CorrelationId: $correlationId")
+
       val rawData = AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(request.body))
       val result =
         for {
@@ -64,10 +69,13 @@ class AmendCharitableGivingController @Inject()(val authService: EnrolmentsAuthS
         }
 
       result.leftMap { errorWrapper =>
-        val correlationId = getCorrelationId(errorWrapper)
-        val result        = errorResult(errorWrapper).withApiHeaders(correlationId)
-        auditSubmission(createAuditDetails(nino, taxYear, result.header.status, request.request.body, correlationId, request.userDetails, Some(errorWrapper)))
-        errorResult(errorWrapper).withApiHeaders(correlationId)
+        val resCorrelationId = errorWrapper.correlationId
+        val result = errorResult(errorWrapper).withApiHeaders(resCorrelationId)
+        logger.info(s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
+          s"Error response received with CorrelationId: $resCorrelationId")
+        auditSubmission(createAuditDetails(nino, taxYear, result.header.status,
+          request.request.body, resCorrelationId, request.userDetails, Some(errorWrapper)))
+        result
       }.merge
     }
 

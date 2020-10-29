@@ -24,11 +24,11 @@ import v2.models.requestData.{DesTaxYear, RetrieveCharitableGivingRequest, Retri
 
 class RetrieveCharitableGivingRequestDataParser @Inject()(validator: RetrieveCharitableGivingValidator) {
 
-  def parseRequest(data: RetrieveCharitableGivingRawData): Either[ErrorWrapper, RetrieveCharitableGivingRequest] = {
+  def parseRequest(data: RetrieveCharitableGivingRawData)(implicit correlationId: String): Either[ErrorWrapper, RetrieveCharitableGivingRequest] = {
     validator.validate(data) match {
       case List() => Right(RetrieveCharitableGivingRequest(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear)))
-      case error :: Nil => Left(ErrorWrapper(None, error, None))
-      case errors => Left(ErrorWrapper(None, BadRequestError, Some(errors)))
+      case error :: Nil => Left(ErrorWrapper(correlationId, error, None))
+      case errors => Left(ErrorWrapper(correlationId, BadRequestError, Some(errors)))
     }
   }
 

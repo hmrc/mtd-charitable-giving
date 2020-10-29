@@ -33,6 +33,7 @@ class RetrieveCharitableGivingRawDataParserSpec extends UnitSpec {
   val invalidTaxYear = "2016-18"
   val invalidNino = "foobar"
   val validNino = "AA123456A"
+  implicit val correlationId: String = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
 
   "calling parseRequest" should {
     "return a valid retrieve request" when {
@@ -50,7 +51,7 @@ class RetrieveCharitableGivingRawDataParserSpec extends UnitSpec {
 
       "a single validation error occurs" in new Test {
         val retrieveCharitableGivingRequestData = RetrieveCharitableGivingRawData(invalidNino, validTaxYear)
-        val expectedResponse = ErrorWrapper(None, NinoFormatError, None)
+        val expectedResponse = ErrorWrapper(correlationId, NinoFormatError, None)
         MockRetrieveCharitableGivingValidator.validate(retrieveCharitableGivingRequestData).returns(List(NinoFormatError))
 
         val result = parser.parseRequest(retrieveCharitableGivingRequestData)
@@ -60,7 +61,7 @@ class RetrieveCharitableGivingRawDataParserSpec extends UnitSpec {
 
       "multiple validation errors occur" in new Test {
         val retrieveCharitableGivingRequestData = RetrieveCharitableGivingRawData(invalidNino, invalidTaxYear)
-        val expectedResponse = ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
+        val expectedResponse = ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
         MockRetrieveCharitableGivingValidator.validate(retrieveCharitableGivingRequestData).returns(List(NinoFormatError, TaxYearFormatError))
 
 

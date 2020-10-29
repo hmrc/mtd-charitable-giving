@@ -24,6 +24,7 @@ import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.fixtures.Fixtures.CharitableGivingFixture.charitableGivingModel
 import v2.mocks.requestParsers.MockRetrieveCharitableGivingRequestDataParser
 import v2.mocks.services.{MockAuditService, MockEnrolmentsAuthService, MockMtdIdLookupService, MockRetrieveCharitableGivingService}
+import v2.mocks.utils.MockIdGenerator
 import v2.models.errors._
 import v2.models.outcomes.DesResponse
 import v2.models.requestData.{DesTaxYear, _}
@@ -37,7 +38,8 @@ class RetrieveCharitableGivingControllerSpec extends ControllerBaseSpec
   with MockRetrieveCharitableGivingService
   with MockRetrieveCharitableGivingRequestDataParser
   with MockAuditService
-  with OneInstancePerTest {
+  with OneInstancePerTest
+  with MockIdGenerator {
 
 
   val nino = "AA123456A"
@@ -52,11 +54,13 @@ class RetrieveCharitableGivingControllerSpec extends ControllerBaseSpec
       lookupService = mockMtdIdLookupService,
       requestDataParser = mockRetrieveCharitableGivingRequestDataParser,
       service = mockRetrieveCharitableGivingService,
-      cc = cc
+      cc = cc,
+      idGenerator = mockIdGenerator
     )
 
     MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
     MockedEnrolmentsAuthService.authoriseUser()
+    MockIdGenerator.generateCorrelationId.returns(correlationId)
   }
 
   "retrieve" should {
@@ -84,7 +88,7 @@ class RetrieveCharitableGivingControllerSpec extends ControllerBaseSpec
 
         MockRetrieveCharitableGivingRequestDataParser.parseRequest(
           RetrieveCharitableGivingRawData(nino, taxYear))
-          .returns(Left(ErrorWrapper(None, NinoFormatError, None)))
+          .returns(Left(ErrorWrapper(correlationId, NinoFormatError, None)))
 
         val result: Future[Result] = target.retrieve(nino, taxYear)(fakeGetRequest)
         status(result) shouldBe BAD_REQUEST
@@ -138,7 +142,7 @@ class RetrieveCharitableGivingControllerSpec extends ControllerBaseSpec
       val retrieveCharitableGivingRequestData = RetrieveCharitableGivingRawData(nino, taxYear)
 
       MockRetrieveCharitableGivingRequestDataParser.parseRequest(retrieveCharitableGivingRequestData)
-        .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
+        .returns(Left(ErrorWrapper(correlationId, error, None)))
 
       val response: Future[Result] = target.retrieve(nino, taxYear)(fakeGetRequest)
 
@@ -159,7 +163,7 @@ class RetrieveCharitableGivingControllerSpec extends ControllerBaseSpec
         .returns(Right(retrieveCharitableGivingRequest))
 
       MockCharitableGivingService.retrieve(retrieveCharitableGivingRequest)
-        .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
+        .returns(Future.successful(Left(ErrorWrapper(correlationId, error, None))))
 
       val response: Future[Result] = target.retrieve(nino, taxYear)(fakeGetRequest)
 
