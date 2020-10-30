@@ -32,7 +32,7 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
   }
 
 
-  val correlationId = "X-123"
+  implicit val correlationId: String = "X-123"
   val nino = "AA123456A"
   val desTaxYear = "2018"
   val expectedDesResponse = DesResponse(correlationId, charitableGivingModel)
@@ -56,7 +56,7 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
       val response = DesResponse(correlationId, MultipleErrors(Seq(
         Error("NOT_FOUND_INCOME_SOURCE", "Doesn't matter"),
         Error("INVALID_TAXYEAR", "Doesn't matter"))))
-      val expected = ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NotFoundError, TaxYearFormatError)))
+      val expected = ErrorWrapper(correlationId, BadRequestError, Some(Seq(NotFoundError, TaxYearFormatError)))
 
       MockedDesConnector.retrieve(input).returns(Future.successful(Left(response)))
       private val result = await(target.retrieve(input))
@@ -70,7 +70,7 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
       val response = DesResponse(correlationId, MultipleErrors(Seq(
         Error("NOT_FOUND_PERIOD", "Doesn't matter"),
         Error("INVALID_INCOME_SOURCE", "Doesn't matter"))))
-      val expected = ErrorWrapper(Some(correlationId), DownstreamError, None)
+      val expected = ErrorWrapper(correlationId, DownstreamError, None)
 
       MockedDesConnector.retrieve(input).returns(Future.successful(Left(response)))
       private val result = await(target.retrieve(input))
@@ -80,7 +80,7 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
 
   "return a generic error" in new Test {
     val response = DesResponse(correlationId, OutboundError(DownstreamError))
-    val expected = ErrorWrapper(Some(correlationId), DownstreamError, None)
+    val expected = ErrorWrapper(correlationId, DownstreamError, None)
 
     MockedDesConnector.retrieve(input).returns(Future.successful(Left(response)))
     private val result = await(target.retrieve(input))
@@ -103,7 +103,7 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
   for (error <- errorMap.keys) {
     s"the DesConnector returns a single $error error" in new Test {
       val response = DesResponse(correlationId, SingleError(Error(error, "doesn't matter")))
-      val expected = ErrorWrapper(Some(correlationId), errorMap(error), None)
+      val expected = ErrorWrapper(correlationId, errorMap(error), None)
 
       MockedDesConnector.retrieve(input).returns(Future.successful(Left(response)))
 

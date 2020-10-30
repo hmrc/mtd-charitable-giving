@@ -28,7 +28,7 @@ trait MockAmendCharitableGivingRequestDataParser extends MockFactory{
 
   object MockAmendCharitableGivingRequestDataParser {
     def parseRequest(data: AmendCharitableGivingRawData): CallHandler[Either[ErrorWrapper, AmendCharitableGivingRequest]] = {
-      (mockAmendCharitableGivingRequestDataParser.parseRequest(_:AmendCharitableGivingRawData)).expects(data)
+      (mockAmendCharitableGivingRequestDataParser.parseRequest(_:AmendCharitableGivingRawData)(_: String)).expects(data, *)
     }
   }
 }

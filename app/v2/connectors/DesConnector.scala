@@ -33,12 +33,14 @@ class DesConnector @Inject()(http: HttpClient,
 
   val logger = Logger(this.getClass)
 
-  private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier): HeaderCarrier = hc
+  private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier,
+                                           correlationId: String): HeaderCarrier = hc
     .copy(authorization = Some(Authorization(s"Bearer ${appConfig.desToken}")))
-    .withExtraHeaders("Environment" -> appConfig.desEnv)
+    .withExtraHeaders("Environment" -> appConfig.desEnv, "CorrelationId" -> correlationId)
 
   def amend(amendCharitableGivingRequest: AmendCharitableGivingRequest)
-           (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AmendCharitableGivingConnectorOutcome] = {
+           (implicit hc: HeaderCarrier, ec: ExecutionContext,
+            correlationId: String): Future[AmendCharitableGivingConnectorOutcome] = {
 
     import v2.connectors.httpparsers.AmendCharitableGivingHttpParser.amendHttpReads
     import CharitableGiving.writes
@@ -53,7 +55,8 @@ class DesConnector @Inject()(http: HttpClient,
   }
 
   def retrieve(retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest)
-              (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[RetrieveCharitableGivingConnectorOutcome] = {
+              (implicit hc: HeaderCarrier, ec: ExecutionContext,
+               correlationId: String): Future[RetrieveCharitableGivingConnectorOutcome] = {
 
     val nino = retrieveCharitableGivingRequest.nino.nino
     val desTaxYear = retrieveCharitableGivingRequest.desTaxYear

@@ -25,13 +25,13 @@ import v2.models.requestData.{AmendCharitableGivingRawData, AmendCharitableGivin
 
 class AmendCharitableGivingRequestDataParser @Inject()(validator: AmendCharitableGivingValidator) {
 
-  def parseRequest(data: AmendCharitableGivingRawData): Either[ErrorWrapper, AmendCharitableGivingRequest] = {
+  def parseRequest(data: AmendCharitableGivingRawData)(implicit correlationId: String): Either[ErrorWrapper, AmendCharitableGivingRequest] = {
     validator.validate(data) match {
       case List() =>
         //Validation passed.  Request data is ok to transform.
         Right(AmendCharitableGivingRequest(Nino(data.nino), DesTaxYear.fromMtd(data.taxYear), data.body.json.as[CharitableGiving]))
-      case err :: Nil => Left(ErrorWrapper(None, err, None))
-      case errs => Left(ErrorWrapper(None, BadRequestError, Some(errs)))
+      case err :: Nil => Left(ErrorWrapper(correlationId, err, None))
+      case errs => Left(ErrorWrapper(correlationId, BadRequestError, Some(errs)))
     }
   }
 }

@@ -30,13 +30,13 @@ trait MockDesConnector extends MockFactory {
 
   object MockedDesConnector {
     def amend(amendCharitableGivingRequest: AmendCharitableGivingRequest): CallHandler[Future[AmendCharitableGivingConnectorOutcome]] = {
-      (connector.amend(_: AmendCharitableGivingRequest)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(amendCharitableGivingRequest, *, *)
+      (connector.amend(_: AmendCharitableGivingRequest)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(amendCharitableGivingRequest, *, *, *)
     }
 
     def retrieve(retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest): CallHandler[Future[RetrieveCharitableGivingConnectorOutcome]] = {
-      (connector.retrieve(_: RetrieveCharitableGivingRequest)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(retrieveCharitableGivingRequest, *, *)
+      (connector.retrieve(_: RetrieveCharitableGivingRequest)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(retrieveCharitableGivingRequest, *, *, *)
     }
   }
 

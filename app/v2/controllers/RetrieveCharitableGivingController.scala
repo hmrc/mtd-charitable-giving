@@ -27,7 +27,7 @@ import v2.models.domain.CharitableGiving
 import v2.models.errors._
 import v2.models.requestData.RetrieveCharitableGivingRawData
 import v2.services.{CharitableGivingService, EnrolmentsAuthService, MtdIdLookupService}
-import v2.utils.Logging
+import v2.utils.{IdGenerator, Logging}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,7 +36,8 @@ class RetrieveCharitableGivingController @Inject()(val authService: EnrolmentsAu
                                                    val lookupService: MtdIdLookupService,
                                                    requestDataParser: RetrieveCharitableGivingRequestDataParser,
                                                    service: CharitableGivingService,
-                                                   cc: ControllerComponents)(implicit ec: ExecutionContext)
+                                                   cc: ControllerComponents,
+                                                   val idGenerator: IdGenerator)(implicit ec: ExecutionContext)
   extends AuthorisedController(cc) with BaseController with Logging {
 
   implicit val endpointLogContext: EndpointLogContext =
@@ -44,6 +45,10 @@ class RetrieveCharitableGivingController @Inject()(val authService: EnrolmentsAu
 
   def retrieve(nino: String, taxYear: String): Action[AnyContent] = authorisedAction(nino).async {
     implicit request =>
+
+      implicit val correlationId: String = idGenerator.generateCorrelationId
+      logger.info(s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] with CorrelationId: $correlationId")
+
       val rawData = RetrieveCharitableGivingRawData(nino, taxYear)
       val result =
         for {
@@ -60,8 +65,10 @@ class RetrieveCharitableGivingController @Inject()(val authService: EnrolmentsAu
         }
 
       result.leftMap { errorWrapper =>
-        val correlationId = getCorrelationId(errorWrapper)
-        errorResult(errorWrapper).withApiHeaders(correlationId)
+        val resCorrelationId = errorWrapper.correlationId
+        logger.info(s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
+          s"Error response received with CorrelationId: $resCorrelationId")
+        errorResult(errorWrapper).withApiHeaders(resCorrelationId)
       }.merge
     }
 
