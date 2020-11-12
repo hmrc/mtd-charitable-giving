@@ -37,7 +37,7 @@ class DesConnectorSpec extends ConnectorSpec {
     MockedAppConfig.desToken returns "des-token"
     MockedAppConfig.desEnvironment returns "des-environment"
   }
-
+  implicit val correlationId: String = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
   lazy val baseUrl = "test-BaseUrl"
 
   "Amend charitable giving tax relief" should {

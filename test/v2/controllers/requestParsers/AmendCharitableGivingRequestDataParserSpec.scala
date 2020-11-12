@@ -30,7 +30,7 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
   val validTaxYear = "2017-18"
   val desTaxYear = "2018"
   val validJsonBody = AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)
-  val correlationId = "X-123"
+  implicit val correlationId: String = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
 
   trait Test extends MockAmendCharitableGivingValidator {
     lazy val parser = new AmendCharitableGivingRequestDataParser(mockValidator)
@@ -65,7 +65,7 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
           AmendCharitableGivingRawData(invalidNino, validTaxYear, validJsonBody)
 
         val expectedResponse =
-          ErrorWrapper(None, NinoFormatError, None)
+          ErrorWrapper(correlationId, NinoFormatError, None)
 
         MockedAmendCharitableGivingValidator.validate(amendCharitableGivingRequestData)
           .returns(List(NinoFormatError))
@@ -80,7 +80,7 @@ class AmendCharitableGivingRequestDataParserSpec extends UnitSpec {
           AmendCharitableGivingRawData(validNino, invalidDate, validJsonBody)
 
         val multipleErrorWrapper =
-          ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
+          ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
 
         MockedAmendCharitableGivingValidator.validate(amendCharitableGivingRequestData)
           .returns(List(NinoFormatError, TaxYearFormatError))

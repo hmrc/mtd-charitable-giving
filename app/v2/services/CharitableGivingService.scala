@@ -32,7 +32,8 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
 
   def amend(amendCharitableGivingRequest: AmendCharitableGivingRequest)
             (implicit hc: HeaderCarrier,
-             ec: ExecutionContext): Future[AmendCharitableGivingOutcome] = {
+             ec: ExecutionContext,
+             correlationId: String): Future[AmendCharitableGivingOutcome] = {
 
     connector.amend(amendCharitableGivingRequest).map {
       case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
@@ -40,19 +41,20 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
         if (mtdErrors.contains(DownstreamError)) {
           logger.info(s"[CharitableGivingService] [amend] [CorrelationId - $correlationId]" +
             s" - downstream returned INVALID_IDTYPE or NOT_FOUND_PERIOD. Revert to ISE")
-          Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
+          Left(ErrorWrapper(correlationId, DownstreamError, None))
         } else {
-          Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
+          Left(ErrorWrapper(correlationId, BadRequestError, Some(mtdErrors)))
         }
-      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdErrorAmend(error.code), None))
-      case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
+      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(correlationId, desErrorToMtdErrorAmend(error.code), None))
+      case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(correlationId, error, None))
       case Right(desResponse) => Right(desResponse)
     }
   }
 
   def retrieve(retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest)
               (implicit hc: HeaderCarrier,
-               ec: ExecutionContext): Future[RetrieveCharitableGivingOutcome] = {
+               ec: ExecutionContext,
+               correlationId: String): Future[RetrieveCharitableGivingOutcome] = {
 
     connector.retrieve(retrieveCharitableGivingRequest).map {
       case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
@@ -60,12 +62,12 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
         if (mtdErrors.contains(DownstreamError)) {
           logger.info(s"[CharitableGivingService] [retrieve] [CorrelationId - $correlationId]" +
             s" - downstream returned INVALID_IDTYPE, NOT_FOUND_PERIOD or INVALID_INCOME_SOURCE. Revert to ISE")
-          Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
+          Left(ErrorWrapper(correlationId, DownstreamError, None))
         } else {
-          Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
+          Left(ErrorWrapper(correlationId, BadRequestError, Some(mtdErrors)))
         }
-      case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
-      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdErrorRetrieve(error.code), None))
+      case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(correlationId, error, None))
+      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(correlationId, desErrorToMtdErrorRetrieve(error.code), None))
       case Right(desResponse) => Right(DesResponse(desResponse.correlationId, desResponse.responseData))
     }
   }

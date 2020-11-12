@@ -24,6 +24,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.mocks.requestParsers.MockAmendCharitableGivingRequestDataParser
 import v2.mocks.services.{MockAmendCharitableGivingService, MockAuditService, MockEnrolmentsAuthService, MockMtdIdLookupService}
+import v2.mocks.utils.MockIdGenerator
 import v2.models.audit.{AuditError, AuditEvent, AuditResponse, CharitableGivingAuditDetail}
 import v2.models.domain.{CharitableGiving, GiftAidPayments, Gifts}
 import v2.models.errors._
@@ -39,7 +40,8 @@ class AmendCharitableGivingControllerSpec extends ControllerBaseSpec
   with MockAmendCharitableGivingService
   with MockAmendCharitableGivingRequestDataParser
   with MockAuditService
-  with OneInstancePerTest {
+  with OneInstancePerTest
+  with MockIdGenerator {
 
   trait Test {
 
@@ -51,10 +53,12 @@ class AmendCharitableGivingControllerSpec extends ControllerBaseSpec
       charitableGivingService = mockAmendCharitableGivingService,
       requestDataParser = mockAmendCharitableGivingRequestDataParser,
       auditService = mockAuditService,
-      cc = cc
+      cc = cc,
+      idGenerator = mockIdGenerator
     )
     MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
     MockedEnrolmentsAuthService.authoriseUser()
+    MockIdGenerator.generateCorrelationId.returns(correlationId)
   }
 
   val nino = "AA123456A"
@@ -100,7 +104,7 @@ class AmendCharitableGivingControllerSpec extends ControllerBaseSpec
 
         MockAmendCharitableGivingRequestDataParser.parseRequest(
           AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
-          .returns(Left(ErrorWrapper(None, NinoFormatError, None)))
+          .returns(Left(ErrorWrapper(correlationId, NinoFormatError, None)))
 
         val result: Future[Result] = target.amend(nino, taxYear)(fakePostRequest(CharitableGivingFixture.mtdFormatJson))
         status(result) shouldBe BAD_REQUEST
@@ -169,7 +173,7 @@ class AmendCharitableGivingControllerSpec extends ControllerBaseSpec
 
     "return a valid error response" when {
       "multiple errors exist" in new Test() {
-        val multipleErrorResponse = ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
+        val multipleErrorResponse = ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
 
         MockAmendCharitableGivingRequestDataParser.parseRequest(
           AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
@@ -195,7 +199,7 @@ class AmendCharitableGivingControllerSpec extends ControllerBaseSpec
     s"a ${error.code} error is returned from the parser" in new Test {
       MockAmendCharitableGivingRequestDataParser.parseRequest(
         AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(CharitableGivingFixture.mtdFormatJson)))
-        .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
+        .returns(Left(ErrorWrapper(correlationId, error, None)))
 
       val response: Future[Result] = target.amend(nino, taxYear)(fakePostRequest[JsValue](CharitableGivingFixture.mtdFormatJson))
 
@@ -218,7 +222,7 @@ class AmendCharitableGivingControllerSpec extends ControllerBaseSpec
         .returns(Right(amendCharitableGivingRequest))
 
       MockCharitableGivingService.amend(amendCharitableGivingRequest)
-        .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
+        .returns(Future.successful(Left(ErrorWrapper(correlationId, error, None))))
 
       val response: Future[Result] = target.amend(nino, taxYear)(fakePostRequest[JsValue](CharitableGivingFixture.mtdFormatJson))
 

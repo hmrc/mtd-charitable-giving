@@ -32,7 +32,7 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
   }
 
 
-  val correlationId = "X-123"
+  implicit val correlationId: String = "X-123"
   val expectedRef = "000000000001013"
   val nino = "AA123456A"
   val desTaxYear = "2018"
@@ -58,7 +58,7 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
         val response = DesResponse(correlationId,
           MultipleErrors(Seq(Error("INVALID_NINO", "doesn't matter"), Error("INVALID_TAXYEAR", "doesn't matter"))))
 
-        val expected = ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
+        val expected = ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, TaxYearFormatError)))
 
         MockedDesConnector.amend(input).returns(Future.successful(Left(response)))
 
@@ -72,7 +72,7 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
         val response = DesResponse(correlationId,
           MultipleErrors(Seq(Error("INVALID_NINO", "doesn't matter"), Error("INVALID_TYPE", "doesn't matter"))))
 
-        val expected = ErrorWrapper(Some(correlationId), DownstreamError, None)
+        val expected = ErrorWrapper(correlationId, DownstreamError, None)
 
         MockedDesConnector.amend(input).returns(Future.successful(Left(response)))
 
@@ -84,7 +84,7 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
     "the DesConnector returns a GenericError" in new Test {
       val response = DesResponse(correlationId, OutboundError(DownstreamError))
 
-      val expected = ErrorWrapper(Some(correlationId), DownstreamError, None)
+      val expected = ErrorWrapper(correlationId, DownstreamError, None)
 
       MockedDesConnector.amend(input).returns(Future.successful(Left(response)))
 
@@ -113,7 +113,7 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
 
         val response = DesResponse(correlationId, SingleError(Error(error, "doesn't matter")))
 
-        val expected = ErrorWrapper(Some(correlationId), errorMap(error), None)
+        val expected = ErrorWrapper(correlationId, errorMap(error), None)
 
         MockedDesConnector.amend(input).returns(Future.successful(Left(response)))
 

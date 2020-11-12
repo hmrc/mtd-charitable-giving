@@ -30,8 +30,8 @@ trait MockRetrieveCharitableGivingService extends MockFactory {
 
   object MockCharitableGivingService {
     def retrieve(retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest): CallHandler[Future[RetrieveCharitableGivingOutcome]] = {
-      (mockRetrieveCharitableGivingService.retrieve(_: RetrieveCharitableGivingRequest)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(retrieveCharitableGivingRequest, *, *)
+      (mockRetrieveCharitableGivingService.retrieve(_: RetrieveCharitableGivingRequest)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(retrieveCharitableGivingRequest, *, *, *)
     }
   }
 
