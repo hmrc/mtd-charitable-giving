@@ -27,6 +27,7 @@ import v2.mocks.services.{MockAmendCharitableGivingService, MockAuditService, Mo
 import v2.models.audit.{AuditError, AuditEvent, AuditResponse, CharitableGivingAuditDetail}
 import v2.models.domain.{CharitableGiving, GiftAidPayments, Gifts}
 import v2.models.errors._
+import v2.models.outcomes.DesResponse
 import v2.models.requestData.{AmendCharitableGivingRawData, AmendCharitableGivingRequest, DesTaxYear}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -71,7 +72,7 @@ class AmendCharitableGivingControllerSpec extends ControllerBaseSpec
           .returns(Right(amendCharitableGivingRequest))
 
         MockCharitableGivingService.amend(amendCharitableGivingRequest)
-          .returns(Future.successful(Right(correlationId)))
+          .returns(Future.successful(Right(DesResponse(correlationId,""))))
 
         val result: Future[Result] = target.amend(nino, taxYear)(fakePostRequest(CharitableGivingFixture.mtdFormatJson))
         status(result) shouldBe NO_CONTENT

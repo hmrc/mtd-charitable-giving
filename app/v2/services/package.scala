@@ -25,7 +25,7 @@ package object services {
 
   type AuthOutcome = Either[Error, UserDetails]
 
-  type AmendCharitableGivingOutcome = Either[ErrorWrapper, String]
+  type AmendCharitableGivingOutcome = Either[ErrorWrapper, DesResponse[String]]
   type RetrieveCharitableGivingOutcome = Either[ErrorWrapper, DesResponse[CharitableGiving]]
 
 }
