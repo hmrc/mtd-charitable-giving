@@ -47,7 +47,7 @@ class CharitableGivingService @Inject()(connector: DesConnector) {
         }
       case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(correlationId, desErrorToMtdErrorAmend(error.code), None))
       case Left(DesResponse(correlationId, OutboundError(error))) => Left(ErrorWrapper(correlationId, error, None))
-      case Right(desResponse) => Right(desResponse.correlationId)
+      case Right(desResponse) => Right(desResponse)
     }
   }
 

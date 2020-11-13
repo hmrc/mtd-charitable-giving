@@ -44,13 +44,11 @@ class AmendCharitableGivingServiceSpec extends ServiceSpec {
     "return a valid correlationId" when {
       "a valid data is passed" in new Test {
 
-        private val expected = correlationId
-
         MockedDesConnector.amend(input).returns(Future.successful(Right(expectedDesResponse)))
 
         private val result = await(target.amend(input))
 
-        result shouldBe Right(expected)
+        result shouldBe Right(expectedDesResponse)
       }
     }
 

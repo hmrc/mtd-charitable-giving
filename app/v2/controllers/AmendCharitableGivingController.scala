@@ -56,16 +56,16 @@ class AmendCharitableGivingController @Inject()(val authService: EnrolmentsAuthS
       val result =
         for {
           parsedRequest <- EitherT.fromEither[Future](requestDataParser.parseRequest(rawData))
-          correlationId <- EitherT(charitableGivingService.amend(parsedRequest))
+          desResponse <- EitherT(charitableGivingService.amend(parsedRequest))
         } yield {
           logger.info(
             s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
-              s"Success response received with CorrelationId: ${correlationId}")
+              s"Success response received with CorrelationId: ${desResponse}")
           auditSubmission(createAuditDetails(nino, taxYear, NO_CONTENT, request.request.body,
-            correlationId, request.userDetails))
+            desResponse.correlationId, request.userDetails))
 
           NoContent
-            .withApiHeaders(correlationId)
+            .withApiHeaders(desResponse.correlationId)
         }
 
       result.leftMap { errorWrapper =>
