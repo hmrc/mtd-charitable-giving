@@ -39,7 +39,7 @@ class RetrieveCharitableGivingHttpParserSpec extends UnitSpec {
     "return a DesResponse with valid mtd charitable giving json" when {
       "the http response has status 200 and des charitable giving json" in {
         val correlationId = "X-123"
-        val httpResponse = HttpResponse(OK, Some(desExpectedJson), Map("CorrelationId" -> Seq(correlationId)))
+        val httpResponse = HttpResponse(OK, desExpectedJson, Map("CorrelationId" -> Seq(correlationId)))
 
         val result = RetrieveCharitableGivingHttpParser.retrieveHttpReads.read(GET, "/test", httpResponse)
         result shouldBe Right(httpParsedDesResponse)
@@ -57,7 +57,7 @@ class RetrieveCharitableGivingHttpParserSpec extends UnitSpec {
           """.stripMargin)
         val expected = DesResponse(correlationId, SingleError(Error("TEST_CODE", "some reason")))
 
-        val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
+        val httpResponse = HttpResponse(BAD_REQUEST, errorResponseJson, Map("CorrelationId" -> Seq(correlationId)))
         val result = RetrieveCharitableGivingHttpParser.retrieveHttpReads.read(GET, "/", httpResponse)
         result shouldBe Left(expected)
       }
@@ -72,7 +72,7 @@ class RetrieveCharitableGivingHttpParserSpec extends UnitSpec {
           """.stripMargin)
         val expected = DesResponse(correlationId, SingleError(Error("TEST_CODE", "some reason")))
 
-        val httpResponse = HttpResponse(NOT_FOUND, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
+        val httpResponse = HttpResponse(NOT_FOUND, errorResponseJson, Map("CorrelationId" -> Seq(correlationId)))
         val result = RetrieveCharitableGivingHttpParser.retrieveHttpReads.read(GET, "/", httpResponse)
         result shouldBe Left(expected)
       }
@@ -92,7 +92,7 @@ class RetrieveCharitableGivingHttpParserSpec extends UnitSpec {
         val expected =  DesResponse(correlationId, OutboundError(DownstreamError))
         val unHandledStatusCode = SEE_OTHER
 
-        val httpResponse = HttpResponse(unHandledStatusCode, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
+        val httpResponse = HttpResponse(unHandledStatusCode, errorResponseJson, Map("CorrelationId" -> Seq(correlationId)))
         val result = RetrieveCharitableGivingHttpParser.retrieveHttpReads.read(PUT, "/test", httpResponse)
         result shouldBe Left(expected)
       }
@@ -101,7 +101,7 @@ class RetrieveCharitableGivingHttpParserSpec extends UnitSpec {
       "the error response from DES can't be read" in {
         val expected =  DesResponse(correlationId, OutboundError(DownstreamError))
 
-        val httpResponse = HttpResponse(OK, None, Map("CorrelationId" -> Seq(correlationId)))
+        val httpResponse = HttpResponse(OK, "", Map("CorrelationId" -> Seq(correlationId)))
         val result = RetrieveCharitableGivingHttpParser.retrieveHttpReads.read(PUT, "/test", httpResponse)
         result shouldBe Left(expected)
       }
@@ -117,7 +117,7 @@ class RetrieveCharitableGivingHttpParserSpec extends UnitSpec {
             stripMargin)
         val expected =  DesResponse(correlationId, OutboundError(DownstreamError))
 
-        val httpResponse = HttpResponse(INTERNAL_SERVER_ERROR, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
+        val httpResponse = HttpResponse(INTERNAL_SERVER_ERROR, errorResponseJson, Map("CorrelationId" -> Seq(correlationId)))
         val result = RetrieveCharitableGivingHttpParser.retrieveHttpReads.read(PUT, "/test", httpResponse)
         result shouldBe Left(expected)
       }
@@ -133,7 +133,7 @@ class RetrieveCharitableGivingHttpParserSpec extends UnitSpec {
             stripMargin)
         val expected =  DesResponse(correlationId, OutboundError(DownstreamError))
 
-        val httpResponse = HttpResponse(SERVICE_UNAVAILABLE, Some(errorResponseJson), Map("CorrelationId" -> Seq(correlationId)))
+        val httpResponse = HttpResponse(SERVICE_UNAVAILABLE, errorResponseJson, Map("CorrelationId" -> Seq(correlationId)))
         val result = RetrieveCharitableGivingHttpParser.retrieveHttpReads.read(PUT, "/test", httpResponse)
         result shouldBe Left(expected)
       }
