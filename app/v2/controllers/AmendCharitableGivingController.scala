@@ -71,7 +71,7 @@ class AmendCharitableGivingController @Inject()(val authService: EnrolmentsAuthS
       result.leftMap { errorWrapper =>
         val resCorrelationId = errorWrapper.correlationId
         val result = errorResult(errorWrapper).withApiHeaders(resCorrelationId)
-        logger.info(s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
+        logger.warn(s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
           s"Error response received with CorrelationId: $resCorrelationId")
         auditSubmission(createAuditDetails(nino, taxYear, result.header.status,
           request.request.body, resCorrelationId, request.userDetails, Some(errorWrapper)))
