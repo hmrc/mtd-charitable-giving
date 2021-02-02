@@ -66,7 +66,7 @@ class RetrieveCharitableGivingController @Inject()(val authService: EnrolmentsAu
 
       result.leftMap { errorWrapper =>
         val resCorrelationId = errorWrapper.correlationId
-        logger.info(s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
+        logger.warn(s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
           s"Error response received with CorrelationId: $resCorrelationId")
         errorResult(errorWrapper).withApiHeaders(resCorrelationId)
       }.merge
