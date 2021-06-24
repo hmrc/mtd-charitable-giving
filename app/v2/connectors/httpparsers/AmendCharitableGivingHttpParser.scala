@@ -16,7 +16,6 @@
 
 package v2.connectors.httpparsers
 
-import play.api.Logger
 import play.api.http.Status._
 import play.api.libs.json._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
@@ -25,8 +24,6 @@ import v2.models.errors._
 import v2.models.outcomes.DesResponse
 
 object AmendCharitableGivingHttpParser extends HttpParser {
-
-  val logger = Logger(AmendCharitableGivingHttpParser.getClass)
 
   private val jsonReads: Reads[String] = (__ \ "transactionReference").read[String]
 
