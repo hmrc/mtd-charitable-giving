@@ -26,8 +26,7 @@ import v2.models.outcomes.DesResponse
 
 object AmendCharitableGivingHttpParser extends HttpParser {
 
-  private val logger = Logger(AmendCharitableGivingHttpParser.getClass)
-
+  val logger = Logger(AmendCharitableGivingHttpParser.getClass)
 
   private val jsonReads: Reads[String] = (__ \ "transactionReference").read[String]
 

@@ -79,7 +79,6 @@ class RetrieveCharitableGivingControllerSpec extends ControllerBaseSpec
         status(result) shouldBe OK
         contentAsJson(result) shouldBe CharitableGivingFixture.mtdFormatJson
         header("X-CorrelationId", result) shouldBe Some(correlationId)
-
       }
     }
 
@@ -112,7 +111,6 @@ class RetrieveCharitableGivingControllerSpec extends ControllerBaseSpec
 
       badRequestErrorsFromParser.foreach(errorsFromParserTester(_, BAD_REQUEST))
       badRequestErrorsFromService.foreach(errorsFromServiceTester(_, BAD_REQUEST))
-
     }
 
     "return a 500 Internal Server Error with a single error" when {
@@ -123,7 +121,6 @@ class RetrieveCharitableGivingControllerSpec extends ControllerBaseSpec
 
       internalServerErrorErrors.foreach(errorsFromParserTester(_, INTERNAL_SERVER_ERROR))
       internalServerErrorErrors.foreach(errorsFromServiceTester(_, INTERNAL_SERVER_ERROR))
-
     }
 
     "return a 404 Not Found Error with a single error" when {
@@ -145,7 +142,6 @@ class RetrieveCharitableGivingControllerSpec extends ControllerBaseSpec
         .returns(Left(ErrorWrapper(correlationId, error, None)))
 
       val response: Future[Result] = target.retrieve(nino, taxYear)(fakeGetRequest)
-
 
       status(response) shouldBe expectedStatus
       contentAsJson(response) shouldBe Json.toJson(error)
@@ -172,5 +168,4 @@ class RetrieveCharitableGivingControllerSpec extends ControllerBaseSpec
       header("X-CorrelationId", response) shouldBe Some(correlationId)
     }
   }
-
 }

@@ -42,8 +42,7 @@ trait MockHttpClient extends MockFactory {
             url == actualUrl &&
               requiredHeaders.forall(h => headersForUrl.contains(h)) &&
               excludedHeaders.forall(h => !headersForUrl.contains(h))
-          }
-        })
+          }})
     }
 
     def post[T](url: String,
@@ -59,8 +58,7 @@ trait MockHttpClient extends MockFactory {
             url == actualUrl &&
               requiredHeaders.forall(h => headersForUrl.contains(h)) &&
               excludedHeaders.forall(h => !headersForUrl.contains(h))
-          }
-        })
+          }})
     }
 
     def put[T](url: String,
@@ -76,8 +74,7 @@ trait MockHttpClient extends MockFactory {
             url == actualUrl &&
               requiredHeaders.forall(h => headersForUrl.contains(h)) &&
               excludedHeaders.forall(h => !headersForUrl.contains(h))
-          }
-        })
+          }})
     }
   }
 }

@@ -47,7 +47,6 @@ trait HttpParser extends Logging {
 
   def retrieveCorrelationId(response: HttpResponse): String = response.header("CorrelationId").getOrElse("")
 
-
   private val multipleErrorReads: Reads[Seq[Error]] = (__ \ "failures").read[Seq[Error]]
 
   def parseErrors(response: HttpResponse): DesError = {
@@ -60,5 +59,4 @@ trait HttpParser extends Logging {
 
     singleError orElse multipleErrors getOrElse unableToParseJsonError
   }
-
 }
