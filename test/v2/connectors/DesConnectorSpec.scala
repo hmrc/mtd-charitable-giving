@@ -16,7 +16,7 @@
 
 package v2.connectors
 
-import uk.gov.hmrc.domain.Nino
+import v2.models.domain.Nino
 import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.mocks.{MockAppConfig, MockHttpClient}
 import v2.models.domain.{CharitableGiving, GiftAidPayments, Gifts}
@@ -33,12 +33,12 @@ class DesConnectorSpec extends ConnectorSpec {
       http = mockHttpClient,
       appConfig = mockAppConfig
     )
-    MockedAppConfig.desBaseUrl returns baseUrl
-    MockedAppConfig.desToken returns "des-token"
-    MockedAppConfig.desEnvironment returns "des-environment"
+
+    val desRequestHeaders: Seq[(String, String)] = Seq("Environment" -> "des-environment", "Authorization" -> s"Bearer des-token")
+    MockAppConfig.desBaseUrl returns baseUrl
+    MockAppConfig.desToken returns "des-token"
+    MockAppConfig.desEnvironment returns "des-environment"
   }
-  implicit val correlationId: String = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
-  lazy val baseUrl = "test-BaseUrl"
 
   "Amend charitable giving tax relief" should {
     "return a successful response with transactionId and correlationId" when {
@@ -90,7 +90,7 @@ class DesConnectorSpec extends ConnectorSpec {
         val desTaxYear = DesTaxYear("1234")
         val charitableGiving = CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None)))
 
-        MockedHttpClient.post[CharitableGiving, AmendCharitableGivingConnectorOutcome](
+        MockedHttpClient.post[CharitableGiving,AmendCharitableGivingConnectorOutcome](
           s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear",
           charitableGiving)
           .returns(Future.successful(Left(expectedDesResponse)))
@@ -101,8 +101,6 @@ class DesConnectorSpec extends ConnectorSpec {
         result shouldBe Left(expectedDesResponse)
       }
     }
-
-
   }
 
   "Retrieve charitable giving tax relief" should {
@@ -154,7 +152,5 @@ class DesConnectorSpec extends ConnectorSpec {
         result shouldBe Left(expectedDesResponse)
       }
     }
-
-
   }
 }

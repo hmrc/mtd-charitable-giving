@@ -16,7 +16,7 @@
 
 package v2.services
 
-import uk.gov.hmrc.domain.Nino
+import v2.models.domain.Nino
 import v2.fixtures.Fixtures.CharitableGivingFixture._
 import v2.mocks.connectors.MockDesConnector
 import v2.models.errors._
@@ -110,11 +110,5 @@ class RetrieveCharitableGivingServiceSpec extends ServiceSpec {
       private val result = await(target.retrieve(input))
       result shouldBe Left(expected)
     }
-
   }
-
-
-
-
-
 }

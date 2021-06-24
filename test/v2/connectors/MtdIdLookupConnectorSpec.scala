@@ -28,10 +28,8 @@ class MtdIdLookupConnectorSpec extends ConnectorSpec {
       http = mockHttpClient,
       appConfig = mockAppConfig
     )
-    MockedAppConfig.mtdIdBaseUrl returns baseUrl
+    MockAppConfig.mtdIdBaseUrl returns baseUrl
   }
-
-  lazy val baseUrl = "test-mtdIdBaseUrl"
 
   val nino = "test-nino"
   val mtdId = "test-mtdId"
@@ -39,8 +37,10 @@ class MtdIdLookupConnectorSpec extends ConnectorSpec {
   "getMtdId" should {
     "return an MtdId" when {
       "the http client returns a mtd id" in new Test {
-        MockedHttpClient.get[MtdIdLookupOutcome](s"$baseUrl/mtd-identifier-lookup/nino/$nino")
-          .returns(Future.successful(Right(mtdId)))
+        MockedHttpClient.get[MtdIdLookupOutcome](
+          s"$baseUrl/mtd-identifier-lookup/nino/$nino",
+          config = dummyDesHeaderCarrierConfig)
+        .returns(Future.successful(Right(mtdId)))
 
         val result: MtdIdLookupOutcome = await(connector.getMtdId(nino))
         result shouldBe Right(mtdId)
@@ -49,8 +49,10 @@ class MtdIdLookupConnectorSpec extends ConnectorSpec {
 
     "return a DownstreamError" when {
       "the http client returns a DownstreamError" in new Test {
-        MockedHttpClient.get[MtdIdLookupOutcome](s"$baseUrl/mtd-identifier-lookup/nino/$nino")
-          .returns(Future.successful(Left(DownstreamError)))
+        MockedHttpClient.get[MtdIdLookupOutcome](
+          s"$baseUrl/mtd-identifier-lookup/nino/$nino",
+          config = dummyDesHeaderCarrierConfig)
+        .returns(Future.successful(Right(mtdId)))
 
         val result: MtdIdLookupOutcome = await(connector.getMtdId(nino))
         result shouldBe Left(DownstreamError)
