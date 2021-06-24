@@ -16,128 +16,49 @@
 
 package v2.models.errors
 
-import play.api.libs.json.{ Json, OWrites }
-
-case class MtdError(code: String, message: String, paths: Option[Seq[String]] = None)
-
-object MtdError {
-    implicit val writes: OWrites[MtdError] = Json.writes[MtdError]
-
-    implicit def genericWrites[T <: MtdError]: OWrites[T] =
-        writes.contramap[T](c => c: MtdError)
-}
-
 // Nino Errors
-object NinoFormatError extends Error(
-    code = "FORMAT_NINO",
-    message = "The provided NINO is invalid")
+object NinoFormatError extends Error("FORMAT_NINO", "The provided NINO is invalid")
 
 //Format Rules
-object TaxYearFormatError extends Error(
-    code = "FORMAT_TAX_YEAR",
-    message = "The provided tax year is invalid")
-
-object GiftAidSpecifiedYearFormatError extends Error(
-    code = "FORMAT_GIFT_AID_SPECIFIED_YEAR",
-    message = "The specified year payment amount is invalid")
-
-object GiftAidOneOffSpecifiedYearFormatError extends Error(
-    code = "FORMAT_GIFT_AID_ONE_OFF_SPECIFIED_YEAR",
-    message = "The one-off specified year amount is invalid")
-
-object GiftAidSpecifiedYearPreviousFormatError extends Error(
-    code = "FORMAT_GIFT_AID_SPECIFIED_YEAR_PREVIOUS_YEAR",
-    message = "The specified year treated as previous year amount is invalid")
-
-object GiftAidFollowingYearSpecifiedFormatError extends Error(
-    code = "FORMAT_GIFT_AID_FOLLOWING_YEAR_SPECIFIED_YEAR",
-    message = "The following year treated as specified year amount is invalid")
-
-object GiftAidNonUKCharityAmountFormatError extends Error(
-    code = "FORMAT_GIFT_AID_NONUK_CHARITY_AMOUNT",
-    message = "The gift aid non-UK Charities amount is invalid")
-
-object GiftAidNonUKNamesFormatError extends Error(
-    code = "FORMAT_GIFT_AID_NONUK_NAMES",
-    message = "The non-UK charity names are invalid")
-
-object GiftsSharesSecuritiesFormatError extends Error(
-    code = "FORMAT_GIFTS_SHARES_SECURITIES",
-    message = "The shares or securities amount is invalid")
-
-object GiftsLandsBuildingsFormatError extends Error(
-    code = "FORMAT_GIFTS_LAND_BUILDINGS",
-    message = "The land and buildings amount is invalid")
-
-object GiftsInvestmentsAmountFormatError extends Error(
-    code = "FORMAT_GIFTS_INVESTMENTS_AMOUNT",
-    message = "The investments amount is invalid")
-
-object GiftsNonUKInvestmentsNamesFormatError extends Error(
-    code = "FORMAT_GIFTS_NONUK_INVESTMENTS_NAMES",
-    message = "The non-UK investments charity names list is invalid")
+object TaxYearFormatError extends Error("FORMAT_TAX_YEAR", "The provided tax year is invalid")
+object GiftAidSpecifiedYearFormatError extends Error("FORMAT_GIFT_AID_SPECIFIED_YEAR", "The specified year payment amount is invalid")
+object GiftAidOneOffSpecifiedYearFormatError extends Error("FORMAT_GIFT_AID_ONE_OFF_SPECIFIED_YEAR", "The one-off specified year amount is invalid")
+object GiftAidSpecifiedYearPreviousFormatError extends
+  Error("FORMAT_GIFT_AID_SPECIFIED_YEAR_PREVIOUS_YEAR", "The specified year treated as previous year amount is invalid")
+object GiftAidFollowingYearSpecifiedFormatError extends
+  Error("FORMAT_GIFT_AID_FOLLOWING_YEAR_SPECIFIED_YEAR", "The following year treated as specified year amount is invalid")
+object GiftAidNonUKCharityAmountFormatError extends Error("FORMAT_GIFT_AID_NONUK_CHARITY_AMOUNT", "The gift aid non-UK Charities amount is invalid")
+object GiftAidNonUKNamesFormatError extends Error("FORMAT_GIFT_AID_NONUK_NAMES", "The non-UK charity names are invalid")
+object GiftsSharesSecuritiesFormatError extends Error("FORMAT_GIFTS_SHARES_SECURITIES", "The shares or securities amount is invalid")
+object GiftsLandsBuildingsFormatError extends Error("FORMAT_GIFTS_LAND_BUILDINGS", "The land and buildings amount is invalid")
+object GiftsInvestmentsAmountFormatError extends Error("FORMAT_GIFTS_INVESTMENTS_AMOUNT", "The investments amount is invalid")
+object GiftsNonUKInvestmentsNamesFormatError extends Error("FORMAT_GIFTS_NONUK_INVESTMENTS_NAMES", "The non-UK investments charity names list is invalid")
 
 //Rule Errors
-object EmptyOrNonMatchingBodyRuleError extends Error(
-    code = "RULE_INCORRECT_OR_EMPTY_BODY_SUBMITTED",
-    message = "An empty or non-matching body was submitted")
-
-object GiftAidAndGiftsEmptyRuleError extends Error(
-    code = "RULE_EMPTY_GIFTS_OR_GIFT_AID",
-    message = "A supplied gift aid or gifts object must not be empty")
-
-object NonUKNamesNotSpecifiedRuleError extends Error(
-    code = "RULE_GIFT_AID_NONUK_AMOUNT_WITHOUT_NAMES",
-    message = "Non-UK charity gift aid amount supplied without the non-UK gift aid charity names")
-
-object NonUKAmountNotSpecifiedRuleError extends Error(
-    code = "RULE_GIFT_AID_NONUK_NAMES_WITHOUT_AMOUNT",
-    message ="Non-UK charity gift aid charity names supplied without an amount or the amount was zero")
-
-object NonUKInvestmentsNamesNotSpecifiedRuleError extends Error(
-    code = "RULE_GIFTS_NONUK_INVESTMENTS_AMOUNT_WITHOUT_NAMES",
-    message ="Positive non-UK gift of investment amount supplied without non-UK gift of investment charity names")
-
-object NonUKInvestmentAmountNotSpecifiedRuleError extends Error(
-    code = "RULE_GIFTS_NONUK_INVESTMENTS_NAMES_WITHOUT_AMOUNT",
-    message = "Non-UK gift of investment charity names supplied without an amount or the amount was zero")
-
-object TaxYearNotSupportedRuleError extends Error(
-    code = "RULE_TAX_YEAR_NOT_SUPPORTED",
-    message = "Tax year not supported, because it precedes the earliest allowable tax year")
-
-object RuleTaxYearRangeExceededError extends Error(
-    code = "RULE_TAX_YEAR_RANGE_EXCEEDED",
-    message = "Tax year range exceeded. A tax year range of one year is required.")
+object EmptyOrNonMatchingBodyRuleError extends
+  Error("RULE_INCORRECT_OR_EMPTY_BODY_SUBMITTED", "An empty or non-matching body was submitted")
+object GiftAidAndGiftsEmptyRuleError extends
+  Error("RULE_EMPTY_GIFTS_OR_GIFT_AID", "A supplied gift aid or gifts object must not be empty")
+object NonUKNamesNotSpecifiedRuleError extends
+  Error("RULE_GIFT_AID_NONUK_AMOUNT_WITHOUT_NAMES", "Non-UK charity gift aid amount supplied without the non-UK gift aid charity names")
+object NonUKAmountNotSpecifiedRuleError extends
+  Error("RULE_GIFT_AID_NONUK_NAMES_WITHOUT_AMOUNT", "Non-UK charity gift aid charity names supplied without an amount or the amount was zero")
+object NonUKInvestmentsNamesNotSpecifiedRuleError extends
+  Error("RULE_GIFTS_NONUK_INVESTMENTS_AMOUNT_WITHOUT_NAMES",
+      "Positive non-UK gift of investment amount supplied without non-UK gift of investment charity names")
+object NonUKInvestmentAmountNotSpecifiedRuleError extends
+  Error("RULE_GIFTS_NONUK_INVESTMENTS_NAMES_WITHOUT_AMOUNT", "Non-UK gift of investment charity names supplied without an amount or the amount was zero")
+object TaxYearNotSupportedRuleError extends
+  Error("RULE_TAX_YEAR_NOT_SUPPORTED", "Tax year not supported, because it precedes the earliest allowable tax year")
+object RuleTaxYearRangeExceededError extends
+  Error("RULE_TAX_YEAR_RANGE_EXCEEDED", "Tax year range exceeded. A tax year range of one year is required.")
 
 //Standard Errors
-object NotFoundError extends Error(
-    code = "MATCHING_RESOURCE_NOT_FOUND",
-    message = "Matching resource not found"
-)
-
-object DownstreamError extends Error(
-    code = "INTERNAL_SERVER_ERROR",
-    message = "An internal server error occurred"
-)
-
-object BadRequestError extends Error(
-    code = "INVALID_REQUEST",
-    message = "Invalid request"
-)
-
-object BVRError extends Error(
-    code = "BUSINESS_ERROR",
-    message = "Business validation error"
-)
-
-object ServiceUnavailableError extends Error(
-    code = "SERVICE_UNAVAILABLE",
-    message = "Internal server error"
-)
+object DownstreamError extends Error("INTERNAL_SERVER_ERROR", "An internal server error occurred")
+object NotFoundError extends Error("MATCHING_RESOURCE_NOT_FOUND", "Matching resource not found")
+object BadRequestError extends Error("INVALID_REQUEST", "Invalid request")
+object BvrError extends Error("BUSINESS_ERROR", "Business validation error")
+object ServiceUnavailableError extends Error("SERVICE_UNAVAILABLE", "Internal server error")
 
 //Authorisation Errors
-object UnauthorisedError extends Error(
-    code = "CLIENT_OR_AGENT_NOT_AUTHORISED",
-    message = "The client and/or agent is not authorised"
-)
+object UnauthorisedError extends Error("CLIENT_OR_AGENT_NOT_AUTHORISED", "The client and/or agent is not authorised.")

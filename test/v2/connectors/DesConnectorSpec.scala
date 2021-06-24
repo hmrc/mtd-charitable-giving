@@ -35,10 +35,10 @@ class DesConnectorSpec extends ConnectorSpec {
     )
 
     val desRequestHeaders: Seq[(String, String)] = Seq("Environment" -> "des-environment", "Authorization" -> s"Bearer des-token")
-    MockAppConfig.desBaseUrl returns baseUrl
-    MockAppConfig.desToken returns "des-token"
-    MockAppConfig.desEnvironment returns "des-environment"
-    MockAppConfig.desEnvironmentHeaders returns Some(allowedDesHeaders)
+    MockedAppConfig.desBaseUrl returns url
+    MockedAppConfig.desToken returns "des-token"
+    MockedAppConfig.desEnvironment returns "des-environment"
+    MockedAppConfig.desEnvironmentHeaders returns Some(allowedDesHeaders)
   }
 
   "Amend charitable giving tax relief" should {
@@ -52,7 +52,7 @@ class DesConnectorSpec extends ConnectorSpec {
         val expectedDesResponse = DesResponse("X-123", expectedRef)
 
         MockedHttpClient.post[CharitableGiving, AmendCharitableGivingConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear",
+          s"$url" + s"/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear", dummyDesHeaderCarrierConfig,
           CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None))))
           .returns(Future.successful(Right(expectedDesResponse)))
 
@@ -72,7 +72,7 @@ class DesConnectorSpec extends ConnectorSpec {
         val charitableGiving = CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None)))
 
         MockedHttpClient.post[CharitableGiving, AmendCharitableGivingConnectorOutcome](
-          s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear",
+          s"$url/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear", dummyDesHeaderCarrierConfig,
           charitableGiving)
           .returns(Future.successful(Left(expectedDesResponse)))
 
@@ -91,8 +91,8 @@ class DesConnectorSpec extends ConnectorSpec {
         val desTaxYear = DesTaxYear("1234")
         val charitableGiving = CharitableGiving(Some(GiftAidPayments(None, None, None, None, None, None)), Some(Gifts(None, None, None, None)))
 
-        MockedHttpClient.post[CharitableGiving,AmendCharitableGivingConnectorOutcome](
-          s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear",
+        MockedHttpClient.post[CharitableGiving, AmendCharitableGivingConnectorOutcome](
+          s"$url/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear", dummyDesHeaderCarrierConfig,
           charitableGiving)
           .returns(Future.successful(Left(expectedDesResponse)))
 
@@ -112,7 +112,7 @@ class DesConnectorSpec extends ConnectorSpec {
         val httpParsedDesResponse = DesResponse("X-123", CharitableGivingFixture.charitableGivingModel)
 
         MockedHttpClient.get[RetrieveCharitableGivingConnectorOutcome](
-          s"$baseUrl" + s"/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear")
+          s"$url" + s"/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear", dummyDesHeaderCarrierConfig)
           .returns(Future.successful(Right(httpParsedDesResponse)))
 
         val result = await(connector.retrieve(RetrieveCharitableGivingRequest(Nino(nino), desTaxYear)))
@@ -128,7 +128,7 @@ class DesConnectorSpec extends ConnectorSpec {
         val desTaxYear = DesTaxYear("1234")
 
         MockedHttpClient.get[RetrieveCharitableGivingConnectorOutcome](
-          s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear")
+          s"$url/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear", dummyDesHeaderCarrierConfig)
           .returns(Future.successful(Left(expectedDesResponse)))
 
         val result = await(connector.retrieve(RetrieveCharitableGivingRequest(Nino(nino), desTaxYear)))
@@ -145,7 +145,7 @@ class DesConnectorSpec extends ConnectorSpec {
         val desTaxYear = DesTaxYear("1234")
 
         MockedHttpClient.get[RetrieveCharitableGivingConnectorOutcome](
-          s"$baseUrl/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear")
+          s"$url/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear", dummyDesHeaderCarrierConfig)
           .returns(Future.successful(Left(expectedDesResponse)))
 
         val result = await(connector.retrieve(RetrieveCharitableGivingRequest(Nino(nino), desTaxYear)))
