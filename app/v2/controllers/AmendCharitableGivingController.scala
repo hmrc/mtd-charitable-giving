@@ -48,9 +48,10 @@ class AmendCharitableGivingController @Inject()(val authService: EnrolmentsAuthS
 
   def amend(nino: String, taxYear: String): Action[JsValue] =
     authorisedAction(nino).async(parse.json) { implicit request =>
-
       implicit val correlationId: String = idGenerator.generateCorrelationId
-      logger.info(s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] with CorrelationId: $correlationId")
+      logger.info(
+        s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] " +
+          s"with CorrelationId: $correlationId")
 
       val rawData = AmendCharitableGivingRawData(nino, taxYear, AnyContentAsJson(request.body))
       val result =

@@ -17,7 +17,7 @@
 package v2.controllers.requestParsers
 
 import javax.inject.Inject
-import uk.gov.hmrc.domain.Nino
+import v2.models.domain.Nino
 import v2.controllers.requestParsers.validators.RetrieveCharitableGivingValidator
 import v2.models.errors.{BadRequestError, ErrorWrapper}
 import v2.models.requestData.{DesTaxYear, RetrieveCharitableGivingRequest, RetrieveCharitableGivingRawData}

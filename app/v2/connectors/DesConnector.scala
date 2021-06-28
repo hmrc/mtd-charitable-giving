@@ -18,9 +18,7 @@ package v2.connectors
 
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.Authorization
-import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import v2.config.AppConfig
 import v2.models.domain.CharitableGiving
 import v2.models.requestData.{AmendCharitableGivingRequest, RetrieveCharitableGivingRequest}
@@ -33,10 +31,19 @@ class DesConnector @Inject()(http: HttpClient,
 
   val logger = Logger(this.getClass)
 
-  private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier,
-                                           correlationId: String): HeaderCarrier = hc
-    .copy(authorization = Some(Authorization(s"Bearer ${appConfig.desToken}")))
-    .withExtraHeaders("Environment" -> appConfig.desEnv, "CorrelationId" -> correlationId)
+  private def desHeaderCarrier(additionalHeaders: Seq[String] = Seq.empty)(implicit hc: HeaderCarrier, correlationId: String): HeaderCarrier = {
+    HeaderCarrier(
+      extraHeaders = hc.extraHeaders ++
+        // Contract headers
+        Seq(
+          "Authorization" -> s"Bearer ${appConfig.desToken}",
+          "Environment" -> appConfig.desEnv,
+          "CorrelationId" -> correlationId
+        ) ++
+        // Other headers (i.e Gov-Test-Scenario, Content-Type)
+        hc.headers(additionalHeaders ++ appConfig.desEnvironmentHeaders.getOrElse(Seq.empty))
+    )
+  }
 
   def amend(amendCharitableGivingRequest: AmendCharitableGivingRequest)
            (implicit hc: HeaderCarrier, ec: ExecutionContext,
@@ -51,7 +58,7 @@ class DesConnector @Inject()(http: HttpClient,
     val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear"
 
     http.POST[CharitableGiving, AmendCharitableGivingConnectorOutcome](url, amendCharitableGivingRequest.model)(writes, amendHttpReads,
-      desHeaderCarrier, implicitly)
+      desHeaderCarrier(), implicitly)
   }
 
   def retrieve(retrieveCharitableGivingRequest: RetrieveCharitableGivingRequest)
@@ -64,6 +71,6 @@ class DesConnector @Inject()(http: HttpClient,
 
     val url = s"${appConfig.desBaseUrl}/income-tax/nino/$nino/income-source/charity/annual/$desTaxYear"
 
-    http.GET[RetrieveCharitableGivingConnectorOutcome](url)(retrieveHttpReads, desHeaderCarrier, implicitly)
+    http.GET[RetrieveCharitableGivingConnectorOutcome](url)(retrieveHttpReads, desHeaderCarrier(), implicitly)
   }
 }

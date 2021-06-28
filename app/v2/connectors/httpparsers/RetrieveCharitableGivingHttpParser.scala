@@ -19,7 +19,6 @@ package v2.connectors.httpparsers
 import play.api.http.Status._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import v2.connectors.RetrieveCharitableGivingConnectorOutcome
-import v2.connectors.httpparsers.AmendCharitableGivingHttpParser.logger
 import v2.models.domain.CharitableGiving
 import v2.models.errors.{DownstreamError, OutboundError}
 import v2.models.outcomes.DesResponse

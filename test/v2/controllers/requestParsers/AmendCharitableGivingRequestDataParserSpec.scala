@@ -18,7 +18,7 @@ package v2.controllers.requestParsers
 
 import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
-import uk.gov.hmrc.domain.Nino
+import v2.models.domain.Nino
 import v2.fixtures.Fixtures.CharitableGivingFixture
 import v2.mocks.validators.MockAmendCharitableGivingValidator
 import v2.models.errors.{BadRequestError, ErrorWrapper, NinoFormatError, TaxYearFormatError}

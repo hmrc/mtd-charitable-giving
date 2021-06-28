@@ -17,7 +17,7 @@
 package v2.services
 
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
+import v2.utils.Logging
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Individual, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
@@ -32,7 +32,7 @@ import v2.models.errors.{DownstreamError, UnauthorisedError}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EnrolmentsAuthService @Inject()(val connector: AuthConnector, val appConfig: AppConfig) {
+class EnrolmentsAuthService @Inject()(val connector: AuthConnector, val appConfig: AppConfig) extends Logging {
 
   private val authFunction: AuthorisedFunctions = new AuthorisedFunctions {
     override def authConnector: AuthConnector = connector
@@ -46,7 +46,9 @@ class EnrolmentsAuthService @Inject()(val connector: AuthConnector, val appConfi
   def buildPredicate(predicate: Predicate): Predicate =
     if (appConfig.authServiceValidationEnabled) {
       predicate and ((Individual and ConfidenceLevel.L200) or Organisation or Agent)
-    } else predicate
+    } else {
+      predicate
+    }
 
   def authorised(predicate: Predicate)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AuthOutcome] = {
     authFunction.authorised(buildPredicate(predicate)).retrieve(affinityGroup and authorisedEnrolments) {
@@ -62,14 +64,14 @@ class EnrolmentsAuthService @Inject()(val connector: AuthConnector, val appConfi
             val user: AuthOutcome = Right(UserDetails("", "Agent", arn))
             user
           case None        =>
-            Logger.warn(s"[EnrolmentsAuthService][authorised] No AgentReferenceNumber defined on agent enrolment.")
+            logger.warn(s"[EnrolmentsAuthService][authorised] No AgentReferenceNumber defined on agent enrolment.")
             Left(DownstreamError)
         }
     } recoverWith {
       case _: MissingBearerToken     => Future.successful(Left(UnauthorisedError))
       case _: AuthorisationException => Future.successful(Left(UnauthorisedError))
       case error                     =>
-        Logger.warn(s"[EnrolmentsAuthService][authorised] An unexpected error occurred: $error")
+        logger.warn(s"[EnrolmentsAuthService][authorised] An unexpected error occurred: $error")
         Future.successful(Left(DownstreamError))
     }
   }

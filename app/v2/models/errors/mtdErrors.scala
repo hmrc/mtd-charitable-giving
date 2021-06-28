@@ -45,7 +45,7 @@ object NonUKAmountNotSpecifiedRuleError extends
   Error("RULE_GIFT_AID_NONUK_NAMES_WITHOUT_AMOUNT", "Non-UK charity gift aid charity names supplied without an amount or the amount was zero")
 object NonUKInvestmentsNamesNotSpecifiedRuleError extends
   Error("RULE_GIFTS_NONUK_INVESTMENTS_AMOUNT_WITHOUT_NAMES",
-    "Positive non-UK gift of investment amount supplied without non-UK gift of investment charity names")
+      "Positive non-UK gift of investment amount supplied without non-UK gift of investment charity names")
 object NonUKInvestmentAmountNotSpecifiedRuleError extends
   Error("RULE_GIFTS_NONUK_INVESTMENTS_NAMES_WITHOUT_AMOUNT", "Non-UK gift of investment charity names supplied without an amount or the amount was zero")
 object TaxYearNotSupportedRuleError extends

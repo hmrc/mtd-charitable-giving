@@ -16,7 +16,7 @@
 
 package v2.services
 
-import uk.gov.hmrc.domain.Nino
+import v2.models.domain.Nino
 import v2.mocks.connectors.MockDesConnector
 import v2.models.domain.{CharitableGiving, GiftAidPayments, Gifts}
 import v2.models.errors._
